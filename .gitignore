@@ -211,3 +211,4 @@ fabric.properties
 ###> phpstan/phpstan ###
 phpstan.neon
 ###< phpstan/phpstan ###
+.ddev
