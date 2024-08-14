@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Category;
 use App\Entity\Prompt;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -30,12 +31,17 @@ class PromptRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Prompt $entity, bool $flush = false): void
+    public function remove(Prompt $promptForDeletion, bool $flush = false): void
     {
-        $this->getEntityManager()->remove($entity);
+        $this->getEntityManager()->remove($promptForDeletion);
 
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function flush()
+    {
+        $this->getEntityManager()->flush();
     }
 }
