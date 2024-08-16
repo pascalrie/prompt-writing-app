@@ -91,4 +91,19 @@ class Tag
 
         return $this;
     }
+
+    public function jsonSerialize(bool $withNotes = false): array
+    {
+        $json = [
+            'title' => $this->title,
+            'color' => $this->color,
+        ];
+
+        if ($withNotes) {
+            foreach ($this->notes as $note) {
+                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize()];
+            }
+        }
+        return $json;
+    }
 }

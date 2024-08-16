@@ -98,4 +98,24 @@ class Prompt
 
         return $this;
     }
+
+    public function jsonSerialize(bool $withCategory = true, bool $withNotes = false): array
+    {
+        $json = [
+            'title' => $this->title,
+        ];
+
+        if ($withCategory) {
+            $json['category'] = $this->category->jsonSerialize();
+        }
+
+        if ($withNotes) {
+            /**@var Note $note */
+            foreach ($this->notes as $note) {
+                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, true, true, false)];
+            }
+        }
+
+        return $json;
+    }
 }

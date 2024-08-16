@@ -180,4 +180,36 @@ class Note
 
         return $this;
     }
+
+    public function jsonSerialize(bool $withContent = false, bool $withCategory = true, bool $withPrompt = true, bool $withTags = true, bool $withFolder = false): array
+    {
+        $json = [
+            'title' => $this->title,
+            'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
+            'updatedAt' => $this->updatedAt->format('Y-m-d H:i:s'),
+        ];
+
+        if ($withContent) {
+            $json['content'] = $this->content;
+        }
+
+        if ($withCategory) {
+            $json['category'] = $this->category->jsonSerialize();
+        }
+
+        if ($withPrompt) {
+            $json['prompt'] = $this->prompt->jsonSerialize();
+        }
+
+        if ($withTags) {
+            foreach ($this->tags as $tag) {
+                $json += ['Tag with id: ' . $tag->getId() => $tag->jsonSerialize()];
+            }
+        }
+
+        if ($withFolder) {
+            $json['folder'] = $this->folder->jsonSerialize();
+        }
+        return $json;
+    }
 }

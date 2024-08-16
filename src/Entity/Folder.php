@@ -80,4 +80,20 @@ class Folder
 
         return $this;
     }
+
+    public function jsonSerialize(bool $withNotes = false): array
+    {
+        $json = [
+            'title' => $this->title
+        ];
+
+        if ($withNotes) {
+            /**@var Note $note */
+            foreach ($this->notes as $note) {
+                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, true, true, false)];
+            }
+        }
+
+        return $json;
+    }
 }

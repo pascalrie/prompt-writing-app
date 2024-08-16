@@ -116,4 +116,27 @@ class Category
 
         return $this;
     }
+
+    public function jsonSerialize(bool $withPrompts = false, bool $withNotes = false): array
+    {
+        $json = [
+            'title' => $this->title
+        ];
+
+        if ($withPrompts) {
+            /** @var Prompt $prompt */
+            foreach ($this->prompts as $prompt) {
+                $json += ['Prompt with id: ' . $prompt->getId() => $prompt->jsonSerialize(false)];
+            }
+        }
+
+        if ($withNotes) {
+            /**@var Note $note */
+            foreach ($this->notes as $note) {
+                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, false, false, false)];
+            }
+        }
+
+        return $json;
+    }
 }

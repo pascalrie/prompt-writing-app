@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
 use App\Repository\CategoryRepository;
+use Doctrine\ORM\EntityNotFoundException;
 
 class CategoryService
 {
@@ -32,24 +33,33 @@ class CategoryService
         return $category;
     }
 
-    public function update(int $oldCategoryId, string $newTitle = "", array $potentialNewPrompts = null,
-                           array $potentialNewNotes = null): void
+    /**
+     * @throws EntityNotFoundException
+     */
+    public function update(int   $oldCategoryId, string $newTitle = "", array $potentialPromptIdsToAdd = null,
+                           array $potentialNoteIdsToAdd = null): Category
     {
         $categoryInDb = $this->categoryRepository->findBy(['id' => $oldCategoryId])[0];
+
+        if (null === $categoryInDb) {
+            throw new EntityNotFoundException('Category for update with id ' . $oldCategoryId .  'not found');
+        }
 
         if (null !== $newTitle) {
             $categoryInDb->setTitle($newTitle);
         }
 
-        if (null !== $potentialNewPrompts) {
-            $this->addPromptsIfNotInCategory($potentialNewPrompts, $categoryInDb);
+        if (null !== $potentialPromptIdsToAdd) {
+            $this->addPromptsIfNotInCategory($potentialPromptIdsToAdd, $categoryInDb);
         }
 
-        if (null !== $potentialNewNotes) {
-            $this->addNotesIfNotInCategory($potentialNewNotes, $categoryInDb);
+        if (null !== $potentialNoteIdsToAdd) {
+            $this->addNotesIfNotInCategory($potentialNoteIdsToAdd, $categoryInDb);
         }
 
         $this->categoryRepository->flush();
+
+        return $this->show($oldCategoryId);
     }
 
     public function list(): array
@@ -57,11 +67,17 @@ class CategoryService
         return $this->categoryRepository->findAll();
     }
 
+    /**
+     * @throws EntityNotFoundException
+     */
     public function delete(int $id): void
     {
         $category = $this->categoryRepository->findBy(['id' => $id])[0];
-        $this->categoryRepository->remove($category);
+        if (null === $category) {
+            throw new EntityNotFoundException('Category for deletion with id ' . $id . ' not found');
+        }
 
+        $this->categoryRepository->remove($category, true);
     }
 
     public function show(int $id): Category
