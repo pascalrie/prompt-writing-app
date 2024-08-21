@@ -2,17 +2,31 @@
 
 namespace App\Controller\Api;
 
+use App\Service\FolderService;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class FolderApiController extends BaseApiController
 {
+    protected FolderService $folderService;
+
+    public function __construct(FolderService $folderService)
+    {
+        $this->folderService = $folderService;
+    }
+
     /**
      * @Route("/folder/create", name="api_create_folder", methods={"POST"})
      */
-    public function create(): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $bodyParameters = json_decode($request->getContent());
+        $title = $bodyParameters->title;
+
+        $folder = $this->folderService->create($title);
+
+        return $this->json($this->appendTimeStampToApiResponse($folder->jsonSerialize()));
     }
 
     /**
@@ -20,7 +34,8 @@ class FolderApiController extends BaseApiController
      */
     public function list(): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $folders = $this->folderService->list();
+        return $this->json($this->appendTimeStampToApiResponse($folders));
     }
 
     /**
@@ -28,15 +43,27 @@ class FolderApiController extends BaseApiController
      */
     public function show(int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $folder = $this->folderService->show($id);
+        return $this->json($this->appendTimeStampToApiResponse($folder->jsonSerialize(true)));
     }
 
     /**
      * @Route("/folder/update/{id}", name="api_update_folder", methods={"PUT"})
      */
-    public function update(int $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $bodyParameters = json_decode($request->getContent());
+        $newTitle = $bodyParameters->title;
+        $potentialNewNoteIds = $bodyParameters->potentialNewNotes;
+
+        $potentialNewNoteObjects = [];
+        foreach ($potentialNewNoteIds as $potentialNewNoteId) {
+            $potentialNewNoteObjects += $this->folderService->show($potentialNewNoteId);
+        }
+
+        $folder = $this->folderService->update($id, $newTitle, $potentialNewNoteObjects);
+
+        return $this->json($this->appendTimeStampToApiResponse($folder->jsonSerialize()));
     }
 
     /**
@@ -44,6 +71,12 @@ class FolderApiController extends BaseApiController
      */
     public function delete(int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $this->folderService->delete($id);
+        $folderHopefullyNull = $this->folderService->show($id);
+        if (null !== $folderHopefullyNull) {
+            return $this->json($this->appendTimeStampToApiResponse(['message' => 'Failed.']));
+        }
+
+        return $this->json($this->appendTimeStampToApiResponse(['message' => 'Success.']));
     }
 }

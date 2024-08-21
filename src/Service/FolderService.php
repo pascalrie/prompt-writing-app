@@ -19,14 +19,17 @@ class FolderService
     {
         $folder = new Folder();
         $folder->setTitle($title);
+
         if ($firstNote) {
             $folder->addNote($firstNote);
         }
+
         $this->folderRepository->add($folder);
+
         return $folder;
     }
 
-    public function update(int $folderId, string $newTitle = "", array $notes = null): void
+    public function update(int $folderId, string $newTitle = "", array $potentialNewNotes = null): Folder
     {
         $folderEntityFromDb = $this->folderRepository->findBy(['id' => $folderId])[0];
 
@@ -34,11 +37,15 @@ class FolderService
             $folderEntityFromDb->setTitle($newTitle);
         }
 
-        if (null !== $notes) {
-            $this->addNotesIfNotAssociatedToFolder($notes, $folderEntityFromDb);
+        if (null !== $potentialNewNotes) {
+            foreach ($potentialNewNotes as $note) {
+                $folderEntityFromDb->addNote($note);
+            }
         }
 
         $this->folderRepository->flush();
+
+        return $folderEntityFromDb;
     }
 
     public function list(): array
@@ -52,29 +59,21 @@ class FolderService
         $this->folderRepository->remove($category);
     }
 
-    public function show(int $id): Folder
+    public function show(int $id): ?Folder
     {
-        return $this->folderRepository->findBy(['id' => $id])[0];
+        $folders = $this->folderRepository->findBy(['id' => $id]);
+        if (empty($folders)) {
+            return null;
+        }
+        return $folders[0];
     }
 
-    private function isNoteAlreadyAssociatedToFolder(int $folderId, int $noteId): bool
+    public function showBy(string $criteria, $argument): ?Folder
     {
-        $notesForGivenFolder = $this->folderRepository->findBy(['id' => $folderId])[0]->getNotes();
-        foreach ($notesForGivenFolder as $noteAlreadyInFolder) {
-            if ($noteAlreadyInFolder->getId() === $noteId) {
-                return true;
-            }
+        $folders = $this->folderRepository->findBy([$criteria, $argument]);
+        if (empty($folders)) {
+            return null;
         }
-        return false;
-    }
-
-    private function addNotesIfNotAssociatedToFolder(array $notesToAdd, Folder $folder): void
-    {
-        foreach ($notesToAdd as $noteToAdd) {
-            $isAssociated = $this->isNoteAlreadyAssociatedToFolder($folder->getId(), $noteToAdd->getId());
-            if (!$isAssociated) {
-                $folder->addNote($noteToAdd);
-            }
-        }
+        return $folders[0];
     }
 }

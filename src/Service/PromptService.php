@@ -51,8 +51,21 @@ class PromptService
         $this->promptRepository->remove($promptForDeletion);
     }
 
-    public function show(int $id): Prompt
+    public function show(int $id): ?Prompt
     {
-        return $this->promptRepository->findBy(['id' => $id])[0];
+        $prompts = $this->promptRepository->findBy(['id' => $id]);
+        if (empty($prompts)) {
+            return null;
+        }
+        return $prompts[0];
+    }
+
+    public function showBy(string $criteria, $argument): ?Prompt
+    {
+        $prompts = $this->promptRepository->findBy([$criteria, $argument]);
+        if (empty($prompts)) {
+            return null;
+        }
+        return $prompts[0];
     }
 }

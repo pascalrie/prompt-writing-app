@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use App\Repository\CategoryRepository;
 use App\Service\CategoryService;
 use App\Service\NoteService;
 use App\Service\PromptService;
@@ -31,10 +30,11 @@ class CategoryApiController extends BaseApiController
      */
     public function create(Request $request): JsonResponse
     {
-        $bodyParameters = json_decode($request);
+        $bodyParameters = json_decode($request->getContent());
         $title = $bodyParameters->title;
 
         $category = $this->categoryService->create($title);
+
         return $this->json($category->jsonSerialize());
     }
 
@@ -55,7 +55,7 @@ class CategoryApiController extends BaseApiController
     {
         $category = $this->categoryService->show($id);
 
-        return $this->json($category->jsonSerialize(true));
+        return $this->json($this->appendTimeStampToApiResponse($category->jsonSerialize(true)));
     }
 
     /**
@@ -64,23 +64,24 @@ class CategoryApiController extends BaseApiController
      */
     public function update(Request $request, int $id): JsonResponse
     {
-        $bodyParameters = json_decode($request);
+        $bodyParameters = json_decode($request->getContent());
         $newTitle = $bodyParameters->title;
         $potentialNewPromptIds = $bodyParameters->potentialNewPrompts;
         $potentialNewNoteIds = $bodyParameters->potentialNewNotes;
 
-        $promptObjects = [];
+        $promptObjectsForGivenIds = [];
         foreach ($potentialNewPromptIds as $potentialNewPromptId) {
-            $promptObjects += $this->promptService->show($potentialNewPromptId);
+            $promptObjectsForGivenIds += $this->promptService->show($potentialNewPromptId);
         }
-        $noteObjects = [];
+
+        $noteObjectsForGivenIds = [];
         foreach ($potentialNewNoteIds as $potentialNewNoteId) {
-            $noteObjects += $this->noteService->show($potentialNewNoteId);
+            $noteObjectsForGivenIds += $this->noteService->show($potentialNewNoteId);
         }
 
-        $updatedCategory = $this->categoryService->update($id, $newTitle, $promptObjects, $noteObjects);
+        $updatedCategory = $this->categoryService->update($id, $newTitle, $promptObjectsForGivenIds, $noteObjectsForGivenIds);
 
-        return $this->json($updatedCategory->jsonSerialize());
+        return $this->json($this->appendTimeStampToApiResponse($updatedCategory->jsonSerialize()));
     }
 
     /**
@@ -91,6 +92,9 @@ class CategoryApiController extends BaseApiController
     {
         $this->categoryService->delete($id);
         $categoryHopefullyNull = $this->categoryService->show($id);
-        return $this->json($categoryHopefullyNull->jsonSerialize());
+        if (null !== $categoryHopefullyNull) {
+            return $this->json($this->appendTimeStampToApiResponse(['message' => ['Not successfully deleted category' . json_encode($categoryHopefullyNull->jsonSerialize())]]));
+        }
+        return $this->json($this->appendTimeStampToApiResponse(['message' => 'Successfully deleted category.']));
     }
 }

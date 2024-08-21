@@ -32,7 +32,7 @@ class Tag
     /**
      * @ORM\ManyToMany(targetEntity=Note::class, inversedBy="tags")
      */
-    private ArrayCollection $notes;
+    private Collection $notes;
 
     public function __construct()
     {
@@ -68,17 +68,14 @@ class Tag
         return $this;
     }
 
-    /**
-     * @return Collection<int, Note>
-     */
-    public function getNotes(): Collection
+    public function getNotes(): ArrayCollection
     {
         return $this->notes;
     }
 
     public function addNote(Note $note): self
     {
-        if (!$this->notes->contains($note)) {
+        if (!$this->getNotes()->contains($note)) {
             $this->notes[] = $note;
         }
 
@@ -87,7 +84,7 @@ class Tag
 
     public function removeNote(Note $note): self
     {
-        $this->notes->removeElement($note);
+        $this->getNotes()->removeElement($note);
 
         return $this;
     }
@@ -100,7 +97,7 @@ class Tag
         ];
 
         if ($withNotes) {
-            foreach ($this->notes as $note) {
+            foreach ($this->getNotes() as $note) {
                 $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize()];
             }
         }

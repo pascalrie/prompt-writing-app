@@ -17,44 +17,51 @@ class CategoryService
         $this->categoryRepository = $categoryRepository;
     }
 
-    public function create(string $title, Note $firstNote = null, Prompt $firstPrompt = null): Category
+    public function create(string $title = "", Note $firstNote = null, Prompt $firstPrompt = null): Category
     {
         $category = new Category();
-        $category->setTitle($title);
-        if ($firstNote !== null) {
+
+        if (null !== $title) {
+            $category->setTitle($title);
+        }
+
+        if (null !== $firstNote) {
             $category->addNote($firstNote);
         }
 
-        if ($firstPrompt !== null) {
+        if (null !== $firstPrompt) {
             $category->addPrompt($firstPrompt);
         }
 
-        $this->categoryRepository->add($category);
-        return $category;
+        return $this->categoryRepository->add($category, true);
     }
 
     /**
      * @throws EntityNotFoundException
      */
-    public function update(int   $oldCategoryId, string $newTitle = "", array $potentialPromptIdsToAdd = null,
-                           array $potentialNoteIdsToAdd = null): Category
+    public function update(int   $oldCategoryId, string $newTitle = "", array $newPotentialPrompts = null,
+                           array $newPotentialNotes = null): Category
     {
         $categoryInDb = $this->categoryRepository->findBy(['id' => $oldCategoryId])[0];
 
         if (null === $categoryInDb) {
-            throw new EntityNotFoundException('Category for update with id ' . $oldCategoryId .  'not found');
+            throw new EntityNotFoundException("Category for update with id {$oldCategoryId} not found");
         }
 
         if (null !== $newTitle) {
             $categoryInDb->setTitle($newTitle);
         }
 
-        if (null !== $potentialPromptIdsToAdd) {
-            $this->addPromptsIfNotInCategory($potentialPromptIdsToAdd, $categoryInDb);
+        if (null !== $newPotentialPrompts) {
+            foreach ($newPotentialPrompts as $prompt) {
+                $categoryInDb->addPrompt($prompt);
+            }
         }
 
-        if (null !== $potentialNoteIdsToAdd) {
-            $this->addNotesIfNotInCategory($potentialNoteIdsToAdd, $categoryInDb);
+        if (null !== $newPotentialNotes) {
+            foreach ($newPotentialNotes as $note) {
+                $categoryInDb->addNote($note);
+            }
         }
 
         $this->categoryRepository->flush();
@@ -72,58 +79,32 @@ class CategoryService
      */
     public function delete(int $id): void
     {
-        $category = $this->categoryRepository->findBy(['id' => $id])[0];
-        if (null === $category) {
-            throw new EntityNotFoundException('Category for deletion with id ' . $id . ' not found');
+        $category = $this->categoryRepository->findBy(['id' => $id]);
+
+        if ([] === $category) {
+           throw new EntityNotFoundException("Category with id {$id} not found");
         }
+
+        $category = $this->categoryRepository->findBy(['id' => $id])[0];
 
         $this->categoryRepository->remove($category, true);
     }
 
-    public function show(int $id): Category
+    public function show(int $id): ?Category
     {
-        return $this->categoryRepository->findBy(['id' => $id])[0];
+        $categories = $this->categoryRepository->findBy(['id' => $id]);
+        if (empty($categories)) {
+            return null;
+        }
+        return $categories[0];
     }
 
-    private function isPotentialNewPromptAlreadyInCategory(int $categoryId, int $promptId): bool
+    public function showByTitle(string $title): ?Category
     {
-        $promptsForGivenCategory = $this->categoryRepository->findBy(['id' => $categoryId])[0]->getPrompts();
-        foreach ($promptsForGivenCategory as $promptInCategory) {
-            if ($promptInCategory->getId() === $promptId) {
-                return true;
-            }
+        $categories = $this->categoryRepository->findBy(['title' => $title]);
+        if (empty($categories)) {
+            return null;
         }
-        return false;
-    }
-
-    private function isPotentialNewNoteAlreadyInCategory(int $categoryId, int $noteId): bool
-    {
-        $notesForGivenCategory = $this->categoryRepository->findBy(['id' => $categoryId])[0]->getNotes();
-        foreach ($notesForGivenCategory as $noteAlreadyInCategory) {
-            if ($noteAlreadyInCategory->getId() === $noteId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private function addPromptsIfNotInCategory (array $promptsToAdd, Category $category): void
-    {
-        foreach ($promptsToAdd as $promptToAdd) {
-            $isAssociated = $this->isPotentialNewPromptAlreadyInCategory($category->getId(), $promptToAdd->getId());
-            if (!$isAssociated) {
-                $category->addPrompt($promptToAdd);
-            }
-        }
-    }
-
-    private function addNotesIfNotInCategory (array $notesToAdd, Category $category): void
-    {
-        foreach ($notesToAdd as $noteToAdd) {
-            $isAssociated = $this->isPotentialNewNoteAlreadyInCategory($category->getId(), $noteToAdd->getId());
-            if (!$isAssociated) {
-                $category->addNote($noteToAdd);
-            }
-        }
+        return $categories[0];
     }
 }

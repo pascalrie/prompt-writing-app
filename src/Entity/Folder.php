@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\FolderRepository;
+use App\Util\ConversionUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,7 +28,7 @@ class Folder
     /**
      * @ORM\OneToMany(targetEntity=Note::class, mappedBy="folder")
      */
-    private ArrayCollection $notes;
+    private Collection $notes;
 
     public function __construct()
     {
@@ -51,17 +52,14 @@ class Folder
         return $this;
     }
 
-    /**
-     * @return Collection<int, Note>
-     */
-    public function getNotes(): Collection
+    public function getNotes(): ArrayCollection
     {
-        return $this->notes;
+        return ConversionUtil::convertCollectionIntoArrayCollection($this->notes);
     }
 
     public function addNote(Note $note): self
     {
-        if (!$this->notes->contains($note)) {
+        if (!$this->getNotes()->contains($note)) {
             $this->notes[] = $note;
             $note->setFolder($this);
         }
@@ -71,7 +69,7 @@ class Folder
 
     public function removeNote(Note $note): self
     {
-        if ($this->notes->removeElement($note)) {
+        if ($this->getNotes()->removeElement($note)) {
             // set the owning side to null (unless already changed)
             if ($note->getFolder() === $this) {
                 $note->setFolder(null);
@@ -89,7 +87,7 @@ class Folder
 
         if ($withNotes) {
             /**@var Note $note */
-            foreach ($this->notes as $note) {
+            foreach ($this->getNotes() as $note) {
                 $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, true, true, false)];
             }
         }

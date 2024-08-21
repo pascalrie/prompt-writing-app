@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CategoryRepository;
+use App\Util\ConversionUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,12 +28,12 @@ class Category
     /**
      * @ORM\OneToMany(targetEntity=Prompt::class, mappedBy="category")
      */
-    private ArrayCollection $prompts;
+    private Collection $prompts;
 
     /**
      * @ORM\OneToMany(targetEntity=Note::class, mappedBy="category")
      */
-    private ArrayCollection $notes;
+    private Collection $notes;
 
     public function __construct()
     {
@@ -57,21 +58,17 @@ class Category
         return $this;
     }
 
-    /**
-     * @return Collection<int, Prompt>
-     */
-    public function getPrompts(): Collection
+    public function getPrompts(): ArrayCollection
     {
-        return $this->prompts;
+        return ConversionUtil::convertCollectionIntoArrayCollection($this->prompts);
     }
 
     public function addPrompt(Prompt $prompt): self
     {
-        if (!$this->prompts->contains($prompt)) {
-            $this->prompts[] = $prompt;
+        if (!$this->getPrompts()->contains($prompt)) {
+            $this->getPrompts()->add($prompt);
             $prompt->setCategory($this);
         }
-
         return $this;
     }
 
@@ -87,17 +84,14 @@ class Category
         return $this;
     }
 
-    /**
-     * @return Collection<int, Note>
-     */
-    public function getNotes(): Collection
+    public function getNotes(): ArrayCollection
     {
-        return $this->notes;
+        return ConversionUtil::convertCollectionIntoArrayCollection($this->notes);
     }
 
     public function addNote(Note $note): self
     {
-        if (!$this->notes->contains($note)) {
+        if (!$this->getNotes()->contains($note)) {
             $this->notes[] = $note;
             $note->setCategory($this);
         }
@@ -125,14 +119,14 @@ class Category
 
         if ($withPrompts) {
             /** @var Prompt $prompt */
-            foreach ($this->prompts as $prompt) {
+            foreach ($this->getPrompts() as $prompt) {
                 $json += ['Prompt with id: ' . $prompt->getId() => $prompt->jsonSerialize(false)];
             }
         }
 
         if ($withNotes) {
             /**@var Note $note */
-            foreach ($this->notes as $note) {
+            foreach ($this->getNotes() as $note) {
                 $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, false, false, false)];
             }
         }

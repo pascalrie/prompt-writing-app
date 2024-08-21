@@ -27,13 +27,16 @@ class NoteService
         $note->setUpdatedAt(new DateTime('NOW'));
         $note->setTitle($title);
 
-        if ("" !== $content ) {
+        if ("" !== $content) {
             $note->setContent($content);
         }
 
-        if (null !== $tags) {
-            foreach ($tags as $tag) {
-                $note->addTag($tag);
+        if (!$tags->isEmpty()) {
+            $tagsForForeach = $tags->toArray();
+            foreach ($tagsForForeach as $tag) {
+                if (null !== $tag) {
+                    $note->addTag($tag);
+                }
             }
         }
 
@@ -41,11 +44,11 @@ class NoteService
             $note->setCategory($category);
         }
 
-        $this->noteRepository->add($note);
+        $this->noteRepository->add($note, true);
         return $note;
     }
 
-    public function update(int $noteId, string $newTitle = "", string $newContent = "", array $newTags = null, Category $newCategory = null): void
+    public function update(int $noteId, string $newTitle = "", string $newContent = "", array $potentialNewTags = null, Category $newCategory = null): void
     {
         $noteFromDb = $this->noteRepository->findBy(['id' => $noteId])[0];
 
@@ -57,8 +60,10 @@ class NoteService
             $noteFromDb->setContent($newContent);
         }
 
-        if (null !== $newTags) {
-            $this->addTagsIfNotAssociatedToNote($newTags, $noteFromDb);
+        if (null !== $potentialNewTags) {
+            foreach ($potentialNewTags as $tag) {
+                $noteFromDb->addTag($tag);
+            }
         }
 
         if (null !== $newCategory) {
@@ -80,29 +85,22 @@ class NoteService
         $this->noteRepository->remove($category);
     }
 
-    public function show(int $id): Note
+    public function show(int $id): ?Note
     {
-        return $this->noteRepository->findBy(['id' => $id])[0];
+        $notes = $this->noteRepository->findBy(['id' => $id]);
+        if (empty($notes)) {
+            return null;
+        }
+
+        return $notes[0];
     }
 
-    private function isTagAlreadyAssociatedToNote(int $noteId, int $tagId): bool
+    public function showBy(string $criteria, $argument): ?Note
     {
-        $tagsForGivenNote = $this->noteRepository->findBy(['id' => $noteId])[0]->getTags();
-        foreach ($tagsForGivenNote as $tagForNote) {
-            if ($tagForNote->getId() === $tagId) {
-                return true;
-            }
+        $notes = $this->noteRepository->findBy([$criteria => $argument]);
+        if (empty($notes)) {
+            return null;
         }
-        return false;
-    }
-
-    private function addTagsIfNotAssociatedToNote(array $tags, Note $note): void
-    {
-        foreach ($tags as $tagToAdd) {
-            $isAssociated = $this->isTagAlreadyAssociatedToNote($note->getId(), $tagToAdd->getId());
-            if (!$isAssociated) {
-                $note->addTag($tagToAdd);
-            }
-        }
+        return $notes[0];
     }
 }

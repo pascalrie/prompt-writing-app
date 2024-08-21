@@ -35,15 +35,17 @@ class TagService
         $this->tagRepository->add($tag);
     }
 
-    public function update(int $tagId, string $title = "", array $notes = null, string $color = "")
+    public function update(int $tagId, string $title = "", array $potentialNewNotes = null, string $color = "")
     {
         $tagFromDb = $this->tagRepository->findBy(['id' => $tagId])[0];
         if ("" !== $title) {
             $tagFromDb->setTitle($title);
         }
 
-        if (null !== $notes) {
-            $this->addNotesIfNotAssociatedToTag($notes, $tagFromDb);
+        if (null !== $potentialNewNotes) {
+            foreach ($potentialNewNotes as $note) {
+                $tagFromDb->addNote($note);
+            }
         }
 
         if ("" !== $color) {
@@ -64,29 +66,21 @@ class TagService
         $this->tagRepository->remove($tag);
     }
 
-    public function show(int $id): Tag
+    public function show(int $id): ?Tag
     {
-        return $this->tagRepository->findBy(['id' => $id])[0];
+        $tags = $this->tagRepository->findBy(['id' => $id]);
+        if (empty($tags)) {
+            return null;
+        }
+        return $tags[0];
     }
 
-    private function isNoteAlreadyAssociatedToTag(int $noteId, int $tagId): bool
+    public function showBy(string $criteria, $argument): ?Tag
     {
-        $notesForGivenTag = $this->tagRepository->findBy(['id' => $tagId])[0]->getNotes();
-        foreach ($notesForGivenTag as $note) {
-            if ($note->getId() === $noteId) {
-                return true;
-            }
+        $tags = $this->tagRepository->findBy([$criteria => $argument]);
+        if (empty($tags)) {
+            return null;
         }
-        return false;
-    }
-
-    private function addNotesIfNotAssociatedToTag(array $notes, Tag $tag): void
-    {
-        foreach ($notes as $note) {
-            $isAssociated = $this->isNoteAlreadyAssociatedToTag($note->getId(), $tag->getId());
-            if (!$isAssociated) {
-                $tag->addNote($note);
-            }
-        }
+        return $tags[0];
     }
 }

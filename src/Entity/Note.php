@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\NoteRepository;
+use App\Util\ConversionUtil;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -53,7 +54,7 @@ class Note
     /**
      * @ORM\ManyToMany(targetEntity=Tag::class, mappedBy="notes")
      */
-    private ArrayCollection $tags;
+    private Collection $tags;
 
     /**
      * @ORM\ManyToOne(targetEntity=Folder::class, inversedBy="notes")
@@ -142,12 +143,9 @@ class Note
         return $this;
     }
 
-    /**
-     * @return Collection<int, Tag>
-     */
-    public function getTags(): Collection
+    public function getTags(): ArrayCollection
     {
-        return $this->tags;
+        return ConversionUtil::convertCollectionIntoArrayCollection($this->tags);
     }
 
     public function addTag(Tag $tag): self
@@ -181,7 +179,7 @@ class Note
         return $this;
     }
 
-    public function jsonSerialize(bool $withContent = false, bool $withCategory = true, bool $withPrompt = true, bool $withTags = true, bool $withFolder = false): array
+    public function jsonSerialize(bool $withContent = false, bool $withCategory = true, bool $withPrompt = false, bool $withTags = true, bool $withFolder = false): array
     {
         $json = [
             'title' => $this->title,
@@ -202,7 +200,7 @@ class Note
         }
 
         if ($withTags) {
-            foreach ($this->tags as $tag) {
+            foreach ($this->getTags() as $tag) {
                 $json += ['Tag with id: ' . $tag->getId() => $tag->jsonSerialize()];
             }
         }
