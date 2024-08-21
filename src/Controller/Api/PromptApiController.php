@@ -2,11 +2,17 @@
 
 namespace App\Controller\Api;
 
+use App\Service\PromptService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 class PromptApiController extends BaseApiController
 {
+    protected PromptService $promptService;
+
+    public function __construct(PromptService $promptService) {
+        $this->promptService = $promptService;
+    }
     /**
      * @Route("/prompt/create", name="api_create_prompt", methods={"POST"})
      */
@@ -20,7 +26,12 @@ class PromptApiController extends BaseApiController
      */
     public function list(): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $notes = $this->promptService->list();
+        $response = [];
+        foreach ($notes as $note) {
+            $response += [$note->jsonSerialize()];
+        }
+        return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
     /**
@@ -28,7 +39,11 @@ class PromptApiController extends BaseApiController
      */
     public function show(int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $prompt = $this->promptService->show($id);
+        if (null === $prompt) {
+            return $this->json($this->appendTimeStampToApiResponse(['code' => 404, 'message' => 'Prompt with id: ' . $id . ' not found.']));
+        }
+        return $this->json($this->appendTimeStampToApiResponse($prompt->jsonSerialize()));
     }
 
     /**
@@ -44,6 +59,13 @@ class PromptApiController extends BaseApiController
      */
     public function delete(int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $promptForDeletionShouldntBeNull = $this->promptService->show($id);
+
+        if (null === $promptForDeletionShouldntBeNull) {
+            return $this->json($this->appendTimeStampToApiResponse(
+                ['code' => 404, 'message' => "Prompt for deletion with id: {$id} not found."]));
+        }
+
+        return $this->json('Hallo Welt');
     }
 }

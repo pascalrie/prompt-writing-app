@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Note;
 use App\Service\CategoryService;
 use App\Service\NoteService;
 use App\Service\TagService;
@@ -62,7 +63,12 @@ class NoteApiController extends BaseApiController
      */
     public function list(): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $notes = $this->noteService->list();
+        $response = [];
+        foreach ($notes as $note) {
+            $response += [$note->jsonSerialize()];
+        }
+        return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
     /**
@@ -70,15 +76,65 @@ class NoteApiController extends BaseApiController
      */
     public function show(int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $note = $this->noteService->show($id);
+        if (null === $note) {
+            return $this->json($this->appendTimeStampToApiResponse(['code' => 404, 'message' => "Note with id: {$id} not found."]));
+        }
+        return $this->json($this->appendTimeStampToApiResponse($note->jsonSerialize()));
     }
 
     /**
      * @Route("/note/update/{id}", name="api_update_note", methods={"PUT"})
      */
-    public function update(int $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $bodyParameters = json_decode($request->getContent());
+        $content = $bodyParameters->content;
+        $newTitle = $bodyParameters->title;
+        $newCategory = $bodyParameters->category;
+        $newTagTitles = $bodyParameters->tags;
+        $contentIsAdded = $bodyParameters->contentIsAdded;
+
+        $noteForUpdateShouldntBeNull = $this->noteService->show($id);
+        if (null === $noteForUpdateShouldntBeNull) {
+            return $this->json($this->appendTimeStampToApiResponse(
+                ['code' => 404, 'message' => "Note for update with id: {$id} not found."]));
+        }
+
+        if (null === $contentIsAdded) {
+            $contentIsAdded = false;
+        }
+
+        // check for wish to remove tags with "/rm" or "/remove" && check for tag-duplicates with current note
+        $newTagTitles = $this->adjustTagList($noteForUpdateShouldntBeNull, $newTagTitles);
+
+        $this->noteService->update($id, $content, $contentIsAdded, $newTitle, $newTagTitles, $newCategory);
+        $updatedNoteFromDb = $this->noteService->show($id);
+
+        return $this->json($this->appendTimeStampToApiResponse($updatedNoteFromDb->jsonSerialize()));
+    }
+
+    /**
+     * @param Note $note
+     * @param array|null $newTagTitles
+     * @return array
+     */
+    private function adjustTagList(Note $note, ?array $newTagTitles): array
+    {
+        if (!empty($newTagTitles)) {
+            $newListOfTags = [];
+            foreach ($newTagTitles as $newTagTitle) {
+                $tag = $this->tagService->showBy('title', $newTagTitle);
+                if (str_contains($tag->getTitle(), '/remove' || str_contains($tag->getTitle(), '/rm'))) {
+                    $this->tagService->removeFromNote($note, $tag);
+                    $this->noteService->removeTagFromNote($note, $tag);
+                    $newListOfTags = array_splice($newTagTitles, $tag->getTitle(), 1);
+                }
+            }
+            // items, not in intersection of both arrays
+            return $this->removeConjunctItemsBasedOnTitleInTwoArrays($note->getTags()->toArray(), $newTagTitles);
+        }
+        return $newTagTitles;
     }
 
     /**
@@ -86,6 +142,21 @@ class NoteApiController extends BaseApiController
      */
     public function delete(int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $noteForDeletionShouldntBeNull = $this->noteService->show($id);
+        if (null === $noteForDeletionShouldntBeNull) {
+            return $this->json($this->appendTimeStampToApiResponse(
+                ['code' => 404, 'message' => "Note for deletion with id: {$id} not found."]));
+        }
+        $this->noteService->delete($id);
+        $noteAfterDeletionShouldBeNull = $this->noteService->show($id);
+        if (null !== $noteAfterDeletionShouldBeNull) {
+            return $this->json($this->appendTimeStampToApiResponse(
+                ['message' => "Note deletion with id: {$id} was not successful."]
+            ));
+        }
+
+        return $this->json($this->json($this->appendTimeStampToApiResponse(
+            ['message' => "Note deletion with id: {$id} was successful."]
+        )));
     }
 }

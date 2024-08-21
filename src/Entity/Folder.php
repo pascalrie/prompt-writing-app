@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=FolderRepository::class)
  */
-class Folder
+class Folder implements IEntity
 {
     /**
      * @ORM\Id

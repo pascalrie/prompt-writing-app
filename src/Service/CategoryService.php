@@ -36,17 +36,10 @@ class CategoryService
         return $this->categoryRepository->add($category, true);
     }
 
-    /**
-     * @throws EntityNotFoundException
-     */
     public function update(int   $oldCategoryId, string $newTitle = "", array $newPotentialPrompts = null,
                            array $newPotentialNotes = null): Category
     {
         $categoryInDb = $this->categoryRepository->findBy(['id' => $oldCategoryId])[0];
-
-        if (null === $categoryInDb) {
-            throw new EntityNotFoundException("Category for update with id {$oldCategoryId} not found");
-        }
 
         if (null !== $newTitle) {
             $categoryInDb->setTitle($newTitle);
@@ -74,17 +67,8 @@ class CategoryService
         return $this->categoryRepository->findAll();
     }
 
-    /**
-     * @throws EntityNotFoundException
-     */
     public function delete(int $id): void
     {
-        $category = $this->categoryRepository->findBy(['id' => $id]);
-
-        if ([] === $category) {
-           throw new EntityNotFoundException("Category with id {$id} not found");
-        }
-
         $category = $this->categoryRepository->findBy(['id' => $id])[0];
 
         $this->categoryRepository->remove($category, true);

@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=NoteRepository::class)
  */
-class Note
+class Note implements IEntity
 {
     /**
      * @ORM\Id
@@ -92,6 +92,12 @@ class Note
     {
         $this->content = $content;
 
+        return $this;
+    }
+
+    public function addContent(string $content): self
+    {
+        $this->content .= $content;
         return $this;
     }
 
@@ -179,7 +185,7 @@ class Note
         return $this;
     }
 
-    public function jsonSerialize(bool $withContent = false, bool $withCategory = true, bool $withPrompt = false, bool $withTags = true, bool $withFolder = false): array
+    public function jsonSerialize(bool $withContent = true, bool $withCategory = true, bool $withPrompt = true, bool $withTags = true, bool $withFolder = true): array
     {
         $json = [
             'title' => $this->title,

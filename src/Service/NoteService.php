@@ -19,17 +19,19 @@ class NoteService
         $this->noteRepository = $categoryRepository;
     }
 
-    public function create(string $title, string $content = "", ArrayCollection $tags = null, Category $category = null): Note
+    public function create(string $title = "", string $content = "", ArrayCollection $tags = null, Category $category = null): Note
     {
         $note = new Note();
 
         $note->setCreatedAt(new DateTimeImmutable('NOW'));
         $note->setUpdatedAt(new DateTime('NOW'));
+        if (null === $title) {
+            $title = substr($content, 0, 15) . '...';
+        }
+
         $note->setTitle($title);
 
-        if ("" !== $content) {
-            $note->setContent($content);
-        }
+        $note->setContent($content);
 
         if (!$tags->isEmpty()) {
             $tagsForForeach = $tags->toArray();
@@ -48,20 +50,25 @@ class NoteService
         return $note;
     }
 
-    public function update(int $noteId, string $newTitle = "", string $newContent = "", array $potentialNewTags = null, Category $newCategory = null): void
+    public function update(int $noteId, string $content, bool $contentIsAdded = false, string $newTitle = "", array $newTags = null, Category $newCategory = null): void
     {
         $noteFromDb = $this->noteRepository->findBy(['id' => $noteId])[0];
 
-        if ("" !== $newTitle) {
-            $noteFromDb->setTitle($newTitle);
+        if ($contentIsAdded) {
+            $noteFromDb->addContent($content);
         }
 
-        if ("" !== $newContent) {
-            $noteFromDb->setContent($newContent);
+        if (!$contentIsAdded) {
+            $noteFromDb->setContent($content);
         }
 
-        if (null !== $potentialNewTags) {
-            foreach ($potentialNewTags as $tag) {
+        if (null === $newTitle) {
+            $newTitle = substr($noteFromDb->getContent(), 0, 15) . '...';
+        }
+        $noteFromDb->setTitle($newTitle);
+
+        if (null !== $newTags) {
+            foreach ($newTags as $tag) {
                 $noteFromDb->addTag($tag);
             }
         }
@@ -81,8 +88,8 @@ class NoteService
 
     public function delete(int $id): void
     {
-        $category = $this->noteRepository->findBy(['id' => $id])[0];
-        $this->noteRepository->remove($category);
+        $note = $this->noteRepository->findBy(['id' => $id])[0];
+        $this->noteRepository->remove($note, true);
     }
 
     public function show(int $id): ?Note
@@ -102,5 +109,11 @@ class NoteService
             return null;
         }
         return $notes[0];
+    }
+
+    public function removeTagFromNote(?Note $note, ?Tag $tag)
+    {
+        $note->removeTag($tag);
+        $this->noteRepository->flush();
     }
 }

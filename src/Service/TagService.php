@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Note;
 use App\Entity\Tag;
 use App\Repository\TagRepository;
 
@@ -82,5 +83,14 @@ class TagService
             return null;
         }
         return $tags[0];
+    }
+
+    public function removeFromNote(?Note $note, ?Tag $tag)
+    {
+        $tag->removeNote($note);
+        if ($tag->getNotes()->isEmpty()) {
+            $this->tagRepository->remove($tag);
+        }
+        $this->tagRepository->flush();
     }
 }

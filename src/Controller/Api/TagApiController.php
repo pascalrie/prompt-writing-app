@@ -2,19 +2,31 @@
 
 namespace App\Controller\Api;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Service\TagService;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TagApiController extends BaseApiController
 {
+    protected TagService $tagService;
+
+    public function __construct(TagService $tagService)
+    {
+        $this->tagService = $tagService;
+    }
     /**
      * @Route("/tag/create", name="api_create_tag", methods={"GET", "POST"})
      */
-    public function create(): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $bodyParameters = json_decode($request->getContent());
+        $title = $bodyParameters->title;
+        $noteTitleList = $bodyParameters->noteTitles;
+        $color = $bodyParameters->color;
+
+        return $this->json('MULM');
+
     }
 
     /**
@@ -22,7 +34,12 @@ class TagApiController extends BaseApiController
      */
     public function list(): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $tags = $this->tagService->list();
+        $response = [];
+        foreach ($tags as $tag) {
+            $response += [$tag->jsonSerialize()];
+        }
+        return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
     /**
@@ -30,7 +47,11 @@ class TagApiController extends BaseApiController
      */
     public function show(int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $tag = $this->tagService->show($id);
+        if (null === $tag) {
+            return $this->json($this->appendTimeStampToApiResponse(['code' => 404, 'message' => 'Tag with id: ' . $id . ' not found.']));
+        }
+        return $this->json($this->appendTimeStampToApiResponse($tag->jsonSerialize()));
     }
 
     /**
@@ -46,6 +67,21 @@ class TagApiController extends BaseApiController
      */
     public function delete(int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $tagForDeletionShouldntBeNull = $this->tagService->show($id);
+        if (null === $tagForDeletionShouldntBeNull) {
+            return $this->json($this->appendTimeStampToApiResponse(
+                ['code' => 404, 'message' => "Tag for deletion with id: {$id} not found."]));
+        }
+        $this->tagService->delete($id);
+        $tagAfterDeletionShouldBeNull = $this->tagService->show($id);
+        if (null !== $tagAfterDeletionShouldBeNull) {
+            return $this->json($this->appendTimeStampToApiResponse(
+                ['message' => "Tag for deletion with id: {$id} was not successful."]
+            ));
+        }
+
+        return $this->json($this->json($this->appendTimeStampToApiResponse(
+            ['message' => "Tag for deletion with id: {$id} was successful."]
+        )));
     }
 }

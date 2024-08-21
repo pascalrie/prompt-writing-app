@@ -44,8 +44,11 @@ class CategoryApiController extends BaseApiController
     public function list(): JsonResponse
     {
         $categories = $this->categoryService->list();
-
-        return $this->json($categories);
+        $response = [];
+        foreach ($categories as $category) {
+            $response += [$category->jsonSerialize()];
+        }
+        return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
     /**
@@ -54,13 +57,14 @@ class CategoryApiController extends BaseApiController
     public function show(int $id): JsonResponse
     {
         $category = $this->categoryService->show($id);
-
+        if (null === $category) {
+            return $this->json($this->appendTimeStampToApiResponse(['code' => 404, 'message' => "Category with id: {$id} not found."]));
+        }
         return $this->json($this->appendTimeStampToApiResponse($category->jsonSerialize(true)));
     }
 
     /**
      * @Route("/category/update/{id}", name="api_update_category", methods={"PUT"})
-     * @throws EntityNotFoundException
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -68,6 +72,12 @@ class CategoryApiController extends BaseApiController
         $newTitle = $bodyParameters->title;
         $potentialNewPromptIds = $bodyParameters->potentialNewPrompts;
         $potentialNewNoteIds = $bodyParameters->potentialNewNotes;
+
+        $categoryForUpdateShouldntBeNull = $this->categoryService->show($id);
+        if (null === $categoryForUpdateShouldntBeNull) {
+            return $this->json($this->appendTimeStampToApiResponse(
+                ['code' => 404, 'message' => "Category for update with id: {$id} not found."]));
+        }
 
         $promptObjectsForGivenIds = [];
         foreach ($potentialNewPromptIds as $potentialNewPromptId) {
@@ -86,10 +96,16 @@ class CategoryApiController extends BaseApiController
 
     /**
      * @Route("/category/delete/{id}", name="api_delete_category", methods={"DELETE"})
-     * @throws EntityNotFoundException
      */
     public function delete(int $id): JsonResponse
     {
+        $categoryForDeletionShouldntBeNull = $this->categoryService->show($id);
+
+        if (null === $categoryForDeletionShouldntBeNull) {
+            return $this->json($this->appendTimeStampToApiResponse(
+                ['code' => 404, 'message' => "Category for deletion with id: {$id} not found."]));
+        }
+
         $this->categoryService->delete($id);
         $categoryHopefullyNull = $this->categoryService->show($id);
         if (null !== $categoryHopefullyNull) {

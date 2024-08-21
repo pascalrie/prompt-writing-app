@@ -35,7 +35,11 @@ class FolderApiController extends BaseApiController
     public function list(): JsonResponse
     {
         $folders = $this->folderService->list();
-        return $this->json($this->appendTimeStampToApiResponse($folders));
+        $response = [];
+        foreach ($folders as $folder) {
+            $response += [$folder->jsonSerialize()];
+        }
+        return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
     /**
@@ -44,7 +48,10 @@ class FolderApiController extends BaseApiController
     public function show(int $id): JsonResponse
     {
         $folder = $this->folderService->show($id);
-        return $this->json($this->appendTimeStampToApiResponse($folder->jsonSerialize(true)));
+        if (null === $folder) {
+            return $this->json($this->appendTimeStampToApiResponse(['code' => 404, 'message' => 'Folder with id: ' . $id . ' not found.']));
+        }
+        return $this->json($this->appendTimeStampToApiResponse($folder->jsonSerialize()));
     }
 
     /**
@@ -71,7 +78,15 @@ class FolderApiController extends BaseApiController
      */
     public function delete(int $id): JsonResponse
     {
+        $folderForDeletionShouldntBeNull = $this->folderService->show($id);
+
+        if (null === $folderForDeletionShouldntBeNull) {
+            return $this->json($this->appendTimeStampToApiResponse(
+                ['code' => 404, 'message' => "Folder for deletion with id: {$id} not found."]));
+        }
+
         $this->folderService->delete($id);
+
         $folderHopefullyNull = $this->folderService->show($id);
         if (null !== $folderHopefullyNull) {
             return $this->json($this->appendTimeStampToApiResponse(['message' => 'Failed.']));
