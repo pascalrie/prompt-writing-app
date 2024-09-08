@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=PromptRepository::class)
  */
-class Prompt implements IEntity
+class Prompt
 {
     /**
      * @ORM\Id

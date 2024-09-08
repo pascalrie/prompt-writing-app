@@ -2,10 +2,10 @@
 
 namespace App\Repository;
 
-use App\Entity\Category;
+use App\Entity\Folder;
 use App\Entity\Note;
+use App\Repository\Factory\IRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,7 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Note[]    findAll()
  * @method Note[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class NoteRepository extends ServiceEntityRepository
+class NoteRepository extends ServiceEntityRepository implements IRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -44,5 +44,10 @@ class NoteRepository extends ServiceEntityRepository
     public function flush(): void
     {
         $this->getEntityManager()->flush();
+    }
+
+    private function persist(Note $note): void
+    {
+        $this->getEntityManager()->persist($note);
     }
 }

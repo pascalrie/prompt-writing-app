@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Category;
+use App\Repository\Factory\IRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,39 +15,39 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Category[]    findAll()
  * @method Category[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class CategoryRepository extends ServiceEntityRepository
+class CategoryRepository extends ServiceEntityRepository implements IRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Category::class);
     }
 
-    public function add(Category $entity, bool $flush = false): Category
+    public function add(Category $category, bool $flush = false): Category
     {
-        $this->persist($entity);
+        $this->persist($category);
 
         if ($flush) {
             $this->flush();
         }
 
-        return $entity;
+        return $category;
     }
 
-    public function remove(Category $entity, bool $flush = false): void
+    public function remove(Category $category, bool $flush = false): void
     {
-        $this->getEntityManager()->remove($entity);
+        $this->getEntityManager()->remove($category);
 
         if ($flush) {
             $this->flush();
         }
     }
 
-    private function persist(Category $entity): void
+    public function persist(Category $category): void
     {
-        $this->getEntityManager()->persist($entity);
+        $this->getEntityManager()->persist($category);
     }
 
-    private function flush()
+    public function flush(): void
     {
         $this->getEntityManager()->flush();
     }

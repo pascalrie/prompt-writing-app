@@ -2,23 +2,43 @@
 
 namespace App\Controller\Api;
 
+use App\Repository\Factory\RepositoryCreator;
+use App\Service\CategoryService;
 use App\Service\PromptService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class PromptApiController extends BaseApiController
+class PromptApiController extends AbstractApiController
 {
     protected PromptService $promptService;
 
-    public function __construct(PromptService $promptService) {
+    protected CategoryService $categoryService;
+
+    public function __construct(PromptService     $promptService, CategoryService $categoryService, EntityManagerInterface $em,
+                                RepositoryCreator $repositoryCreator)
+    {
+        parent::__construct($em, $repositoryCreator);
         $this->promptService = $promptService;
+        $this->categoryService = $categoryService;
     }
+
     /**
      * @Route("/prompt/create", name="api_create_prompt", methods={"POST"})
      */
-    public function create(): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $bodyParameters = json_decode($request->getContent());
+        $title = $bodyParameters->title;
+        $categoryTitle = $bodyParameters->category;
+
+        $category = $this->categoryService->showByTitle($categoryTitle);
+        if (null === $category) {
+            $category = $this->categoryService->create($categoryTitle);
+        }
+        $prompt = $this->promptService->create($title, $category->getId());
+        return $this->json($this->appendTimeStampToApiResponse($prompt->jsonSerialize()));
     }
 
     /**
@@ -49,9 +69,27 @@ class PromptApiController extends BaseApiController
     /**
      * @Route("/prompt/update/{id}", name="api_update_prompt", methods={"PUT"})
      */
-    public function update(int $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $bodyParameters = json_decode($request->getContent());
+        $promptTitle = $bodyParameters->title;
+        $categoryTitle = $bodyParameters->category;
+
+        $promptForUpdateShouldntBeNull = $this->promptService->show($id);
+
+        if (null === $promptForUpdateShouldntBeNull) {
+            return $this->json(['code' => 404, 'message' => 'Prompt with id: ' . $id . ' not found.']);
+        }
+
+        $categoryTitle = $this->categoryService->showByTitle($categoryTitle);
+
+        if (null === $categoryTitle) {
+            return $this->json(['code' => 404, 'message' => 'Category with title: ' . $categoryTitle . ' not found. 
+            Please create one.']);
+        }
+
+        $prompt = $this->promptService->update($id, $promptTitle, $categoryTitle);
+        return $this->json($this->appendTimeStampToApiResponse($prompt->jsonSerialize()));
     }
 
     /**
@@ -66,6 +104,12 @@ class PromptApiController extends BaseApiController
                 ['code' => 404, 'message' => "Prompt for deletion with id: {$id} not found."]));
         }
 
-        return $this->json('Hallo Welt');
+        $this->promptService->delete($id);
+        $promptHopefullyNull = $this->promptService->show($id);
+        if (null !== $promptHopefullyNull) {
+            return $this->json($this->appendTimeStampToApiResponse(['message' => ['Not successfully deleted prompt' . json_encode($promptHopefullyNull->jsonSerialize())]]));
+        }
+
+        return $this->json($this->appendTimeStampToApiResponse(['message' => 'Successfully deleted prompt.']));
     }
 }

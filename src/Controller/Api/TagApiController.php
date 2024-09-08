@@ -2,19 +2,28 @@
 
 namespace App\Controller\Api;
 
+use App\Repository\Factory\RepositoryCreator;
+use App\Service\NoteService;
 use App\Service\TagService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class TagApiController extends BaseApiController
+class TagApiController extends AbstractApiController
 {
     protected TagService $tagService;
 
-    public function __construct(TagService $tagService)
+    protected NoteService $noteService;
+
+    public function __construct(TagService        $tagService, NoteService $noteService, EntityManagerInterface $em,
+                                RepositoryCreator $repositoryCreator)
     {
+        parent::__construct($em, $repositoryCreator);
         $this->tagService = $tagService;
+        $this->noteService = $noteService;
     }
+
     /**
      * @Route("/tag/create", name="api_create_tag", methods={"GET", "POST"})
      */
@@ -25,7 +34,9 @@ class TagApiController extends BaseApiController
         $noteTitleList = $bodyParameters->noteTitles;
         $color = $bodyParameters->color;
 
-        return $this->json('MULM');
+        $createdTag = $this->tagService->create($title, $noteTitleList, $color);
+
+        return $this->json($this->appendTimeStampToApiResponse($createdTag->jsonSerialize()));
 
     }
 
@@ -57,9 +68,26 @@ class TagApiController extends BaseApiController
     /**
      * @Route("/tag/update/{id}", name="api_update_tag", methods={"PUT"})
      */
-    public function update(int $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
-        return $this->json(['Hallo Welt']);
+        $bodyParameters = json_decode($request->getContent());
+        $title = $bodyParameters->title;
+        $color = $bodyParameters->color;
+        $potentialNewNotes = $bodyParameters->notes;
+
+        $noteObjects = [];
+        foreach ($potentialNewNotes as $note) {
+            $noteObjects += $this->noteService->show($note);
+        }
+
+        $tagToUpdate = $this->tagService->tagRepository->findBy(['title' => $title])[0];
+        $notesFromDb = $tagToUpdate->getNotes()->toArray();
+        $finalNotesToAdd = $this->findNonDuplicateObjectsInTwoArraysWithVariableCriteria($notesFromDb, $noteObjects);
+
+        $this->tagService->update($id, $title, $finalNotesToAdd, $color);
+        $finalTag = $this->tagService->show($tagToUpdate->getId());
+
+        return $this->json($this->appendTimeStampToApiResponse($finalTag->jsonSerialize()));
     }
 
     /**

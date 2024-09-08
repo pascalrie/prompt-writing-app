@@ -2,17 +2,20 @@
 
 namespace App\Controller\Api;
 
+use App\Repository\Factory\RepositoryCreator;
 use App\Service\FolderService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class FolderApiController extends BaseApiController
+class FolderApiController extends AbstractApiController
 {
     protected FolderService $folderService;
 
-    public function __construct(FolderService $folderService)
+    public function __construct(FolderService $folderService, EntityManagerInterface $em, RepositoryCreator $repositoryCreator)
     {
+        parent::__construct($em, $repositoryCreator);
         $this->folderService = $folderService;
     }
 

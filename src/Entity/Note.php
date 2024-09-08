@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=NoteRepository::class)
  */
-class Note implements IEntity
+class Note
 {
     /**
      * @ORM\Id

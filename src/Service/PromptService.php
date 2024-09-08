@@ -26,7 +26,7 @@ class PromptService
         return $prompt;
     }
 
-    public function update(int $promptId, string $title = "", Category $newCategory = null): void
+    public function update(int $promptId, string $title = "", Category $newCategory = null): Prompt
     {
         $promptFromDb = $this->promptRepository->findBy(['promptId' => $promptId])[0];
 
@@ -38,6 +38,8 @@ class PromptService
         }
 
         $this->promptRepository->flush();
+
+        return $this->promptRepository->findBy(['promptId' => $promptId])[0];
     }
 
     public function list(): array

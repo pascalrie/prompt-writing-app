@@ -8,14 +8,14 @@ use App\Repository\TagRepository;
 
 class TagService
 {
-    protected TagRepository $tagRepository;
+    public TagRepository $tagRepository;
 
     public function __construct(TagRepository $tagRepository)
     {
         $this->tagRepository = $tagRepository;
     }
 
-    public function create(string $title = "", array $notes = null, string $color = "")
+    public function create(string $title = "", array $notes = null, string $color = ""): Tag
     {
         $tag = new Tag();
 
@@ -34,6 +34,8 @@ class TagService
         }
 
         $this->tagRepository->add($tag);
+
+        return $tag;
     }
 
     public function update(int $tagId, string $title = "", array $potentialNewNotes = null, string $color = "")

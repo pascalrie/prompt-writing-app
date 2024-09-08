@@ -2,15 +2,17 @@
 
 namespace App\Controller\Api;
 
+use App\Repository\Factory\RepositoryCreator;
 use App\Service\CategoryService;
 use App\Service\NoteService;
 use App\Service\PromptService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class CategoryApiController extends BaseApiController
+class CategoryApiController extends AbstractApiController
 {
     protected CategoryService $categoryService;
 
@@ -18,8 +20,10 @@ class CategoryApiController extends BaseApiController
 
     protected NoteService $noteService;
 
-    public function __construct(CategoryService $categoryService, PromptService $promptService, NoteService $noteService)
+    public function __construct(CategoryService $categoryService, PromptService $promptService, NoteService $noteService,
+                                EntityManagerInterface $em, RepositoryCreator $repositoryCreator)
     {
+        parent::__construct($em, $repositoryCreator);
         $this->categoryService = $categoryService;
         $this->promptService = $promptService;
         $this->noteService = $noteService;

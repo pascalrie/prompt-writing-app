@@ -2,10 +2,9 @@
 
 namespace App\Repository;
 
-use App\Entity\Category;
 use App\Entity\Folder;
+use App\Repository\Factory\IRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,7 +15,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Folder[]    findAll()
  * @method Folder[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class FolderRepository extends ServiceEntityRepository
+class FolderRepository extends ServiceEntityRepository implements IRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -44,5 +43,10 @@ class FolderRepository extends ServiceEntityRepository
     public function flush()
     {
         $this->getEntityManager()->flush();
+    }
+
+    public function persist(Folder $folder): void
+    {
+        $this->getEntityManager()->persist($folder);
     }
 }

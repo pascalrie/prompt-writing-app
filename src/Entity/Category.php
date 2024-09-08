@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=CategoryRepository::class)
  */
-class Category implements IEntity
+class Category
 {
     /**
      * @ORM\Id

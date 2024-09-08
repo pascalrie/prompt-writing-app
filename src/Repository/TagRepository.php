@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Category;
 use App\Entity\Tag;
+use App\Repository\Factory\IRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -15,7 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Tag[]    findAll()
  * @method Tag[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TagRepository extends ServiceEntityRepository
+class TagRepository extends ServiceEntityRepository implements IRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -43,5 +44,10 @@ class TagRepository extends ServiceEntityRepository
     public function flush(): void
     {
         $this->getEntityManager()->flush();
+    }
+
+    public function persist(Tag $tag): void
+    {
+        $this->getEntityManager()->persist($tag);
     }
 }

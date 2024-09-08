@@ -3,15 +3,17 @@
 namespace App\Controller\Api;
 
 use App\Entity\Note;
+use App\Repository\Factory\RepositoryCreator;
 use App\Service\CategoryService;
 use App\Service\NoteService;
 use App\Service\TagService;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class NoteApiController extends BaseApiController
+class NoteApiController extends AbstractApiController
 {
     protected NoteService $noteService;
 
@@ -20,8 +22,10 @@ class NoteApiController extends BaseApiController
     protected CategoryService $categoryService;
 
     public function __construct(NoteService     $noteService, TagService $tagService,
-                                CategoryService $categoryService)
+                                CategoryService $categoryService,  EntityManagerInterface $em, RepositoryCreator $repositoryCreator)
     {
+        parent::__construct($em, $repositoryCreator);
+
         $this->noteService = $noteService;
         $this->tagService = $tagService;
         $this->categoryService = $categoryService;
@@ -121,18 +125,19 @@ class NoteApiController extends BaseApiController
      */
     private function adjustTagList(Note $note, ?array $newTagTitles): array
     {
-        if (!empty($newTagTitles)) {
-            $newListOfTags = [];
-            foreach ($newTagTitles as $newTagTitle) {
-                $tag = $this->tagService->showBy('title', $newTagTitle);
+        $listOfTags = [];
+        foreach ($note->getTags()->toArray() as $tag) {
+            $listOfTags += $tag;
+        }
+        // find items that are not in intersection of both arrays
+        $tagResults = $this->findDisjunctItemsInTwoArraysBasedOnTitle($listOfTags, $newTagTitles);
+        if (!empty($tagResults)) {
+            foreach ($tagResults as $tag)
                 if (str_contains($tag->getTitle(), '/remove' || str_contains($tag->getTitle(), '/rm'))) {
                     $this->tagService->removeFromNote($note, $tag);
                     $this->noteService->removeTagFromNote($note, $tag);
-                    $newListOfTags = array_splice($newTagTitles, $tag->getTitle(), 1);
                 }
-            }
-            // items, not in intersection of both arrays
-            return $this->removeConjunctItemsBasedOnTitleInTwoArrays($note->getTags()->toArray(), $newTagTitles);
+            return $tagResults;
         }
         return $newTagTitles;
     }
@@ -154,7 +159,7 @@ class NoteApiController extends BaseApiController
                 ['message' => "Note deletion with id: {$id} was not successful."]
             ));
         }
-
+        $this->responseForEachImplementedController(Note::class);
         return $this->json($this->json($this->appendTimeStampToApiResponse(
             ['message' => "Note deletion with id: {$id} was successful."]
         )));

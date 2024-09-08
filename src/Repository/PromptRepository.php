@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Category;
 use App\Entity\Prompt;
+use App\Repository\Factory\IRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -15,7 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Prompt[]    findAll()
  * @method Prompt[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PromptRepository extends ServiceEntityRepository
+class PromptRepository extends ServiceEntityRepository implements IRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -40,8 +41,13 @@ class PromptRepository extends ServiceEntityRepository
         }
     }
 
-    public function flush()
+    public function flush(): void
     {
         $this->getEntityManager()->flush();
+    }
+
+    public function persist(Prompt $prompt): void
+    {
+        $this->getEntityManager()->persist($prompt);
     }
 }
