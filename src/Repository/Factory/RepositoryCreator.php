@@ -13,6 +13,7 @@ use Doctrine\ORM\Repository\RepositoryFactory;
 
 class RepositoryCreator implements RepositoryFactory
 {
+    /** @var array $ids */
     private array $ids;
     private ContainerInterface $container;
     private RepositoryFactory $default;
@@ -29,7 +30,6 @@ class RepositoryCreator implements RepositoryFactory
         if (isset($this->ids[$entityName])) {
             return $this->container->get($this->ids[$entityName]);
         }
-
         return $this->default->getRepository($entityManager, $entityName);
     }
 }

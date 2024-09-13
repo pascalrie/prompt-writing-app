@@ -101,6 +101,7 @@ class AbstractApiController extends AbstractController
     /**
      * @param array $array
      * @param $comparison (is an item)
+     * @param bool $compareWithTitle
      * @return bool
      */
     protected function arrayContainsDuplicate(array $array, $comparison, bool $compareWithTitle = false): bool

@@ -6,38 +6,40 @@
 parameters:
 
 services:
+  App\Repository\CategoryRepository:
+    class: App\Repository\CategoryRepository
+    tags: [ 'app.repository']
+  App\Repository\FolderRepository:
+    class: App\Repository\FolderRepository
+    tags: [ 'app.repository']
+  App\Repository\NoteRepository:
+    class: App\Repository\NoteRepository
+    tags: [ 'app.repository']
+  App\Repository\PromptRepository:
+    class: App\Repository\PromptRepository
+    tags: [ 'app.repository']
+  App\Repository\TagRepository:
+    class: App\Repository\TagRepository
+    tags: ['app.repository']
   # this solution is a gist from github (app.doctrine.repository.factory and the one after that)
   # Link: https://gist.github.com/docteurklein/9778800
-  app.doctrine.repository.factory:
-    class: App\Doctrine\Repository\Factory
+  app.doctrine.repository.creator:
+    class: App\Doctrine\Repository\Factory\RepositoryCreator
+    autowire: false
     arguments:
-      - [ ] # Initially empty, to be populated by CompilerPass
+      - $ids:
+          - App\Entity\Category: 'App\Repository\CategoryRepository'
+          - App\Entity\Folder: 'App\Repository\FolderRepository'
+          - App\Entity\Note: 'App\Repository\NoteRepository'
+          - App\Entity\Prompt: 'App\Repository\PromptRepository'
+          - App\Entity\Tag: 'App\Repository\TagRepository'
       - '@service_container'
-      - '@app.doctrine.repository.factory.default'
-  app.doctrine.repository.factory.default:
-    class: Doctrine\ORM\Repository\DefaultRepositoryFactory
-  # service-definition of repositories for factory
-  #    App\Repository\TagRepository:
-  #        tags:
-  #            - { name: 'app.repository', class: 'App\Entity\Tag' }
-  #    App\Repository\Category:
-  #        tags:
-  #            - { name: 'app.repository', class: 'App\Entity\Category'}
-  #    App\Repository\Folder:
-  #        tags:
-  #            - { name: 'app.repository', class: 'App\Entity\Folder'}
-  #    App\Repository\Note:
-  #        tags:
-  #            - { name: 'app.repository', class: 'App\Entity\Note'}
-  #    App\Repository\Prompt:
-  #        tags:
-  #            - { name: 'app.repository', class: 'App\Entity\Prompt'}
+      - '@app.doctrine.repository.factory.repository.creator'
 
-  # default configuration for services in *this* file
+    # default configuration for services in *this* file
   _defaults:
     autowire: true      # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
-
   # makes classes in src/ available to be used as services
   # this creates a service per class whose id is the fully-qualified class name
   App\:
