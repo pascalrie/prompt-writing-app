@@ -3,42 +3,41 @@
 namespace App\Repository\Factory;
 
 // This solution is a gist from github (https://gist.github.com/docteurklein/9778800)
-// slightly adjusted
+// adjusted
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
 class CompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $factory = $container->findDefinition('App\Repository\Factory\RepositoryCreator');
-        $taggedServices = $container->findTaggedServiceIds('app.repository_service');
-        $definition = new Definition();
-        // only to initialize, will be overridden later
+        $factory = $container->findDefinition('app.doctrine.repository.factory');
+
+        $counter = 0;
         $repositories = [];
-        $param['class'] = $definition->getClass();
-        foreach ($taggedServices as $id => $params) {
+        foreach ($container->findTaggedServiceIds('app.repository_service') as $id => $params) {
             foreach ($params as $param) {
-                if (isset($param['class'])) {
-                    $repositories[$param['class']] = $id;
-                }
+                $param['class'] = $counter;
+                $repositories[$param['class']] = $id;
                 $repository = $container->findDefinition($id);
-                $repository->replaceArgument(0, new Reference('doctrine.orm.default_entity_manager'));
+                $repository->setArgument(0, new Reference('doctrine.orm.default_entity_manager'));
+
+                $definition = new Definition();
                 $definition->setClass('Doctrine\ORM\Mapping\ClassMetadata');
                 $definition->setFactory([new Reference('doctrine.orm.default_entity_manager'), 'getClassMetadata']);
-                $repository->replaceArgument(1, $definition);
+
+                $definition->addArgument($param['class']);
+                $repository->setArgument(1, $definition);
             }
-            if (!empty($param['class'])) {
-                $definition->setArguments([$param['class']]);
-            }
+            $counter++;
         }
-        if (!empty($repositories) || null !== $repositories) {
-            $factory->replaceArgument(0, $repositories);
-            $container->findDefinition('doctrine.orm.configuration')
-                ->addMethodCall('setRepositoryFactory', [$factory]);
-        }
+        $factory->setArguments([$repositories]);
+
+        $container->findDefinition('doctrine.orm.configuration')
+            ->addMethodCall('setRepositoryFactory', [$factory]);
     }
 }
