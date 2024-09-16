@@ -35,7 +35,7 @@ class CompilerPass implements CompilerPassInterface
             }
             $counter++;
         }
-        $factory->setArguments([$repositories]);
+        $factory->setArgument(0, $repositories);
 
         $container->findDefinition('doctrine.orm.configuration')
             ->addMethodCall('setRepositoryFactory', [$factory]);
