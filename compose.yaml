@@ -1,0 +1,45 @@
+services:
+  web:
+    image: php:7.4-apache
+    container_name: symfony-web
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ./php.ini:/usr/local/etc/php/php.ini
+    ports:
+      - "8080:80"
+    networks:
+      - symfony-network
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html/public
+    depends_on:
+      - db
+  db:
+    image: mariadb:10.6
+    container_name: mariadb
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: prompt-writing-db
+      MYSQL_USER: db
+      MYSQL_PASSWORD: db
+    networks:
+      - symfony-network
+  symfony:
+    image: php:7.4-cli
+    container_name: symfony-cli
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    networks:
+      - symfony-network
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+
+networks:
+  symfony-network:
+    driver: bridge

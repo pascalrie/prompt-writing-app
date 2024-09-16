@@ -4,6 +4,7 @@ namespace App;
 
 use App\Repository\Factory\CompilerPass;
 use App\Repository\Factory\IRepository;
+use App\Repository\Factory\RepositoryCreator;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
