@@ -2,12 +2,10 @@
 
 namespace App\Controller\Api;
 
-use App\Repository\Factory\RepositoryCreator;
 use App\Service\CategoryService;
 use App\Service\NoteService;
 use App\Service\PromptService;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;

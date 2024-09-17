@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use App\Repository\Factory\RepositoryCreator;
 use App\Service\FolderService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;

@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use App\Repository\Factory\RepositoryCreator;
 use App\Service\NoteService;
 use App\Service\TagService;
 use Doctrine\ORM\EntityManagerInterface;

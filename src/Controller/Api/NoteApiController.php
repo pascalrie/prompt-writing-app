@@ -3,7 +3,6 @@
 namespace App\Controller\Api;
 
 use App\Entity\Note;
-use App\Repository\Factory\RepositoryCreator;
 use App\Service\CategoryService;
 use App\Service\NoteService;
 use App\Service\TagService;

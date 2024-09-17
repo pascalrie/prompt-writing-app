@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use App\Repository\Factory\RepositoryCreatorHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use http\Exception\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -91,8 +90,8 @@ class BaseApiController extends AbstractController
 //        $baseRepository = $this->factoryHandler->decideAndReturnRepository(get_class($base), $this->entityManager);
 //        $comparisonRepository = $this->factoryHandler->decideAndReturnRepository(get_class($comparison), $this->entityManager);
 
-        $basePropertyValue = $base->$getFunctionForBaseProperty();
-        $comparisonPropertyValue = $comparison->$getFunctionForComparisonProperty();
+  //      $basePropertyValue = $base->$getFunctionForBaseProperty();
+  //      $comparisonPropertyValue = $comparison->$getFunctionForComparisonProperty();
 
 //        $baseEntity = $baseRepository->findBy([$basePropertyKey => $basePropertyValue]);
 //        $comparisonEntity = $comparisonRepository->findBy([$comparisonPropertyKey => $comparisonPropertyValue]);
