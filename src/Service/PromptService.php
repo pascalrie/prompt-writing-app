@@ -5,8 +5,9 @@ namespace App\Service;
 use App\Entity\Category;
 use App\Entity\Prompt;
 use App\Repository\PromptRepository;
+use App\Service\Factory\IService;
 
-class PromptService
+class PromptService implements IService
 {
     protected PromptRepository $promptRepository;
 

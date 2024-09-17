@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repository\Factory;
+namespace App\Service\Factory;
 
 // This solution is a gist from github (https://gist.github.com/docteurklein/9778800)
 // adjusted
@@ -15,14 +15,15 @@ class CompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $factory = $container->findDefinition('app.doctrine.repository.factory');
+        $factory = $container->findDefinition('app.factory.service_creator');
 
         $counter = 0;
-        $repositories = [];
-        foreach ($container->findTaggedServiceIds('app.repository_service') as $id => $params) {
+        $services = [];
+
+        foreach ($container->findTaggedServiceIds('app.custom_service') as $id => $params) {
             foreach ($params as $param) {
                 $param['class'] = $counter;
-                $repositories[$param['class']] = $id;
+                $services[$param['class']] = $id;
                 $repository = $container->findDefinition($id);
                 $repository->setArgument(0, new Reference('doctrine.orm.default_entity_manager'));
 
@@ -35,9 +36,8 @@ class CompilerPass implements CompilerPassInterface
             }
             $counter++;
         }
-        $factory->setArgument(0, $repositories);
-
-        $container->findDefinition('doctrine.orm.configuration')
-            ->addMethodCall('setRepositoryFactory', [$factory]);
+        $factory->setArgument(0, $services);
+//        $container->findDefinition('doctrine.orm.configuration')
+//            ->addMethodCall('setFactory', [$factory]);
     }
 }

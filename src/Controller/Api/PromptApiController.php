@@ -10,16 +10,15 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class PromptApiController extends AbstractApiController
+class PromptApiController extends BaseApiController
 {
     protected PromptService $promptService;
 
     protected CategoryService $categoryService;
 
-    public function __construct(PromptService     $promptService, CategoryService $categoryService, EntityManagerInterface $em,
-                                RepositoryCreator $repositoryCreator)
+    public function __construct(PromptService     $promptService, CategoryService $categoryService, EntityManagerInterface $em)
     {
-        parent::__construct($em, $repositoryCreator);
+        parent::__construct($em);
         $this->promptService = $promptService;
         $this->categoryService = $categoryService;
     }

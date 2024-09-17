@@ -6,11 +6,12 @@ use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Tag;
 use App\Repository\NoteRepository;
+use App\Service\Factory\IService;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 
-class NoteService
+class NoteService implements IService
 {
     protected NoteRepository $noteRepository;
 

@@ -6,20 +6,27 @@
 parameters:
 
 services:
-  # this solution is a gist from github (app.doctrine.repository.factory and the one after that)
-  # Link: https://gist.github.com/docteurklein/9778800
-  app.doctrine.repository.factory:
-    class: App\Doctrine\Repository\Factory\RepositoryCreator
-    autowire: false
-    arguments:
-      - [ ]
-      - '@service_container'
-      - '@app.doctrine.repository.factory.default'
-  App\Repository\Factory\IRepository:
-      tags: ['app.repository_service']
-  app.doctrine.repository.factory.default:
-    class: Doctrine\ORM\Repository\DefaultRepositoryFactory
-    # default configuration for services in *this* file
+  app.factory.service_creator:
+    class: App\Service\Factory\BaseServiceCreator
+
+  app.custom_category_service:
+    class: App\Service\CategoryService
+    factory: ['App\Service\Factory\ConcreteCreators\CategoryServiceCreator', manufactureService]
+  app.custom_folder_service:
+    class: App\Service\FolderService
+    factory: ['App\Service\Factory\ConcreteCreators\FolderServiceCreator', manufactureService]
+  app.custom_note_service:
+    class: App\Service\NoteService
+    factory: ['App\Service\Factory\ConcreteCreators\NoteServiceCreator', manufactureService]
+  app.custom_prompt_service:
+    class: App\Service\PromptService
+    factory: ['App\Service\Factory\ConcreteCreators\PromptServiceCreator', manufactureService]
+  app.custom_tag_service:
+    class: App\Service\TagService
+    factory: ['App\Service\Factory\ConcreteCreators\TagServiceCreator', manufactureService]
+
+
+  # default configuration for services in *this* file
   _defaults:
     autowire: true      # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
@@ -34,6 +41,5 @@ services:
 
   # add more service definitions when explicit configuration is needed
   # please note that last definitions always *replace* previous ones
-
 
 

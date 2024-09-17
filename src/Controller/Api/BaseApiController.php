@@ -2,24 +2,21 @@
 
 namespace App\Controller\Api;
 
-use App\Repository\Factory\RepositoryCreator;
+use App\Repository\Factory\RepositoryCreatorHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use http\Exception\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Traits\JsonResponseTrait;
 
-class AbstractApiController extends AbstractController
+class BaseApiController extends AbstractController
 {
     use JsonResponseTrait;
 
-    protected RepositoryCreator $repositoryFactory;
-
     protected EntityManagerInterface $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager, RepositoryCreator $repositoryFactory)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
-        $this->repositoryFactory = $repositoryFactory;
     }
 
     protected function responseForEachImplementedController(string $className)
@@ -28,16 +25,31 @@ class AbstractApiController extends AbstractController
         dd($className);
     }
 
-    protected function findDisjunctItemsInTwoArraysBasedOnTitle(array $base, array $comparison): array
+    protected function findExclusivelyNewItemsInComparisonArrayBasedOnTitle(array $base, array $comparison): array
     {
-        // TODO: implement
-        return [];
+        $results = [];
+
+        if ($this->checkIfBothItemsOrObjectsAreNullOrEmpty($base, $comparison)) {
+            return $base;
+        }
+
+        foreach ($base as $baseItem) {
+            foreach ($comparison as $comparisonItem) {
+                if (!$this->checkClassEquality($baseItem, $comparisonItem)) {
+                    throw new InvalidArgumentException('Class of the first entity is not the same as the class of the entity to compare.');
+                }
+                if ($baseItem->getTitle() === $comparisonItem->getTitle()) {
+                    $results += $baseItem;
+                }
+            }
+        }
+        return $results;
     }
 
-    protected function isTitleDuplicate($base, $comparison): bool
+    protected function isTitleOfObjectsOfSameClassDuplicate($base, $comparison): bool
     {
-        if ($comparison instanceof $base) {
-            if ($comparison->getTitle() === $comparison->getTitle()) {
+        if (get_class($comparison) === get_class($base)) {
+            if ($base->getTitle() === $comparison->getTitle()) {
                 return true;
             }
         }
@@ -57,6 +69,7 @@ class AbstractApiController extends AbstractController
     protected function isEntityBasedOnPropertyDuplicate($base, $comparison, string $basePropertyKey = 'title',
                                                         string $comparisonPropertyKey = 'title'): bool
     {
+        dd("Currently not working method");
         if (is_array($base)) {
             throw new InvalidArgumentException('Base-argument should be an entity, not an array');
         }
@@ -64,36 +77,29 @@ class AbstractApiController extends AbstractController
             throw new InvalidArgumentException('Comparison-argument should be an entity, not an array');
         }
 
-        if (null === $base) {
-            throw new \InvalidArgumentException('Base cannot be null.');
+        if (null === $base || null === $comparison) {
+            throw new InvalidArgumentException('Base-argument and/or Comparison-argument can\'t be null');
         }
 
-        if (null === $comparison) {
-            throw new \InvalidArgumentException('Comparison cannot be null.');
-        }
-
-        $classOfBase = get_class($base);
-        $classOfComparison = get_class($comparison);
-
-        if (!$classOfComparison instanceof $classOfBase) {
-            throw new \InvalidArgumentException('Class of the first entity is not the same as the class of the entity to compare.');
+        if (!$this->checkClassEquality($base, $comparison)) {
+            throw new InvalidArgumentException('Base-argument-class and Comparison-class must be the same.');
         }
 
         $getFunctionForBaseProperty = $this->getGetFunctionOfProperty($basePropertyKey);
         $getFunctionForComparisonProperty = $this->getGetFunctionOfProperty($comparisonPropertyKey);
 
-        $baseRepository = $this->repositoryFactory->getRepository($this->entityManager, $classOfBase);
-        $comparisonRepository = $this->repositoryFactory->getRepository($this->entityManager, $classOfComparison);
+//        $baseRepository = $this->factoryHandler->decideAndReturnRepository(get_class($base), $this->entityManager);
+//        $comparisonRepository = $this->factoryHandler->decideAndReturnRepository(get_class($comparison), $this->entityManager);
 
         $basePropertyValue = $base->$getFunctionForBaseProperty();
         $comparisonPropertyValue = $comparison->$getFunctionForComparisonProperty();
 
-        $baseEntity = $baseRepository->findBy([$basePropertyKey => $basePropertyValue]);
-        $comparisonEntity = $comparisonRepository->findBy([$comparisonPropertyKey => $comparisonPropertyValue]);
+//        $baseEntity = $baseRepository->findBy([$basePropertyKey => $basePropertyValue]);
+//        $comparisonEntity = $comparisonRepository->findBy([$comparisonPropertyKey => $comparisonPropertyValue]);
 
-        if ($baseEntity === $comparisonEntity) {
-            return true;
-        }
+//        if ($baseEntity === $comparisonEntity) {
+//            return true;
+//        }
 
         return false;
     }
@@ -108,7 +114,7 @@ class AbstractApiController extends AbstractController
     {
         foreach ($array as $item) {
             if ($compareWithTitle) {
-                if ($this->isTitleDuplicate($item, $comparison)) {
+                if ($this->isTitleOfObjectsOfSameClassDuplicate($item, $comparison)) {
                     return true;
                 }
                 return false;
@@ -121,7 +127,7 @@ class AbstractApiController extends AbstractController
     }
 
     /**
-     * based on a property of an entity (criteria): find disjunct-objects in two arrays
+     * based on a property of an entity (criteria): find exclusively new objects in comparison-array
      * @param array $base of items
      * @param array $itemsToCompare of items
      * @param string $basePropertyKey
@@ -129,12 +135,11 @@ class AbstractApiController extends AbstractController
      * @return array of objects (e.g. array of Tags)
      */
 
-    protected
-    function findNonDuplicateObjectsInTwoArraysWithVariableCriteria
+    protected function findNonDuplicateObjectsInTwoArraysWithVariableCriteria
     (array  $base, array $itemsToCompare, string $basePropertyKey = 'title',
      string $comparisonPropertyKey = 'title'): array
     {
-        $nonConjunctItems = [];
+        $newItems = [];
         if (empty($base)) {
             throw new \InvalidArgumentException('Base-array can\'t be empty');
         }
@@ -153,16 +158,31 @@ class AbstractApiController extends AbstractController
 
         foreach ($itemsToCompare as $newItem) {
             if (!$this->arrayContainsDuplicate($base, $newItem)) {
-                $nonConjunctItems += [$newItem];
+                $newItems += [$newItem];
             }
-            return $nonConjunctItems;
+            return $newItems;
         }
         return $base;
     }
 
-    private
-    function getGetFunctionOfProperty(string $key): string
+    private function getGetFunctionOfProperty(string $key): string
     {
         return 'get' . strtoupper($key);
+    }
+
+    private function checkClassEquality($first, $second): bool
+    {
+        if (get_class($first) !== get_class($second)) {
+            return false;
+        }
+        return true;
+    }
+
+    private function checkIfBothItemsOrObjectsAreNullOrEmpty($first, $second): bool
+    {
+        if (null === $first && null === $second) {
+            return true;
+        }
+        return false;
     }
 }

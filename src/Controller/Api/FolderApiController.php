@@ -9,13 +9,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class FolderApiController extends AbstractApiController
+class FolderApiController extends BaseApiController
 {
     protected FolderService $folderService;
 
-    public function __construct(FolderService $folderService, EntityManagerInterface $em, RepositoryCreator $repositoryCreator)
+    public function __construct(FolderService $folderService, EntityManagerInterface $em)
     {
-        parent::__construct($em, $repositoryCreator);
+        parent::__construct($em);
         $this->folderService = $folderService;
     }
 

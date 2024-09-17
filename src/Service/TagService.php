@@ -5,8 +5,9 @@ namespace App\Service;
 use App\Entity\Note;
 use App\Entity\Tag;
 use App\Repository\TagRepository;
+use App\Service\Factory\IService;
 
-class TagService
+class TagService implements IService
 {
     public TagRepository $tagRepository;
 

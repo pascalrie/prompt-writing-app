@@ -10,16 +10,15 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class TagApiController extends AbstractApiController
+class TagApiController extends BaseApiController
 {
     protected TagService $tagService;
 
     protected NoteService $noteService;
 
-    public function __construct(TagService        $tagService, NoteService $noteService, EntityManagerInterface $em,
-                                RepositoryCreator $repositoryCreator)
+    public function __construct(TagService        $tagService, NoteService $noteService, EntityManagerInterface $em)
     {
-        parent::__construct($em, $repositoryCreator);
+        parent::__construct($em);
         $this->tagService = $tagService;
         $this->noteService = $noteService;
     }

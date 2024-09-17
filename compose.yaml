@@ -7,7 +7,7 @@ services:
       - .:/var/www/html
       - ./php.ini:/usr/local/etc/php/php.ini
     ports:
-      - "8080:80"
+      - "8082:80"
     networks:
       - symfony-network
     environment:
@@ -36,6 +36,9 @@ services:
       - symfony-network
     depends_on:
       - db
+    ports:
+      - "8002:8002"
+
 
 volumes:
   db_data:

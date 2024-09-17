@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class NoteApiController extends AbstractApiController
+class NoteApiController extends BaseApiController
 {
     protected NoteService $noteService;
 
@@ -22,9 +22,9 @@ class NoteApiController extends AbstractApiController
     protected CategoryService $categoryService;
 
     public function __construct(NoteService     $noteService, TagService $tagService,
-                                CategoryService $categoryService,  EntityManagerInterface $em, RepositoryCreator $repositoryCreator)
+                                CategoryService $categoryService,  EntityManagerInterface $em)
     {
-        parent::__construct($em, $repositoryCreator);
+        parent::__construct($em);
 
         $this->noteService = $noteService;
         $this->tagService = $tagService;
@@ -130,7 +130,7 @@ class NoteApiController extends AbstractApiController
             $listOfTags += $tag;
         }
         // find items that are not in intersection of both arrays
-        $tagResults = $this->findDisjunctItemsInTwoArraysBasedOnTitle($listOfTags, $newTagTitles);
+        $tagResults = $this->findExclusivelyNewItemsInComparisonArrayBasedOnTitle($listOfTags, $newTagTitles);
         if (!empty($tagResults)) {
             foreach ($tagResults as $tag)
                 if (str_contains($tag->getTitle(), '/remove' || str_contains($tag->getTitle(), '/rm'))) {

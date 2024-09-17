@@ -5,8 +5,9 @@ namespace App\Service;
 use App\Entity\Folder;
 use App\Entity\Note;
 use App\Repository\FolderRepository;
+use App\Service\Factory\IService;
 
-class FolderService
+class FolderService implements IService
 {
     protected FolderRepository $folderRepository;
 

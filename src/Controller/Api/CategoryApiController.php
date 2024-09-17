@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class CategoryApiController extends AbstractApiController
+class CategoryApiController extends BaseApiController
 {
     protected CategoryService $categoryService;
 
@@ -21,9 +21,9 @@ class CategoryApiController extends AbstractApiController
     protected NoteService $noteService;
 
     public function __construct(CategoryService $categoryService, PromptService $promptService, NoteService $noteService,
-                                EntityManagerInterface $em, RepositoryCreator $repositoryCreator)
+                                EntityManagerInterface $em)
     {
-        parent::__construct($em, $repositoryCreator);
+        parent::__construct($em);
         $this->categoryService = $categoryService;
         $this->promptService = $promptService;
         $this->noteService = $noteService;
