@@ -11,11 +11,22 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class PromptApiController extends BaseApiController
 {
+    /**
+     * @var PromptService $promptService
+     */
     protected PromptService $promptService;
 
+    /**
+     * @var CategoryService $categoryService
+     */
     protected CategoryService $categoryService;
 
-    public function __construct(PromptService     $promptService, CategoryService $categoryService, EntityManagerInterface $em)
+    /**
+     * @param PromptService $promptService
+     * @param CategoryService $categoryService
+     * @param EntityManagerInterface $em
+     */
+    public function __construct(PromptService $promptService, CategoryService $categoryService, EntityManagerInterface $em)
     {
         parent::__construct($em);
         $this->promptService = $promptService;
@@ -111,3 +122,4 @@ class PromptApiController extends BaseApiController
         return $this->json($this->appendTimeStampToApiResponse(['message' => 'Successfully deleted prompt.']));
     }
 }
+

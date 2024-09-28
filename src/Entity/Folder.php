@@ -79,6 +79,10 @@ class Folder
         return $this;
     }
 
+    /**
+     * @param bool $withNotes
+     * @return array|string[]
+     */
     public function jsonSerialize(bool $withNotes = false): array
     {
         $json = [

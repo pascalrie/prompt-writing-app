@@ -11,11 +11,19 @@ class PromptService implements IService
 {
     protected PromptRepository $promptRepository;
 
+    /**
+     * @param PromptRepository $promptRepository
+     */
     public function __construct(PromptRepository $promptRepository)
     {
         $this->promptRepository = $promptRepository;
     }
 
+    /**
+     * @param string $title
+     * @param Category|null $category
+     * @return Prompt
+     */
     public function create(string $title, Category $category = null): Prompt
     {
         $prompt = new Prompt();
@@ -27,6 +35,12 @@ class PromptService implements IService
         return $prompt;
     }
 
+    /**
+     * @param int $promptId
+     * @param string $title
+     * @param Category|null $newCategory
+     * @return Prompt
+     */
     public function update(int $promptId, string $title = "", Category $newCategory = null): Prompt
     {
         $promptFromDb = $this->promptRepository->findBy(['promptId' => $promptId])[0];
@@ -43,17 +57,28 @@ class PromptService implements IService
         return $this->promptRepository->findBy(['promptId' => $promptId])[0];
     }
 
+    /**
+     * @return array
+     */
     public function list(): array
     {
         return $this->promptRepository->findAll();
     }
 
+    /**
+     * @param int $id
+     * @return void
+     */
     public function delete(int $id): void
     {
         $promptForDeletion = $this->promptRepository->findBy(['id' => $id])[0];
         $this->promptRepository->remove($promptForDeletion);
     }
 
+    /**
+     * @param int $id
+     * @return Prompt|null
+     */
     public function show(int $id): ?Prompt
     {
         $prompts = $this->promptRepository->findBy(['id' => $id]);
@@ -63,6 +88,11 @@ class PromptService implements IService
         return $prompts[0];
     }
 
+    /**
+     * @param string $criteria
+     * @param $argument
+     * @return Prompt|null
+     */
     public function showBy(string $criteria, $argument): ?Prompt
     {
         $prompts = $this->promptRepository->findBy([$criteria, $argument]);

@@ -11,11 +11,20 @@ class TagService implements IService
 {
     public TagRepository $tagRepository;
 
+    /**
+     * @param TagRepository $tagRepository
+     */
     public function __construct(TagRepository $tagRepository)
     {
         $this->tagRepository = $tagRepository;
     }
 
+    /**
+     * @param string $title
+     * @param array|null $notes
+     * @param string $color
+     * @return Tag
+     */
     public function create(string $title = "", array $notes = null, string $color = ""): Tag
     {
         $tag = new Tag();
@@ -39,6 +48,13 @@ class TagService implements IService
         return $tag;
     }
 
+    /**
+     * @param int $tagId
+     * @param string $title
+     * @param array|null $potentialNewNotes
+     * @param string $color
+     * @return void
+     */
     public function update(int $tagId, string $title = "", array $potentialNewNotes = null, string $color = "")
     {
         $tagFromDb = $this->tagRepository->findBy(['id' => $tagId])[0];
@@ -59,17 +75,28 @@ class TagService implements IService
         $this->tagRepository->flush();
     }
 
+    /**
+     * @return array
+     */
     public function list(): array
     {
         return $this->tagRepository->findAll();
     }
 
+    /**
+     * @param int $id
+     * @return void
+     */
     public function delete(int $id)
     {
         $tag = $this->tagRepository->findBy(['id' => $id])[0];
         $this->tagRepository->remove($tag);
     }
 
+    /**
+     * @param int $id
+     * @return Tag|null
+     */
     public function show(int $id): ?Tag
     {
         $tags = $this->tagRepository->findBy(['id' => $id]);
@@ -79,6 +106,11 @@ class TagService implements IService
         return $tags[0];
     }
 
+    /**
+     * @param string $criteria
+     * @param $argument
+     * @return Tag|null
+     */
     public function showBy(string $criteria, $argument): ?Tag
     {
         $tags = $this->tagRepository->findBy([$criteria => $argument]);
@@ -88,6 +120,11 @@ class TagService implements IService
         return $tags[0];
     }
 
+    /**
+     * @param Note|null $note
+     * @param Tag|null $tag
+     * @return void
+     */
     public function removeFromNote(?Note $note, ?Tag $tag)
     {
         $tag->removeNote($note);

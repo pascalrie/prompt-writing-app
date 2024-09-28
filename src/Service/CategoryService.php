@@ -12,11 +12,20 @@ class CategoryService implements IService
 {
     protected CategoryRepository $categoryRepository;
 
+    /**
+     * @param CategoryRepository $categoryRepository
+     */
     public function __construct(CategoryRepository $categoryRepository)
     {
         $this->categoryRepository = $categoryRepository;
     }
 
+    /**
+     * @param string $title
+     * @param Note|null $firstNote
+     * @param Prompt|null $firstPrompt
+     * @return Category
+     */
     public function create(string $title = "", Note $firstNote = null, Prompt $firstPrompt = null): Category
     {
         $category = new Category();
@@ -36,6 +45,13 @@ class CategoryService implements IService
         return $this->categoryRepository->add($category, true);
     }
 
+    /**
+     * @param int $oldCategoryId
+     * @param string $newTitle
+     * @param array|null $newPotentialPrompts
+     * @param array|null $newPotentialNotes
+     * @return Category
+     */
     public function update(int   $oldCategoryId, string $newTitle = "", array $newPotentialPrompts = null,
                            array $newPotentialNotes = null): Category
     {
@@ -62,11 +78,18 @@ class CategoryService implements IService
         return $this->show($oldCategoryId);
     }
 
+    /**
+     * @return array
+     */
     public function list(): array
     {
         return $this->categoryRepository->findAll();
     }
 
+    /**
+     * @param int $id
+     * @return void
+     */
     public function delete(int $id): void
     {
         $category = $this->categoryRepository->findBy(['id' => $id])[0];
@@ -74,6 +97,10 @@ class CategoryService implements IService
         $this->categoryRepository->remove($category, true);
     }
 
+    /**
+     * @param int $id
+     * @return Category|null
+     */
     public function show(int $id): ?Category
     {
         $categories = $this->categoryRepository->findBy(['id' => $id]);
@@ -83,6 +110,10 @@ class CategoryService implements IService
         return $categories[0];
     }
 
+    /**
+     * @param string $title
+     * @return Category|null
+     */
     public function showByTitle(string $title): ?Category
     {
         $categories = $this->categoryRepository->findBy(['title' => $title]);

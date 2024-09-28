@@ -13,6 +13,10 @@ trait JsonResponseTrait
     private string $serverErrorCode = '500';
     private string $serverErrorMessage = 'Internal Server Error';
 
+    /**
+     * @param array $response
+     * @return array
+     */
     public function appendTimeStampToApiResponse(array $response): array
     {
         $dateAndTime = new \DateTime('NOW');
@@ -20,6 +24,10 @@ trait JsonResponseTrait
         return $response;
     }
 
+    /**
+     * @param array $response
+     * @return array
+     */
     public function appendMessageToSuccessfulApiResponse(array $response): array
     {
         $response += ['code' => $this->successCode, 'message' => $this->successMessage];

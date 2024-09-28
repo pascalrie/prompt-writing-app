@@ -1,19 +1,19 @@
 services:
   web:
     image: php:7.4-apache
-    container_name: symfony-web
+    container_name: web
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
       - ./php.ini:/usr/local/etc/php/php.ini
     ports:
-      - "8082:80"
-    networks:
-      - symfony-network
+      - "8081:81"
     environment:
       - APACHE_DOCUMENT_ROOT=/var/www/html/public
     depends_on:
       - db
+    networks:
+      - symfony-network
   db:
     image: mariadb:10.6
     container_name: mariadb
@@ -26,19 +26,6 @@ services:
       MYSQL_PASSWORD: db
     networks:
       - symfony-network
-  symfony:
-    image: php:7.4-cli
-    container_name: symfony-cli
-    working_dir: /var/www/html
-    volumes:
-      - .:/var/www/html
-    networks:
-      - symfony-network
-    depends_on:
-      - db
-    ports:
-      - "8002:8002"
-
 
 volumes:
   db_data:

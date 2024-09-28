@@ -11,11 +11,22 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TagApiController extends BaseApiController
 {
+    /**
+     * @var TagService $tagService
+     */
     protected TagService $tagService;
 
+    /**
+     * @var NoteService $noteService
+     */
     protected NoteService $noteService;
 
-    public function __construct(TagService        $tagService, NoteService $noteService, EntityManagerInterface $em)
+    /**
+     * @param TagService $tagService
+     * @param NoteService $noteService
+     * @param EntityManagerInterface $em
+     */
+    public function __construct(TagService $tagService, NoteService $noteService, EntityManagerInterface $em)
     {
         parent::__construct($em);
         $this->tagService = $tagService;
@@ -23,7 +34,7 @@ class TagApiController extends BaseApiController
     }
 
     /**
-     * @Route("/tag/create", name="api_create_tag", methods={"GET", "POST"})
+     * @Route("/tag/create", name="api_create_tag", methods={"POST"})
      */
     public function create(Request $request): JsonResponse
     {
@@ -111,3 +122,4 @@ class TagApiController extends BaseApiController
         )));
     }
 }
+

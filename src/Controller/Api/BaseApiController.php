@@ -11,19 +11,32 @@ class BaseApiController extends AbstractController
 {
     use JsonResponseTrait;
 
+    /** @var EntityManagerInterface $entityManager */
     protected EntityManagerInterface $entityManager;
 
+    /**
+     * @param EntityManagerInterface $entityManager
+     */
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * @param string $className
+     * @return void
+     */
     protected function responseForEachImplementedController(string $className)
     {
         // TODO: implement, with classNames as strings for message-handling, possible?
         dd($className);
     }
 
+    /**
+     * @param array $base
+     * @param array $comparison
+     * @return array
+     */
     protected function findExclusivelyNewItemsInComparisonArrayBasedOnTitle(array $base, array $comparison): array
     {
         $results = [];
@@ -45,6 +58,11 @@ class BaseApiController extends AbstractController
         return $results;
     }
 
+    /**
+     * @param $base
+     * @param $comparison
+     * @return bool
+     */
     protected function isTitleOfObjectsOfSameClassDuplicate($base, $comparison): bool
     {
         if (get_class($comparison) === get_class($base)) {
@@ -55,6 +73,11 @@ class BaseApiController extends AbstractController
         return false;
     }
 
+    /**
+     * @param $base
+     * @param $comparison
+     * @return bool
+     */
     protected function isIdDuplicate($base, $comparison): bool
     {
         if ($comparison instanceof $base) {
@@ -65,6 +88,13 @@ class BaseApiController extends AbstractController
         return false;
     }
 
+    /**
+     * @param $base
+     * @param $comparison
+     * @param string $basePropertyKey
+     * @param string $comparisonPropertyKey
+     * @return bool
+     */
     protected function isEntityBasedOnPropertyDuplicate($base, $comparison, string $basePropertyKey = 'title',
                                                         string $comparisonPropertyKey = 'title'): bool
     {
@@ -164,11 +194,20 @@ class BaseApiController extends AbstractController
         return $base;
     }
 
+    /**
+     * @param string $key
+     * @return string
+     */
     private function getGetFunctionOfProperty(string $key): string
     {
         return 'get' . strtoupper($key);
     }
 
+    /**
+     * @param $first
+     * @param $second
+     * @return bool
+     */
     private function checkClassEquality($first, $second): bool
     {
         if (get_class($first) !== get_class($second)) {
@@ -177,6 +216,11 @@ class BaseApiController extends AbstractController
         return true;
     }
 
+    /**
+     * @param $first
+     * @param $second
+     * @return bool
+     */
     private function checkIfBothItemsOrObjectsAreNullOrEmpty($first, $second): bool
     {
         if (null === $first && null === $second) {

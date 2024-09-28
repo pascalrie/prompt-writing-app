@@ -111,6 +111,11 @@ class Category
         return $this;
     }
 
+    /**
+     * @param bool $withPrompts
+     * @param bool $withNotes
+     * @return array|string[]
+     */
     public function jsonSerialize(bool $withPrompts = false, bool $withNotes = false): array
     {
         $json = [

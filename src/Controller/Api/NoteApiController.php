@@ -14,14 +14,29 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class NoteApiController extends BaseApiController
 {
+    /**
+     * @var NoteService $noteService
+     */
     protected NoteService $noteService;
 
+    /**
+     * @var TagService $tagService
+     */
     protected TagService $tagService;
 
+    /**
+     * @var CategoryService $categoryService
+     */
     protected CategoryService $categoryService;
 
+    /**
+     * @param NoteService $noteService
+     * @param TagService $tagService
+     * @param CategoryService $categoryService
+     * @param EntityManagerInterface $em
+     */
     public function __construct(NoteService     $noteService, TagService $tagService,
-                                CategoryService $categoryService,  EntityManagerInterface $em)
+                                CategoryService $categoryService, EntityManagerInterface $em)
     {
         parent::__construct($em);
 

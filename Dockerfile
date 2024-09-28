@@ -1,33 +1,49 @@
 FROM php:7.4-apache
 
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libonig-dev \
+    libicu-dev \
     libzip-dev \
+    libonig-dev \
+    zlib1g-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    pkg-config \
+    libssl-dev \
+    zlib1g-dev \
+    libevent-dev \
     zip \
     unzip \
-    mariadb-client \
-    nano \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd mbstring zip pdo pdo_mysql
-
-RUN a2enmod rewrite headers
-
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+    git \
+    sudo \
+    && docker-php-ext-install intl pdo_mysql zip pdo zip mbstring opcache
+RUN php -i
+RUN pecl install pecl_http \
+    && docker-php-ext-enable http \
 
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+
+
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-RUN chown -R www-data:www-data /var/www/html
+RUN a2enmod rewrite headers
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-COPY php.ini /usr/local/etc/php/php.ini
+COPY . /var/www/html
+
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
+
+RUN sudo a2enmod ext-http
+RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log /var/www/html/var/sessions \
+    && chown -R www-data:www-data /var/www/html/var
+
+ENV DATABASE_URL="mysql://root:root@db:3308/symfony?serverVersion=mariadb-10.6"
 
 WORKDIR /var/www/html
 
-EXPOSE 80
+EXPOSE 81
 
 CMD ["apache2-foreground"]

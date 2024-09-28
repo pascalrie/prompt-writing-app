@@ -16,11 +16,19 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class TagRepository extends ServiceEntityRepository implements IRepository
 {
+    /**
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Tag::class);
     }
 
+    /**
+     * @param Tag $entity
+     * @param bool $flush
+     * @return void
+     */
     public function add(Tag $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -30,6 +38,11 @@ class TagRepository extends ServiceEntityRepository implements IRepository
         }
     }
 
+    /**
+     * @param Tag $entity
+     * @param bool $flush
+     * @return void
+     */
     public function remove(Tag $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
@@ -39,11 +52,18 @@ class TagRepository extends ServiceEntityRepository implements IRepository
         }
     }
 
+    /**
+     * @return void
+     */
     public function flush(): void
     {
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * @param Tag $tag
+     * @return void
+     */
     public function persist(Tag $tag): void
     {
         $this->getEntityManager()->persist($tag);

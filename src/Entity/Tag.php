@@ -89,6 +89,10 @@ class Tag
         return $this;
     }
 
+    /**
+     * @param bool $withNotes
+     * @return array
+     */
     public function jsonSerialize(bool $withNotes = false): array
     {
         $json = [

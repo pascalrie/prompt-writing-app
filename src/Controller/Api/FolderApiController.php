@@ -10,8 +10,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class FolderApiController extends BaseApiController
 {
+    /**
+     * @var FolderService $folderService
+     */
     protected FolderService $folderService;
 
+    /**
+     * @param FolderService $folderService
+     * @param EntityManagerInterface $em
+     */
     public function __construct(FolderService $folderService, EntityManagerInterface $em)
     {
         parent::__construct($em);
@@ -97,3 +104,4 @@ class FolderApiController extends BaseApiController
         return $this->json($this->appendTimeStampToApiResponse(['message' => 'Success.']));
     }
 }
+

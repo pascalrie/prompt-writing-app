@@ -12,13 +12,28 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CategoryApiController extends BaseApiController
 {
+    /**
+     * @var CategoryService $categoryService
+     */
     protected CategoryService $categoryService;
 
+    /**
+     * @var PromptService $promptService
+     */
     protected PromptService $promptService;
 
+    /**
+     * @var NoteService $noteService
+     */
     protected NoteService $noteService;
 
-    public function __construct(CategoryService $categoryService, PromptService $promptService, NoteService $noteService,
+    /**
+     * @param CategoryService $categoryService
+     * @param PromptService $promptService
+     * @param NoteService $noteService
+     * @param EntityManagerInterface $em
+     */
+    public function __construct(CategoryService        $categoryService, PromptService $promptService, NoteService $noteService,
                                 EntityManagerInterface $em)
     {
         parent::__construct($em);
@@ -116,3 +131,4 @@ class CategoryApiController extends BaseApiController
         return $this->json($this->appendTimeStampToApiResponse(['message' => 'Successfully deleted category.']));
     }
 }
+

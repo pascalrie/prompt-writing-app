@@ -16,11 +16,19 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CategoryRepository extends ServiceEntityRepository implements IRepository
 {
+    /**
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Category::class);
     }
 
+    /**
+     * @param Category $category
+     * @param bool $flush
+     * @return Category
+     */
     public function add(Category $category, bool $flush = false): Category
     {
         $this->persist($category);
@@ -32,6 +40,11 @@ class CategoryRepository extends ServiceEntityRepository implements IRepository
         return $category;
     }
 
+    /**
+     * @param Category $category
+     * @param bool $flush
+     * @return void
+     */
     public function remove(Category $category, bool $flush = false): void
     {
         $this->getEntityManager()->remove($category);
@@ -41,13 +54,21 @@ class CategoryRepository extends ServiceEntityRepository implements IRepository
         }
     }
 
+    /**
+     * @param Category $category
+     * @return void
+     */
     public function persist(Category $category): void
     {
         $this->getEntityManager()->persist($category);
     }
 
+    /**
+     * @return void
+     */
     public function flush(): void
     {
         $this->getEntityManager()->flush();
     }
 }
+

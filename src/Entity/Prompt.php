@@ -97,6 +97,11 @@ class Prompt
         return $this;
     }
 
+    /**
+     * @param bool $withCategory
+     * @param bool $withNotes
+     * @return array|string[]
+     */
     public function jsonSerialize(bool $withCategory = true, bool $withNotes = false): array
     {
         $json = [

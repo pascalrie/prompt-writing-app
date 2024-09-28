@@ -9,21 +9,9 @@ services:
     environment:
       - APP_ENV=dev
     ports:
-      - "8082:80"
+      - "8081:81"
     depends_on:
       - db
-    command: symfony server:start --no-tls --port=8002
-
-  # Symfony overrides
-  symfony:
-    volumes:
-      - .:/var/www/html
-    environment:
-      - APP_ENV=dev
-    depends_on:
-      - db
-
-  # MariaDB overrides
   db:
     environment:
       MYSQL_DATABASE: prompt-writing-db
@@ -33,7 +21,7 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     ports:
-      - "3308:3306"
+      - "3308:3308"
 volumes:
   db_data:
 networks:

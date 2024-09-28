@@ -185,6 +185,14 @@ class Note
         return $this;
     }
 
+    /**
+     * @param bool $withContent
+     * @param bool $withCategory
+     * @param bool $withPrompt
+     * @param bool $withTags
+     * @param bool $withFolder
+     * @return array
+     */
     public function jsonSerialize(bool $withContent = true, bool $withCategory = true, bool $withPrompt = true, bool $withTags = true, bool $withFolder = true): array
     {
         $json = [

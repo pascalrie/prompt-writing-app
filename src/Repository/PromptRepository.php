@@ -16,11 +16,19 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PromptRepository extends ServiceEntityRepository implements IRepository
 {
+    /**
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Prompt::class);
     }
 
+    /**
+     * @param Prompt $entity
+     * @param bool $flush
+     * @return void
+     */
     public function add(Prompt $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -30,6 +38,11 @@ class PromptRepository extends ServiceEntityRepository implements IRepository
         }
     }
 
+    /**
+     * @param Prompt $promptForDeletion
+     * @param bool $flush
+     * @return void
+     */
     public function remove(Prompt $promptForDeletion, bool $flush = false): void
     {
         $this->getEntityManager()->remove($promptForDeletion);
@@ -39,11 +52,18 @@ class PromptRepository extends ServiceEntityRepository implements IRepository
         }
     }
 
+    /**
+     * @return void
+     */
     public function flush(): void
     {
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * @param Prompt $prompt
+     * @return void
+     */
     public function persist(Prompt $prompt): void
     {
         $this->getEntityManager()->persist($prompt);
