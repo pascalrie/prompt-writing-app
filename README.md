@@ -1,9 +1,16 @@
 ## Prompt Writing App - Work in progress
 
-- kurze Beschreibung
-- Features/Funktionen
+### TODOs
+- remove ddev configuration to use docker-compose
+- implement easyadmin dashboard
+- implement test db
+- ext-http in composer.json => find solution
 
-### Prerequesites
+#### TODOs Readme:
+- short description
+- features & functions of application
+
+### Prerequisites
 
 - Docker
 - docker-compose
@@ -27,7 +34,6 @@
 ```docker-compose exec web composer install```
 
 #### 1.5 Add Apache-config-file into project-root (.htaccess)
-
 
 ### 3. Generate database
 
@@ -86,9 +92,3 @@
 
 #### 4.1.3 Access Server in Browser (reference: compose.yaml/compose.override.yaml):
 - http://localhost:8081
-
-
-### TODOs
-
-- implement easyadmin dashboard 
-- implement test db

@@ -63,6 +63,9 @@ class Note
 
     public function __construct()
     {
+        $this->createdAt = new DateTimeImmutable('NOW');
+        $this->updatedAt = new \DateTime('NOW');
+
         $this->tags = new ArrayCollection();
     }
 

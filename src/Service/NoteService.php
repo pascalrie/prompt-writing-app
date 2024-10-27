@@ -34,8 +34,6 @@ class NoteService implements IService
     {
         $note = new Note();
 
-        $note->setCreatedAt(new DateTimeImmutable('NOW'));
-        $note->setUpdatedAt(new DateTime('NOW'));
         if (null === $title) {
             $title = substr($content, 0, 15) . '...';
         }

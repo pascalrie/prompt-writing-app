@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\TagRepository;
+use App\Util\ConversionUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -70,7 +71,7 @@ class Tag
 
     public function getNotes(): ArrayCollection
     {
-        return $this->notes;
+        return ConversionUtil::convertCollectionIntoArrayCollection($this->notes);
     }
 
     public function addNote(Note $note): self

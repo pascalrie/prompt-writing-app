@@ -9,7 +9,6 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
 class CompilerPass implements CompilerPassInterface
 {
@@ -37,7 +36,5 @@ class CompilerPass implements CompilerPassInterface
             $counter++;
         }
         $factory->setArgument(0, $services);
-//        $container->findDefinition('doctrine.orm.configuration')
-//            ->addMethodCall('setFactory', [$factory]);
     }
 }
