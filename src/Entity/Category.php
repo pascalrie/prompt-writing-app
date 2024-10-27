@@ -66,7 +66,7 @@ class Category
     public function addPrompt(Prompt $prompt): self
     {
         if (!$this->getPrompts()->contains($prompt)) {
-            $this->getPrompts()->add($prompt);
+            $this->prompts[] = $prompt;
             $prompt->setCategory($this);
         }
         return $this;

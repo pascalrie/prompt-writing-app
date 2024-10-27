@@ -29,13 +29,14 @@ class PromptRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return void
      */
-    public function add(Prompt $entity, bool $flush = false): void
+    public function add(Prompt $entity, bool $flush = false): Prompt
     {
         $this->getEntityManager()->persist($entity);
 
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+        return $entity;
     }
 
     /**

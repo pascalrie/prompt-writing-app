@@ -2,7 +2,6 @@
 
 ### TODOs
 - remove ddev configuration to use docker-compose
-- implement easyadmin dashboard
 - implement test db
 - ext-http in composer.json => find solution
 
@@ -13,7 +12,7 @@
 ### Prerequisites
 
 - Docker
-- docker-compose
+- ddev (https://ddev.com)
 
 ### 1. Installation and setup
 
@@ -25,33 +24,39 @@
 
 ```cd prompt-writing-project```
 
-#### 1.3 Start and build the docker-container locally
+#### 1.3 Start and build the ddev-docker-container locally
+#### First: Make sure the docker application is started!
+```ddev config```
 
-```docker-compose up --build```
+- mostly 3 presses of enter will suffice
+- if not: adjust the .ddev/config.yaml (for example for the host-db-port)
 
-#### 1.4 Install dependencies of the application inside docker-container:
+- to start the ddev-docker-container: \
+```ddev start```
 
-```docker-compose exec web composer install```
+#### 1.4 Install dependencies of the application inside ddev-docker-container:
 
-#### 1.5 Add Apache-config-file into project-root (.htaccess)
+```ddev exec composer install```
 
-### 3. Generate database
+#### 1.5 Add Apache-config-file into project-root (.htaccess) (only necessary for docker/apache-config)
 
-#### 3.1 Create/Copy (old) .env - file into the project-directory
+### 2. Generate database
 
-```docker-compose exec web php bin/console doctrine:database:create```
+#### 2.1 Create/Copy (old) .env - file into the project-directory
 
-#### 3.2 Update the schema of the database
+```ddev exec php bin/console doctrine:database:create```
 
-```docker-compose exec web php bin/console doctrine:schema:update --force```
+#### 2.2 Update the schema of the database
 
-### 4. Usage:
+```ddev exec php bin/console doctrine:schema:update --force```
 
-#### 4.1 Possible Routes of API
+### 3. Usage:
 
-##### 4.1.1 Show via Command
-```docker-compose exec web php bin/console debug:router```
-##### 4.1.2 Alternatively listed here:
+#### 3.1 Possible Routes of API
+
+##### 3.1.1 Show via Command
+```ddev exec php bin/console debug:router```
+##### 3.1.2 Alternatively listed here:
 - possible routes in a table:
 
 | 	identifier         | method	 | route	                 |
@@ -90,5 +95,8 @@
 | api_update_tag	     | PUT	    | 	 /tag/update/{id}     |
 | api_delete_tag	     | DELETE	 | 	  /tag/delete/{id}    |
 
-#### 4.1.3 Access Server in Browser (reference: compose.yaml/compose.override.yaml):
-- http://localhost:8081
+#### 3.1.3 Access Server in Browser (reference: terminal after ```ddev start```):
+- https://prompt-writing-project.ddev.site 
+
+#### 3.1.4 To access the easyadmin-dashboard, access the route: /admin
+- https://prompt-writing-project.ddev.site/admin

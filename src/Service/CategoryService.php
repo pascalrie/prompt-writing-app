@@ -120,6 +120,10 @@ class CategoryService implements IService
         if (empty($categories)) {
             return null;
         }
-        return $categories[0];
+
+        if (is_array($categories)) {
+            return $categories[0];
+        }
+        return $categories;
     }
 }
