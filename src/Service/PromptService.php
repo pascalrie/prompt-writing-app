@@ -44,7 +44,7 @@ class PromptService implements IService
      * @param array $newNotes
      * @return Prompt
      */
-    public function update(int $promptId, string $title = "", Category $newCategory = null, array $newNotes = []): Prompt
+    public function update(int $promptId, string $title = "", ?Category $newCategory = null, array $newNotes = []): Prompt
     {
         $promptFromDb = $this->promptRepository->findBy(['promptId' => $promptId])[0];
 
@@ -56,7 +56,7 @@ class PromptService implements IService
             $promptFromDb->setCategory($newCategory);
         }
 
-        if (!isEmpty($newNotes)) {
+        if ([] !== $newNotes) {
             foreach ($newNotes as $note) {
                 if ($note instanceof Note) {
                     $promptFromDb->addNote($note);

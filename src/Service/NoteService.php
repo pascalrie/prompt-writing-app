@@ -68,7 +68,7 @@ class NoteService implements IService
      * @param Category|null $newCategory
      * @return void
      */
-    public function update(int $noteId, string $content, bool $contentIsAdded = false, string $newTitle = "", array $newTags = null, Category $newCategory = null): void
+    public function update(int $noteId, string $content, bool $contentIsAdded = false, string $newTitle = "", array $newTags = [], ?Category $newCategory = null): void
     {
         $noteFromDb = $this->noteRepository->findBy(['id' => $noteId])[0];
 
@@ -85,7 +85,7 @@ class NoteService implements IService
         }
         $noteFromDb->setTitle($newTitle);
 
-        if (null !== $newTags) {
+        if ([] !== $newTags) {
             foreach ($newTags as $tag) {
                 $noteFromDb->addTag($tag);
             }

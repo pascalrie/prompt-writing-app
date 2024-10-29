@@ -53,7 +53,7 @@ class CategoryService implements IService
      * @return Category
      */
     public function update(int $id, string $newTitle = "", array $newPotentialPrompts = null,
-                           array    $newPotentialNotes = null): Category
+                           array $newPotentialNotes = []): Category
     {
         $oldCategory = $this->categoryRepository->findBy(['id' => $id])[0];
 
@@ -67,7 +67,7 @@ class CategoryService implements IService
             }
         }
 
-        if (null !== $newPotentialNotes) {
+        if ([] !== $newPotentialNotes) {
             foreach ($newPotentialNotes as $note) {
                 $oldCategory->addNote($note);
             }
