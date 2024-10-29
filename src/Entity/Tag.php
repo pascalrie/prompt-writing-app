@@ -45,6 +45,15 @@ class Tag
         return $this->id;
     }
 
+    /**
+     * only for testing
+     */
+    public function setId(?int $id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
+
     public function getTitle(): ?string
     {
         return $this->title;

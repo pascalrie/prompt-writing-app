@@ -3,9 +3,11 @@
 namespace App\Service;
 
 use App\Entity\Category;
+use App\Entity\Note;
 use App\Entity\Prompt;
 use App\Repository\PromptRepository;
 use App\Service\Factory\IService;
+use function PHPUnit\Framework\isEmpty;
 
 class PromptService implements IService
 {
@@ -39,17 +41,27 @@ class PromptService implements IService
      * @param int $promptId
      * @param string $title
      * @param Category|null $newCategory
+     * @param array $newNotes
      * @return Prompt
      */
-    public function update(int $promptId, string $title = "", Category $newCategory = null): Prompt
+    public function update(int $promptId, string $title = "", Category $newCategory = null, array $newNotes = []): Prompt
     {
         $promptFromDb = $this->promptRepository->findBy(['promptId' => $promptId])[0];
 
         if ("" !== $title) {
             $promptFromDb->setTitle($title);
         }
+
         if (null !== $newCategory) {
             $promptFromDb->setCategory($newCategory);
+        }
+
+        if (!isEmpty($newNotes)) {
+            foreach ($newNotes as $note) {
+                if ($note instanceof Note) {
+                    $promptFromDb->addNote($note);
+                }
+            }
         }
 
         $this->promptRepository->flush();

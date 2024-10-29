@@ -33,9 +33,7 @@ class FolderService implements IService
             $folder->addNote($firstNote);
         }
 
-        $this->folderRepository->add($folder);
-
-        return $folder;
+        return $this->folderRepository->add($folder);
     }
 
     /**

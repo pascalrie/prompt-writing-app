@@ -35,6 +35,15 @@ class Folder
         $this->notes = new ArrayCollection();
     }
 
+    /**
+     * only for testing
+     */
+    public function setId(?int $id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

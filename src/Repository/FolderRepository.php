@@ -29,13 +29,15 @@ class FolderRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return void
      */
-    public function add(Folder $entity, bool $flush = false): void
+    public function add(Folder $entity, bool $flush = false): Folder
     {
         $this->getEntityManager()->persist($entity);
 
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+
+        return $entity;
     }
 
     /**

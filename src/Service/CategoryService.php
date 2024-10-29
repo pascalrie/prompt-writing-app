@@ -46,36 +46,36 @@ class CategoryService implements IService
     }
 
     /**
-     * @param int $oldCategoryId
+     * @param Category $oldCategory
      * @param string $newTitle
      * @param array|null $newPotentialPrompts
      * @param array|null $newPotentialNotes
      * @return Category
      */
-    public function update(int   $oldCategoryId, string $newTitle = "", array $newPotentialPrompts = null,
-                           array $newPotentialNotes = null): Category
+    public function update(int $id, string $newTitle = "", array $newPotentialPrompts = null,
+                           array    $newPotentialNotes = null): Category
     {
-        $categoryInDb = $this->categoryRepository->findBy(['id' => $oldCategoryId])[0];
+        $oldCategory = $this->categoryRepository->findBy(['id' => $id])[0];
 
         if (null !== $newTitle) {
-            $categoryInDb->setTitle($newTitle);
+            $oldCategory->setTitle($newTitle);
         }
 
         if (null !== $newPotentialPrompts) {
             foreach ($newPotentialPrompts as $prompt) {
-                $categoryInDb->addPrompt($prompt);
+                $oldCategory->addPrompt($prompt);
             }
         }
 
         if (null !== $newPotentialNotes) {
             foreach ($newPotentialNotes as $note) {
-                $categoryInDb->addNote($note);
+                $oldCategory->addNote($note);
             }
         }
 
         $this->categoryRepository->flush();
 
-        return $this->show($oldCategoryId);
+        return $this->show($oldCategory->getId());
     }
 
     /**
@@ -125,5 +125,10 @@ class CategoryService implements IService
             return $categories[0];
         }
         return $categories;
+    }
+
+    public function findBy(array $array): array
+    {
+        return $this->categoryRepository->findBy($array);
     }
 }

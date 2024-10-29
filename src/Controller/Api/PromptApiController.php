@@ -83,6 +83,7 @@ class PromptApiController extends BaseApiController
         $bodyParameters = json_decode($request->getContent());
         $promptTitle = $bodyParameters->title;
         $categoryTitle = $bodyParameters->category;
+        $newNotesJustToAdd = $bodyParameters->notes;
 
         $promptForUpdateShouldntBeNull = $this->promptService->show($id);
 
@@ -97,7 +98,7 @@ class PromptApiController extends BaseApiController
             Please create one.']);
         }
 
-        $prompt = $this->promptService->update($id, $promptTitle, $categoryTitle);
+        $prompt = $this->promptService->update($id, $promptTitle, $categoryTitle, $newNotesJustToAdd);
         return $this->json($this->appendTimeStampToApiResponse($prompt->jsonSerialize()));
     }
 

@@ -106,6 +106,7 @@ class CategoryApiController extends BaseApiController
             $noteObjectsForGivenIds += $this->noteService->show($potentialNewNoteId);
         }
 
+        $categoryInDb = $this->categoryService->findBy(['id' => $id])[0];
         $updatedCategory = $this->categoryService->update($id, $newTitle, $promptObjectsForGivenIds, $noteObjectsForGivenIds);
 
         return $this->json($this->appendTimeStampToApiResponse($updatedCategory->jsonSerialize()));
