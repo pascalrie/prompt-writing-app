@@ -50,6 +50,7 @@ class FolderService implements IService
             $folderEntityFromDb->setTitle($newTitle);
         }
 
+        // TODO: maybe replace notes as well?
         if (null !== $potentialNewNotes) {
             foreach ($potentialNewNotes as $note) {
                 if ($note instanceof Note) {

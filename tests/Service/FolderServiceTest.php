@@ -6,15 +6,19 @@ use App\Entity\Folder;
 use App\Entity\Note;
 use App\Repository\FolderRepository;
 use App\Service\FolderService;
+use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\Doctrine\ManagerRegistry;
 
 class FolderServiceTest extends TestCase
 {
+    protected ManagerRegistry $managerRegistry;
+
     protected ?Folder $exampleFolder;
 
     protected ?MockObject $repoMock;
+
+    protected ?FolderService $folderService;
 
     public function setUp(): void
     {
@@ -29,32 +33,44 @@ class FolderServiceTest extends TestCase
             ->setConstructorArgs([$this->managerRegistry])
             ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'remove'])
             ->getMock();
+
+        $this->folderService = new FolderService($this->repoMock);
     }
 
     public function tearDown(): void
     {
-        $this->exampleFolder->setId(null);
         $this->exampleFolder = null;
+        $this->folderService = null;
         $this->repoMock = null;
     }
 
-    public function testUpdateFolder(): void
+    public function testUpdateTitleOfFolder(): void
+    {
+        $this->repoMock
+            ->method('findBy')
+            ->willReturn([$this->exampleFolder]);
+
+        $newTitle = 'New Title';
+
+        $updatedFolder = $this->folderService->update($this->exampleFolder->getId(), $newTitle);
+        $this->assertNotNull($updatedFolder);
+        $this->assertEquals($newTitle, $updatedFolder->getTitle());
+    }
+
+    public function testFolderUpdateNotes(): void
     {
         $this->repoMock
             ->method('findBy')->willReturn([$this->exampleFolder]);
 
-        $folderService = new FolderService($this->repoMock);
 
-        $newTitle = 'Folder 1 New Title';
         $firstNote = new Note();
-        $firstNote->setTitle($newTitle . ' note 1');
         $firstNote->setContent('Hallo Welt 1');
         $newNotes = [$firstNote];
 
-        $updatedFolder = $folderService->update($this->exampleFolder->getId(), $newTitle, $newNotes);
+        $updatedFolder = $this->folderService->update($this->exampleFolder->getId(), "", $newNotes);
 
         $this->assertNotNull($updatedFolder);
-        $this->assertEquals($newTitle, $updatedFolder->getTitle());
+        $this->assertNotNull($updatedFolder->getNotes());
         $this->assertEquals($firstNote, $updatedFolder->getNotes()[0]);
     }
 
@@ -67,8 +83,7 @@ class FolderServiceTest extends TestCase
 
         $this->repoMock->method('findAll')->willReturn([$this->exampleFolder, $secondFolderForList]);
 
-        $folderService = new FolderService($this->repoMock);
-        $folders = $folderService->list();
+        $folders = $this->folderService->list();
 
         $this->assertCount(2, $folders);
         $this->assertNotNull($folders[0]);
@@ -77,12 +92,28 @@ class FolderServiceTest extends TestCase
         $this->assertEquals($title, $folders[1]->getTitle());
     }
 
+    public function testShowNonExistentFolder(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([]);
+        $this->exampleFolder->setId(1000);
+        $shouldBeNull = $this->folderService->show(1000);
+
+        $this->assertNull($shouldBeNull);
+    }
+
     public function testShowFolderByTitle()
     {
         $this->repoMock->method('findBy')->willReturn([$this->exampleFolder]);
-        $folderService = new FolderService($this->repoMock);
-        $folder = $folderService->showBy('title', $this->exampleFolder->getTitle());
+        $folder = $this->folderService->showBy('title', $this->exampleFolder->getTitle());
 
         $this->assertNotNull($folder);
+    }
+
+    public function testNonExistentFolderByTitle(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([]);
+        $folderShouldBeNull = $this->folderService->showBy('title', 'non-existent-title');
+
+        $this->assertNull($folderShouldBeNull);
     }
 }
