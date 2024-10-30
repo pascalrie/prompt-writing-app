@@ -45,7 +45,7 @@ class NoteService implements IService
         if (!$tags->isEmpty()) {
             $tagsForForeach = $tags->toArray();
             foreach ($tagsForForeach as $tag) {
-                if (null !== $tag) {
+                if ($tag instanceof Tag) {
                     $note->addTag($tag);
                 }
             }
@@ -68,26 +68,29 @@ class NoteService implements IService
      * @param Category|null $newCategory
      * @return void
      */
-    public function update(int $noteId, string $content, bool $contentIsAdded = false, string $newTitle = "", array $newTags = [], ?Category $newCategory = null): void
+    public function update(int $noteId, string $content = "", bool $contentIsAdded = false, string $newTitle = "",
+                           array $newTags = [], ?Category $newCategory = null): Note
     {
         $noteFromDb = $this->noteRepository->findBy(['id' => $noteId])[0];
 
-        if ($contentIsAdded) {
+        if ($contentIsAdded && $content !== '') {
             $noteFromDb->addContent($content);
         }
-
-        if (!$contentIsAdded) {
+        // TODO: add remove content function
+        if (!$contentIsAdded && $content !== '') {
             $noteFromDb->setContent($content);
         }
 
-        if (null === $newTitle) {
+        if ("" === $newTitle) {
             $newTitle = substr($noteFromDb->getContent(), 0, 15) . '...';
         }
         $noteFromDb->setTitle($newTitle);
 
         if ([] !== $newTags) {
             foreach ($newTags as $tag) {
-                $noteFromDb->addTag($tag);
+                if ($tag instanceof Tag) {
+                    $noteFromDb->addTag($tag);
+                }
             }
         }
 
@@ -97,6 +100,8 @@ class NoteService implements IService
 
         $noteFromDb->setUpdatedAt(new DateTime('NOW'));
         $this->noteRepository->flush();
+
+        return $noteFromDb;
     }
 
     /**

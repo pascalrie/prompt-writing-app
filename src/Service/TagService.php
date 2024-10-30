@@ -55,7 +55,7 @@ class TagService implements IService
      * @param string $color
      * @return void
      */
-    public function update(int $tagId, string $title = "", array $potentialNewNotes = null, string $color = "")
+    public function update(int $tagId, string $title = "", array $potentialNewNotes = [], string $color = ""): Tag
     {
         $tagFromDb = $this->tagRepository->findBy(['id' => $tagId])[0];
         if ("" !== $title) {
@@ -64,7 +64,9 @@ class TagService implements IService
 
         if (null !== $potentialNewNotes) {
             foreach ($potentialNewNotes as $note) {
-                $tagFromDb->addNote($note);
+                if ($note instanceof Note) {
+                    $tagFromDb->addNote($note);
+                }
             }
         }
 
@@ -73,6 +75,8 @@ class TagService implements IService
         }
 
         $this->tagRepository->flush();
+
+        return $tagFromDb;
     }
 
     /**

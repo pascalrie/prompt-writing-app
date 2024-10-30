@@ -2,7 +2,8 @@
 
 ### TODOs
 - remove ddev configuration to use docker-compose
-- implement test db
+- implement title substr in every service-class
+- implement validity checks in every service-class
 - ext-http in composer.json => find solution
 
 #### TODOs Readme:
@@ -26,7 +27,7 @@
 
 #### 1.3 Start and build the ddev-docker-container locally
 #### First: Make sure the docker application is started!
-```ddev config```
+**Second:** ```ddev config```
 
 - mostly 3 presses of enter will suffice
 - if not: adjust the .ddev/config.yaml (for example for the host-db-port)

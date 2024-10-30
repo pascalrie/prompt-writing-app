@@ -126,8 +126,7 @@ class NoteApiController extends BaseApiController
         // check for wish to remove tags with "/rm" or "/remove" && check for tag-duplicates with current note
         $newTagTitles = $this->adjustTagList($noteForUpdateShouldntBeNull, $newTagTitles);
 
-        $this->noteService->update($id, $content, $contentIsAdded, $newTitle, $newTagTitles, $newCategory);
-        $updatedNoteFromDb = $this->noteService->show($id);
+        $updatedNoteFromDb = $this->noteService->update($id, $content, $contentIsAdded, $newTitle, $newTagTitles, $newCategory);
 
         return $this->json($this->appendTimeStampToApiResponse($updatedNoteFromDb->jsonSerialize()));
     }

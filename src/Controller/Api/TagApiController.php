@@ -93,8 +93,7 @@ class TagApiController extends BaseApiController
         $notesFromDb = $tagToUpdate->getNotes()->toArray();
         $finalNotesToAdd = $this->findNonDuplicateObjectsInTwoArraysWithVariableCriteria($notesFromDb, $noteObjects);
 
-        $this->tagService->update($id, $title, $finalNotesToAdd, $color);
-        $finalTag = $this->tagService->show($tagToUpdate->getId());
+        $finalTag = $this->tagService->update($id, $title, $finalNotesToAdd, $color);
 
         return $this->json($this->appendTimeStampToApiResponse($finalTag->jsonSerialize()));
     }

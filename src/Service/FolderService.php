@@ -52,7 +52,9 @@ class FolderService implements IService
 
         if (null !== $potentialNewNotes) {
             foreach ($potentialNewNotes as $note) {
-                $folderEntityFromDb->addNote($note);
+                if ($note instanceof Note) {
+                    $folderEntityFromDb->addNote($note);
+                }
             }
         }
 
