@@ -46,24 +46,27 @@ class CategoryService implements IService
     }
 
     /**
-     * @param Category $oldCategory
+     * @param int $id
      * @param string $newTitle
      * @param array|null $newPotentialPrompts
      * @param array|null $newPotentialNotes
      * @return Category
      */
-    public function update(int   $id, string $newTitle = "", array $newPotentialPrompts = null,
+    public function update(int $id, string $newTitle = "", array $newPotentialPrompts = [],
                            array $newPotentialNotes = []): Category
     {
+        // TODO: add function to "overwrite" existing prompts
         $oldCategory = $this->categoryRepository->findBy(['id' => $id])[0];
 
-        if (null !== $newTitle) {
+        if ("" !== $newTitle) {
             $oldCategory->setTitle($newTitle);
         }
 
-        if (null !== $newPotentialPrompts) {
+        if ([] !== $newPotentialPrompts) {
             foreach ($newPotentialPrompts as $prompt) {
-                $oldCategory->addPrompt($prompt);
+                if ($prompt instanceof Prompt) {
+                    $oldCategory->addPrompt($prompt);
+                }
             }
         }
 

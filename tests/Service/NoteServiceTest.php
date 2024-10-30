@@ -2,6 +2,7 @@
 
 namespace App\Tests\Service;
 
+use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Tag;
 use App\Repository\NoteRepository;
@@ -76,11 +77,11 @@ class NoteServiceTest extends TestCase
         $this->assertEquals($resultContent, $updatedNote->getContent());
     }
 
-    public function testNoteUpdateTags(): void
+    public function testNoteUpdateAddTag(): void
     {
         $tagToAdd = new Tag();
         $tagToAdd->setId(1);
-        $tagToAdd->setTitle('Tag title');
+        $tagToAdd->setTitle('Tag title 23');
         $tagToAdd->setColor('#FFFFFF');
 
         $this->repoMock->method('findBy')->willReturn([$this->exampleNote]);
@@ -88,5 +89,57 @@ class NoteServiceTest extends TestCase
             false, "", [$tagToAdd]);
 
         $this->assertNotNull($updatedNote);
+        $this->assertNotNull($updatedNote->getTags());
+        $this->assertEquals($tagToAdd, $updatedNote->getTags()[0]);
+    }
+
+    public function testUpdateNoteAddCategory(): void
+    {
+        $categoryToAdd = new Category();
+        $categoryToAdd->setId(1);
+        $categoryToAdd->setTitle('Exciting Category title');
+
+        $this->repoMock->method('findBy')->willReturn([$this->exampleNote]);
+        $updatedNote = $this->noteService->update($this->exampleNote->getId(), "", false, "",
+            [], $categoryToAdd);
+
+        $this->assertNotNull($updatedNote);
+        $this->assertNotNull($updatedNote->getCategory());
+        $this->assertEquals($categoryToAdd, $updatedNote->getCategory());
+    }
+
+    public function testShowNoteWithImpossibleId(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([]);
+        $this->exampleNote->setId(100);
+        $shownNoteHopefullyNull = $this->noteService->show($this->exampleNote->getId());
+
+        $this->assertNull($shownNoteHopefullyNull);
+    }
+
+    public function testShowNote(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([$this->exampleNote]);
+        $shownNote = $this->noteService->show($this->exampleNote->getId());
+
+        $this->assertNotNull($shownNote);
+        $this->assertEquals($this->exampleNote, $shownNote);
+    }
+
+    public function testShowNoteByTitleNotFound(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([]);
+        $noteShouldBeNull = $this->noteService->showBy('title', 'impossible title');
+
+        $this->assertNull($noteShouldBeNull);
+    }
+
+    public function testShowNotesByTitle(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([$this->exampleNote]);
+        $shownNote = $this->noteService->showBy('title', $this->exampleNote->getTitle());
+
+        $this->assertNotNull($shownNote);
+        $this->assertEquals($this->exampleNote, $shownNote);
     }
 }

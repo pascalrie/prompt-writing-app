@@ -6,7 +6,6 @@ use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
 use App\Repository\CategoryRepository;
-use App\Repository\PromptRepository;
 use App\Service\CategoryService;
 use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -20,105 +19,116 @@ class CategoryServiceTest extends TestCase
 
     protected ?MockObject $repoMock;
 
+    protected ?CategoryService $categoryService;
+
     public function setUp(): void
     {
         $this->managerRegistry = $this->createMock(ManagerRegistry::class);
-        $title = 'Category 1';
-
-        $note = new Note();
-        $note->setTitle('note 1');
-        $note->setContent('Hallo Welt');
-
-        $prompt = new Prompt();
-        $prompt->setTitle('Prompt 1');
+        $title = 'Category title 1';
 
         $this->exampleCategory = new Category();
 
         $this->exampleCategory->setId(1);
         $this->exampleCategory->setTitle($title);
-        $this->exampleCategory->addNote($note);
-        $this->exampleCategory = $this->exampleCategory->addPrompt($prompt);
 
         $this->repoMock = $this->getMockBuilder(CategoryRepository::class)
             ->setConstructorArgs([$this->managerRegistry])
             ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll'])
             ->getMock();
+
+        $this->categoryService = new CategoryService($this->repoMock);
     }
 
     public function tearDown(): void
     {
-        $this->exampleCategory->setId(null);
         $this->exampleCategory = null;
         $this->repoMock = null;
+        $this->categoryService = null;
     }
 
-    public function testUpdateCategory(): void
+    public function testCategoryUpdateTitle(): void
     {
-        $this->repoMock
-            ->method('findBy')->willReturn([$this->exampleCategory]);
-
-        $categoryService = new CategoryService($this->repoMock);
-
-        $newTitle = 'New Title';
-        $firstPrompt = new Prompt();
-        $firstPrompt->setTitle($newTitle . ' prompt 1');
-        $secondPrompt = new Prompt();
-        $secondPrompt->setTitle($newTitle . ' prompt 2');
-        $firstNote = new Note();
-        $firstNote->setTitle($newTitle . ' note 1');
-        $firstNote->setContent('Hallo Welt 1');
-        $secondNote = new Note();
-        $secondNote->setTitle($newTitle . ' note 2');
-        $secondNote->setContent('Hallo Welt 2');
-        $newPrompts = [$firstPrompt, $secondPrompt];
-        $newNotes = [$firstNote, $secondNote];
-
-        $updatedCategory = $categoryService->update($this->exampleCategory->getId(), $newTitle, $newPrompts, $newNotes);
+        $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
+        $newTitle = 'new category title';
+        $updatedCategory = $this->categoryService->update($this->exampleCategory->getId(), $newTitle);
 
         $this->assertNotNull($updatedCategory);
         $this->assertEquals($newTitle, $updatedCategory->getTitle());
-
-        // IMPORTANT: expected index = expected index + 1, because they are only added, not replaced!
-        $this->assertEquals($firstPrompt, $updatedCategory->getPrompts()[1]);
-        $this->assertEquals($firstNote, $updatedCategory->getNotes()[1]);
-        $this->assertEquals($secondPrompt, $updatedCategory->getPrompts()[2]);
-        $this->assertEquals($secondNote, $updatedCategory->getNotes()[2]);
     }
 
-    // test of deletion not useful, because only the mocking would be tested (on service-level (unit-test-level))
-
-    public function testShowCategory(): void
+    public function testCategoryUpdatePrompts(): void
     {
         $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
-        $categoryService = new CategoryService($this->repoMock);
-        $category = $categoryService->show($this->exampleCategory->getId());
-        $this->assertNotNull($category);
+        $newPromptToAdd = new Prompt();
+        $newPromptToAdd->setTitle('new prompt');
+        $newPromptToAdd->setId(1);
+
+        $updatedCategory = $this->categoryService->update($this->exampleCategory->getId(), "", [$newPromptToAdd]);
+        $this->assertNotNull($updatedCategory);
+        $this->assertEquals($newPromptToAdd, $updatedCategory->getPrompts()[0]);
     }
 
-    public function testShowCategoriesByTitle(): void
+    public function testCategoryUpdateNotes(): void
     {
         $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
-        $categoryService = new CategoryService($this->repoMock);
-        $category = $categoryService->showByTitle($this->exampleCategory->getTitle());
-        $this->assertNotNull($category);
+        $newNote = new Note();
+        $newNote->setTitle('new note');
+        $newNote->setId(1);
+        $newNote->setContent('content of new note');
+
+        $updatedCategory = $this->categoryService->update($this->exampleCategory->getId(), "", [], [$newNote]);
+        $this->assertNotNull($updatedCategory);
+        $this->assertEquals($newNote, $updatedCategory->getNotes()[0]);
     }
 
-    public function testListCategories(): void
+    public function testCategoryShowShouldBeNonExisting(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([]);
+        $this->exampleCategory->setId(1000);
+
+        $shownCategoryShouldBeNull = $this->categoryService->show($this->exampleCategory->getId());
+
+        $this->assertNull($shownCategoryShouldBeNull);
+    }
+
+    public function testCategoryShow(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
+        $shownCategory = $this->categoryService->show($this->exampleCategory->getId());
+
+        $this->assertNotNull($shownCategory);
+        $this->assertEquals($this->exampleCategory, $shownCategory);
+    }
+
+    public function testCategoryShowByTitleShouldBeNonExisting(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([]);
+        $title = 'impossible category';
+
+        $shownCategory = $this->categoryService->showByTitle($title);
+
+        $this->assertNull($shownCategory);
+    }
+
+    public function testCategoryShowByTitleShouldExist(): void
+    {
+        $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
+        $shownCategory = $this->categoryService->showByTitle($this->exampleCategory->getTitle());
+
+        $this->assertNotNull($shownCategory);
+        $this->assertEquals($this->exampleCategory, $shownCategory);
+    }
+
+    public function testCategoryList(): void
     {
         $secondCategory = new Category();
+        $secondCategory->setTitle('second category');
         $secondCategory->setId(2);
-        $title = 'second category';
-        $secondCategory->setTitle($title);
 
         $this->repoMock->method('findAll')->willReturn([$this->exampleCategory, $secondCategory]);
-        $categoryService = new CategoryService($this->repoMock);
+        $listedCategories = $this->categoryService->list();
 
-        $categories = $categoryService->list();
-
-        $this->assertCount(2, $categories);
-        $this->assertNotNull($categories[0]);
-        $this->assertNotNull($categories[1]);
-        $this->assertEquals('Category 1', $categories[0]->getTitle());
-        $this->assertEquals($title, $categories[1]->getTitle());
+        $this->assertNotNull($listedCategories);
+        $this->assertCount(2, $listedCategories);
     }
 }
