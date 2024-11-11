@@ -9,23 +9,6 @@ services:
   app.factory.service_creator:
     class: App\Service\Factory\BaseServiceCreator
 
-  app.custom_category_service:
-    class: App\Service\CategoryService
-    factory: ['App\Service\Factory\ConcreteCreators\CategoryServiceCreator', manufactureService]
-  app.custom_folder_service:
-    class: App\Service\FolderService
-    factory: ['App\Service\Factory\ConcreteCreators\FolderServiceCreator', manufactureService]
-  app.custom_note_service:
-    class: App\Service\NoteService
-    factory: ['App\Service\Factory\ConcreteCreators\NoteServiceCreator', manufactureService]
-  app.custom_prompt_service:
-    class: App\Service\PromptService
-    factory: ['App\Service\Factory\ConcreteCreators\PromptServiceCreator', manufactureService]
-  app.custom_tag_service:
-    class: App\Service\TagService
-    factory: ['App\Service\Factory\ConcreteCreators\TagServiceCreator', manufactureService]
-
-
   # default configuration for services in *this* file
   _defaults:
     autowire: true      # Automatically injects dependencies in your services.

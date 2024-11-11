@@ -6,8 +6,6 @@ use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
 use App\Repository\PromptRepository;
-use App\Service\Factory\IService;
-use function PHPUnit\Framework\isEmpty;
 
 class PromptService implements IService
 {

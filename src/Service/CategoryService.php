@@ -6,7 +6,6 @@ use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
 use App\Repository\CategoryRepository;
-use App\Service\Factory\IService;
 
 class CategoryService implements IService
 {

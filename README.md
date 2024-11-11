@@ -1,13 +1,35 @@
 ## Prompt Writing App - Work in progress
 
 ### TODOs
+- fix color-selection in easyadmin, in adjusting tags
 - remove ddev configuration to use docker-compose
 - implement validity checks in every service-class
 - ext-http in composer.json => find solution
 
-#### TODOs Readme:
-- short description
-- features & functions of application
+## Features & Functions
+
+Prompt-Writing Application
+
+The Prompt-Writing Application is a versatile Symfony/PHP-based tool designed for capturing and organizing thoughts, reflections,
+and inspirations. By offering a range of predefined prompts, the application encourages creative and insightful responses,
+which users can save, tag, categorize, and organize for future reference. There is an easyadmin-dashboard for managing
+database-entries easily. Furthermore, there are several API-routes to send requests to.
+
+Key Features
+
+	•	Prompts for Inspiration: Browse a collection of predefined prompts to spark ideas or reflections. 
+	•	Each prompt offers a starting point for writing, making it easy to capture insights on various topics.
+	•	Note Creation and Organization: After responding to a prompt, save your response as a note. Notes can be tagged, categorized, and organized into custom folders, allowing you to structure your thoughts intuitively.
+	•	Customizable Categories: Both notes and prompts can be assigned to specific categories, such as “Journal,”, “Quotes,” or any other relevant label.
+	•	Tagging System: Add tags to notes for easy retrieval and organization. Tags allow for flexible categorization, making it simple to locate notes by theme or subject.
+
+Use Cases
+
+	•	Personal Journaling: Use the prompts as a daily journaling tool, capturing your thoughts, emotions, or insights.
+	•	Quote Compilation: Collect quotes from various sources and organize them within a dedicated category, making it easy to reference and draw inspiration.
+
+This application provides a powerful and flexible way to record, categorize, and revisit notes, making it a valuable tool for journaling, organizing quotes, and tracking personal reflections.
+
 
 ### Prerequisites
 
@@ -36,7 +58,7 @@
 
 #### 1.4 Install dependencies of the application inside ddev-docker-container:
 
-```ddev exec composer install```
+```ddev exec composer install --ignore-platform-req=ext-http```
 
 #### 1.5 Add Apache-config-file into project-root (.htaccess) (only necessary for docker/apache-config)
 
@@ -44,9 +66,10 @@
 
 #### 2.1 Create/Copy (old) .env - file into the project-directory
 
+#### 2.1.1 Execute command to create database in ddev-docker-container
 ```ddev exec php bin/console doctrine:database:create```
 
-#### 2.2 Update the schema of the database
+#### 2.2 Update the schema of the database (to use the structure of the entities)
 
 ```ddev exec php bin/console doctrine:schema:update --force```
 
@@ -100,3 +123,6 @@
 
 #### 3.1.4 To access the easyadmin-dashboard, access the route: /admin
 - https://prompt-writing-project.ddev.site/admin
+
+### 4. Execute tests in terminal:
+```./vendor/bin/phpunit```

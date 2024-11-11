@@ -8,7 +8,6 @@ use App\Entity\Tag;
 use App\Repository\CategoryRepository;
 use App\Repository\NoteRepository;
 use App\Repository\TagRepository;
-use App\Service\Factory\IService;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 

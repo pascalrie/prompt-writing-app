@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Repository\CategoryRepository;
-use App\Service\Factory\CompilerPass;
 use App\Repository\FolderRepository;
 use App\Repository\NoteRepository;
 use App\Repository\PromptRepository;
@@ -30,7 +29,5 @@ class Kernel extends BaseKernel
             ->addTag('app.custom_prompt_service');
         $container->registerForAutoconfiguration(TagRepository::class)
             ->addTag('app.custom_tag_service');
-
-        $container->addCompilerPass(new CompilerPass());
     }
 }

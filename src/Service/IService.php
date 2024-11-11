@@ -1,9 +1,6 @@
 <?php
 
-namespace App\Service\Factory;
-
-use App\Repository\IRepository;
-use Symfony\Bridge\Doctrine\ManagerRegistry;
+namespace App\Service;
 
 interface IService
 {
