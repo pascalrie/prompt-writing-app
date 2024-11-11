@@ -78,7 +78,7 @@ class Folder
 
     public function removeNote(Note $note): self
     {
-        if ($this->getNotes()->removeElement($note)) {
+        if ($this->notes->removeElement($note)) {
             // set the owning side to null (unless already changed)
             if ($note->getFolder() === $this) {
                 $note->setFolder(null);
@@ -95,13 +95,14 @@ class Folder
     public function jsonSerialize(bool $withNotes = false): array
     {
         $json = [
+            'id' => $this->id,
             'title' => $this->title
         ];
 
         if ($withNotes) {
             /**@var Note $note */
             foreach ($this->getNotes() as $note) {
-                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, true, true, false)];
+                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, false, true, false)];
             }
         }
 

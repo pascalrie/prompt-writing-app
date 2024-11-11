@@ -128,6 +128,7 @@ class Category
     public function jsonSerialize(bool $withPrompts = false, bool $withNotes = false): array
     {
         $json = [
+            'id' => $this->id,
             'title' => $this->title
         ];
 

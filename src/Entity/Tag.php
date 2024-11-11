@@ -106,6 +106,7 @@ class Tag
     public function jsonSerialize(bool $withNotes = false): array
     {
         $json = [
+            'id' => $this->id,
             'title' => $this->title,
             'color' => $this->color,
         ];

@@ -40,9 +40,10 @@ class FolderService implements IService
      * @param int $folderId
      * @param string $newTitle
      * @param array|null $potentialNewNotes
+     * @param bool $notesShouldBeReplaced
      * @return Folder
      */
-    public function update(int $folderId, string $newTitle = "", array $potentialNewNotes = null): Folder
+    public function update(int $folderId, string $newTitle = "", array $potentialNewNotes = [], bool $notesShouldBeReplaced = false): Folder
     {
         $folderEntityFromDb = $this->folderRepository->findBy(['id' => $folderId])[0];
 
@@ -50,11 +51,25 @@ class FolderService implements IService
             $folderEntityFromDb->setTitle($newTitle);
         }
 
-        // TODO: maybe replace notes as well?
-        if (null !== $potentialNewNotes) {
+        if ($notesShouldBeReplaced) {
+            foreach ($folderEntityFromDb->getNotes() as $noteToRemove) {
+                if ($noteToRemove instanceof Note) {
+                    $folderEntityFromDb->removeNote($noteToRemove);
+                    $this->folderRepository->flush();
+                }
+            }
+
+            foreach ($potentialNewNotes as $noteToAdd) {
+                $folderEntityFromDb->addNote($noteToAdd);
+                $noteToAdd->setFolder($folderEntityFromDb);
+            }
+        }
+
+        if ([] !== $potentialNewNotes && !$notesShouldBeReplaced) {
             foreach ($potentialNewNotes as $note) {
                 if ($note instanceof Note) {
                     $folderEntityFromDb->addNote($note);
+                    $note->setFolder($folderEntityFromDb);
                 }
             }
         }

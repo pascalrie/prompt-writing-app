@@ -5,22 +5,32 @@ namespace App\Service;
 use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Tag;
+use App\Repository\CategoryRepository;
 use App\Repository\NoteRepository;
+use App\Repository\TagRepository;
 use App\Service\Factory\IService;
 use DateTime;
-use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 
 class NoteService implements IService
 {
     protected NoteRepository $noteRepository;
 
+    protected TagRepository $tagRepository;
+
+    protected CategoryRepository $categoryRepository;
+
     /**
-     * @param NoteRepository $categoryRepository
+     * @param NoteRepository $noteRepository
+     * @param TagRepository $tagRepository
+     * @param CategoryRepository $categoryRepository
      */
-    public function __construct(NoteRepository $categoryRepository)
+    public function __construct(NoteRepository     $noteRepository, TagRepository $tagRepository,
+                                CategoryRepository $categoryRepository)
     {
-        $this->noteRepository = $categoryRepository;
+        $this->noteRepository = $noteRepository;
+        $this->tagRepository = $tagRepository;
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -61,41 +71,47 @@ class NoteService implements IService
 
     /**
      * @param int $noteId
-     * @param string $content
-     * @param bool $contentIsAdded
      * @param string $newTitle
+     * @param string $content
+     * @param bool $contentShouldBeAdded
+     * @param bool $contentShouldBeRemoved
      * @param array|null $newTags
-     * @param Category|null $newCategory
+     * @param string|null $newCategoryTitle
      * @return void
      */
-    public function update(int $noteId, string $content = "", bool $contentIsAdded = false, string $newTitle = "",
-                           array $newTags = [], ?Category $newCategory = null): Note
+    public function update(int  $noteId, string $newTitle = "", string $content = "", bool $contentShouldBeAdded = false,
+                           bool $contentShouldBeRemoved = false, array $newTags = [], ?string $newCategoryTitle = ""): Note
     {
         $noteFromDb = $this->noteRepository->findBy(['id' => $noteId])[0];
 
-        if ($contentIsAdded && $content !== '') {
+        if ($contentShouldBeAdded && $content !== "" && !$contentShouldBeRemoved) {
             $noteFromDb->addContent($content);
         }
-        // TODO: add remove content function
-        if (!$contentIsAdded && $content !== '') {
+
+        if (!$contentShouldBeAdded && $content !== "" && !$contentShouldBeRemoved) {
             $noteFromDb->setContent($content);
         }
 
-        if ("" === $newTitle) {
-            $newTitle = substr($noteFromDb->getContent(), 0, 15) . '...';
+        if ($contentShouldBeRemoved) {
+            $noteFromDb->setContent("");
         }
-        $noteFromDb->setTitle($newTitle);
+
+        if ("" !== $newTitle) {
+            $noteFromDb->setTitle($newTitle);
+        }
 
         if ([] !== $newTags) {
             foreach ($newTags as $tag) {
-                if ($tag instanceof Tag) {
+                $tagFromDb = $this->tagRepository->findBy(['title' => $tag])[0];
+                if ($tagFromDb instanceof Tag) {
                     $noteFromDb->addTag($tag);
                 }
             }
         }
 
-        if (null !== $newCategory) {
-            $noteFromDb->setCategory($newCategory);
+        if ("" !== $newCategoryTitle) {
+            $newCategoryFromDb = $this->categoryRepository->findBy(['title' => $newCategoryTitle])[0];
+            $noteFromDb->setCategory($newCategoryFromDb);
         }
 
         $noteFromDb->setUpdatedAt(new DateTime('NOW'));
