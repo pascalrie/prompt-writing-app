@@ -29,7 +29,7 @@ class Prompt
      * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="prompts")
      * @ORM\JoinColumn(nullable=false)
      */
-    private Category $category;
+    private ?Category $category;
 
     /**
      * @ORM\OneToMany(targetEntity=Note::class, mappedBy="prompt")
@@ -114,6 +114,7 @@ class Prompt
     public function jsonSerialize(bool $withCategory = true, bool $withNotes = false): array
     {
         $json = [
+            'id' => $this->id,
             'title' => $this->title,
         ];
 

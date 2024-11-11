@@ -50,22 +50,33 @@ class CategoryService implements IService
      * @param string $newTitle
      * @param array|null $newPotentialPrompts
      * @param array|null $newPotentialNotes
+     * @param bool $promptsShouldBeReplaced
      * @return Category
      */
-    public function update(int $id, string $newTitle = "", array $newPotentialPrompts = [],
-                           array $newPotentialNotes = []): Category
+    public function update(int   $id, string $newTitle = "", array $newPotentialPrompts = [],
+                           array $newPotentialNotes = [], bool $promptsShouldBeReplaced = false): Category
     {
-        // TODO: add function to "overwrite" existing prompts
-        $oldCategory = $this->categoryRepository->findBy(['id' => $id])[0];
+        $oldCategoryFromDb = $this->categoryRepository->findBy(['id' => $id])[0];
 
         if ("" !== $newTitle) {
-            $oldCategory->setTitle($newTitle);
+            $oldCategoryFromDb->setTitle($newTitle);
         }
 
-        if ([] !== $newPotentialPrompts) {
+        if ($promptsShouldBeReplaced) {
+            foreach ($oldCategoryFromDb->getPrompts() as $oldPromptToDelete) {
+                $oldCategoryFromDb->removePrompt($oldPromptToDelete);
+                $this->categoryRepository->flush();
+            }
+
+            foreach ($newPotentialPrompts as $newPotentialPrompt) {
+                $oldCategoryFromDb->addPrompt($newPotentialPrompt);
+            }
+        }
+
+        if ([] !== $newPotentialPrompts && !$promptsShouldBeReplaced) {
             foreach ($newPotentialPrompts as $prompt) {
                 if ($prompt instanceof Prompt) {
-                    $oldCategory->addPrompt($prompt);
+                    $oldCategoryFromDb->addPrompt($prompt);
                 }
             }
         }
@@ -73,14 +84,14 @@ class CategoryService implements IService
         if ([] !== $newPotentialNotes) {
             foreach ($newPotentialNotes as $note) {
                 if ($note instanceof Note) {
-                    $oldCategory->addNote($note);
+                    $oldCategoryFromDb->addNote($note);
                 }
             }
         }
 
         $this->categoryRepository->flush();
 
-        return $this->show($oldCategory->getId());
+        return $oldCategoryFromDb;
     }
 
     /**

@@ -58,6 +58,7 @@ class TagService implements IService
     public function update(int $tagId, string $title = "", array $potentialNewNotes = [], string $color = ""): Tag
     {
         $tagFromDb = $this->tagRepository->findBy(['id' => $tagId])[0];
+
         if ("" !== $title) {
             $tagFromDb->setTitle($title);
         }

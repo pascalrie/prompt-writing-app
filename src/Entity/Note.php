@@ -208,6 +208,7 @@ class Note
     public function jsonSerialize(bool $withContent = true, bool $withCategory = true, bool $withPrompt = true, bool $withTags = true, bool $withFolder = true): array
     {
         $json = [
+            'id' => $this->id,
             'title' => $this->title,
             'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
             'updatedAt' => $this->updatedAt->format('Y-m-d H:i:s'),

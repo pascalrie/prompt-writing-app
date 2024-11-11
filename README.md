@@ -2,7 +2,6 @@
 
 ### TODOs
 - remove ddev configuration to use docker-compose
-- implement title substr in every service-class
 - implement validity checks in every service-class
 - ext-http in composer.json => find solution
 
@@ -29,7 +28,7 @@
 #### First: Make sure the docker application is started!
 **Second:** ```ddev config```
 
-- mostly 3 presses of enter will suffice
+- mostly 3 presses of enter/personal adjustments will suffice
 - if not: adjust the .ddev/config.yaml (for example for the host-db-port)
 
 - to start the ddev-docker-container: \

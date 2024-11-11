@@ -74,6 +74,35 @@ class FolderServiceTest extends TestCase
         $this->assertEquals($firstNote, $updatedFolder->getNotes()[0]);
     }
 
+    public function testFolderUpdateAndReplaceNotes(): void
+    {
+        $this->repoMock
+            ->method('findBy')->willReturn([$this->exampleFolder]);
+
+        $newNoteToAdd = new Note();
+        $newNoteToAdd->setContent('New Note 2 - Hallo Welt');
+        $newNoteToAdd->setTitle('New Note 2');
+        $newNoteToAdd->setId(2);
+
+        $oldNoteToReplace = new Note();
+        $oldNoteToReplace->setContent('Old Note 1- Hallo Welt ');
+        $oldNoteToReplace->setTitle('Old Note 1');
+        $oldNoteToReplace->setId(1);
+
+        // step 1: add the old note to replace with new one later
+        $this->exampleFolder = $this->folderService->update($this->exampleFolder->getId(), "", [$oldNoteToReplace]);
+
+        $this->assertEquals($oldNoteToReplace, $this->exampleFolder->getNotes()[0]);
+
+        // step 2: replace old note with the new one
+        $this->exampleFolder = $this->folderService->update($this->exampleFolder->getId(), "", [$newNoteToAdd], true);
+
+        // index is +1 compared to first (deleted) note
+        $this->assertNull($this->exampleFolder->getNotes()[0]);
+        $this->assertNotNull($this->exampleFolder->getNotes()[1]);
+        $this->assertEquals($newNoteToAdd, $this->exampleFolder->getNotes()[1]);
+    }
+
     public function testListFolders()
     {
         $secondFolderForList = new Folder();
