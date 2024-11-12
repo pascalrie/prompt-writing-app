@@ -35,6 +35,7 @@ This application provides a powerful and flexible way to record, categorize, and
 
 - Docker
 - ddev (https://ddev.com)
+- ddev installation site (https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/)
 
 ### 1. Installation and setup
 
@@ -60,7 +61,7 @@ This application provides a powerful and flexible way to record, categorize, and
 
 ```ddev exec composer install --ignore-platform-req=ext-http```
 
-#### 1.5 Add Apache-config-file into project-root (.htaccess) (only necessary for docker/apache-config)
+#### ( 1.5 Add Apache-config-file into project-root (.htaccess) (only necessary for docker/apache-config) )
 
 ### 2. Generate database
 

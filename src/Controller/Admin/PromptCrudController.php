@@ -23,7 +23,9 @@ class PromptCrudController extends AbstractCrudController
             AssociationField::new('category')
                 ->setCrudController(CategoryCrudController::class)
                 ->setFormTypeOptions(['choice_label' => 'title']),
-            AssociationField::new('notes'),
+            AssociationField::new('notes')
+                ->setCrudController(NoteCrudController::class)
+                ->setFormTypeOptions(['choice_label' => 'title']),
         ];
     }
 }
