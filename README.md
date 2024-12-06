@@ -2,7 +2,7 @@
 
 ### TODOs
 - fix color-selection in easyadmin, in adjusting tags
-- remove ddev configuration to use docker-compose
+- remove ddev configuration to use docker
 - implement validity checks in every service-class
 - ext-http in composer.json => find solution
 
