@@ -102,7 +102,8 @@ class Folder
         if ($withNotes) {
             /**@var Note $note */
             foreach ($this->getNotes() as $note) {
-                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, false, true, false)];
+                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false,
+                    false, true, false)];
             }
         }
 

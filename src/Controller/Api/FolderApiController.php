@@ -83,8 +83,8 @@ class FolderApiController extends BaseApiController
         $folder = $this->folderService->show($id);
 
         if (null === $folder) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND, 'message' =>
-                'Folder with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND,
+                'message' => 'Folder with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
         }
 
         $potentialNewNoteObjects = [];
@@ -106,17 +106,20 @@ class FolderApiController extends BaseApiController
 
         if (null === $folderForDeletionShouldntBeNull) {
             return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeofResponse::NOT_FOUND, 'message' => "Folder for deletion with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+                ['code' => TypeofResponse::NOT_FOUND, 'message' => "Folder for deletion with id: {$id}"
+                    . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
         }
 
         $this->folderService->delete($id);
 
         $folderHopefullyNull = $this->folderService->show($id);
         if (null !== $folderHopefullyNull) {
-            return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Folder with {$id}" . MessageOfResponse::NOT_SUCCESS]));
+            return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Folder with {$id}"
+                . MessageOfResponse::NOT_SUCCESS]));
         }
 
-        return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Folder with {$id}" . MessageOfResponse::SUCCESS]));
+        return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Folder with {$id}"
+            . MessageOfResponse::SUCCESS]));
     }
 }
 

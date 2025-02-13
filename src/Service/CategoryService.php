@@ -137,13 +137,9 @@ class CategoryService implements IService
         }
 
         if (is_array($categories)) {
+            // only show first result if there are duplicates
             return $categories[0];
         }
         return $categories;
-    }
-
-    public function findBy(array $array): array
-    {
-        return $this->categoryRepository->findBy($array);
     }
 }

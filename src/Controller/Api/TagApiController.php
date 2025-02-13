@@ -71,8 +71,8 @@ class TagApiController extends BaseApiController
     {
         $tag = $this->tagService->show($id);
         if (null === $tag) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND, 'message' => 'Tag with id: ' . $id
-                . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND,
+                'message' => 'Tag with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
         }
         return $this->json($this->appendTimeStampToApiResponse($tag->jsonSerialize()));
     }

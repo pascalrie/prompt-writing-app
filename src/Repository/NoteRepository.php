@@ -32,7 +32,7 @@ class NoteRepository extends ServiceEntityRepository implements IRepository
      */
     public function add(Note $entity, bool $flush = false): void
     {
-        $this->getEntityManager()->persist($entity);
+        $this->persist($entity);
 
         if ($flush) {
             $this->getEntityManager()->flush();

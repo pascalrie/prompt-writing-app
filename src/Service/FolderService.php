@@ -42,7 +42,8 @@ class FolderService implements IService
      * @param bool $notesShouldBeReplaced
      * @return Folder
      */
-    public function update(int $folderId, string $newTitle = "", array $potentialNewNotes = [], bool $notesShouldBeReplaced = false): Folder
+    public function update(int $folderId, string $newTitle = "", array $potentialNewNotes = [],
+                           bool $notesShouldBeReplaced = false): Folder
     {
         $folderEntityFromDb = $this->folderRepository->findBy(['id' => $folderId])[0];
 

@@ -123,18 +123,4 @@ class TagService implements IService
         }
         return $tags[0];
     }
-
-    /**
-     * @param Note|null $note
-     * @param Tag|null $tag
-     * @return void
-     */
-    public function removeFromNote(?Note $note, ?Tag $tag)
-    {
-        $tag->removeNote($note);
-        if ($tag->getNotes()->isEmpty()) {
-            $this->tagRepository->remove($tag);
-        }
-        $this->tagRepository->flush();
-    }
 }

@@ -84,7 +84,6 @@ class Category
     public function removePrompt(Prompt $prompt): self
     {
         if ($this->prompts->removeElement($prompt)) {
-            // set the owning side to null (unless already changed)
             if ($prompt->getCategory() === $this) {
                 $prompt->setCategory(null);
             }
@@ -111,7 +110,6 @@ class Category
     public function removeNote(Note $note): self
     {
         if ($this->notes->removeElement($note)) {
-            // set the owning side to null (unless already changed)
             if ($note->getCategory() === $this) {
                 $note->setCategory(null);
             }
@@ -142,7 +140,8 @@ class Category
         if ($withNotes) {
             /**@var Note $note */
             foreach ($this->getNotes() as $note) {
-                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, false, false, false)];
+                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false,
+                    false, false, false)];
             }
         }
 

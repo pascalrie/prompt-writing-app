@@ -39,7 +39,8 @@ class NoteService implements IService
      * @param Category|null $category
      * @return Note
      */
-    public function create(string $title = "", string $content = "", ArrayCollection $tags = null, Category $category = null): Note
+    public function create(string $title = "", string $content = "", ArrayCollection $tags = null,
+                           Category $category = null): Note
     {
         $note = new Note();
 
