@@ -134,5 +134,15 @@ class PromptApiController extends BaseApiController
         return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Prompt with id: {$id}"
             . MessageOfResponse::SUCCESS]));
     }
+
+    /**
+     * @Route("/prompt/choose/random", name="api_prompt_choose", methods={"GET"})
+     */
+    public function chooseRandom(): JsonResponse
+    {
+        $randomPrompt = $this->promptService->showRandomPrompt();
+        $randomPrompt = $randomPrompt->jsonSerialize();
+        return $this->json($this->appendTimeStampToApiResponse($randomPrompt));
+    }
 }
 
