@@ -111,4 +111,11 @@ class PromptService implements IService
         }
         return $prompts[0];
     }
+
+    public function showRandomPrompt(): Prompt
+    {
+        $prompts = $this->promptRepository->findAll();
+        $key = array_rand($prompts);
+        return $this->show($prompts[$key]->getId());
+    }
 }

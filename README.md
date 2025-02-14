@@ -1,6 +1,8 @@
 ## Prompt Writing App - Work in progress
 
 ### TODOs
+
+- implement random prompt "homepage" to create a quick note, based on random prompt
 - fix color-selection in easyadmin, in adjusting tags
 - remove ddev configuration to use docker
 - implement validity checks in every service-class
