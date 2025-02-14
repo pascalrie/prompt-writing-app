@@ -96,13 +96,15 @@ class PromptApiController extends BaseApiController
         $promptForUpdateShouldntBeNull = $this->promptService->show($id);
 
         if (null === $promptForUpdateShouldntBeNull) {
-            return $this->json(['code' => TypeOfResponse::NOT_FOUND, 'message' => 'Prompt with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]);
+            return $this->json(['code' => TypeOfResponse::NOT_FOUND, 'message' => 'Prompt with id: '
+                . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]);
         }
 
         $categoryTitle = $this->categoryService->showByTitle($categoryTitle);
 
         if (null === $categoryTitle) {
-            return $this->json(['code' => TypeOfResponse::NOT_FOUND, 'message' => 'Category with title: ' . $categoryTitle . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]);
+            return $this->json(['code' => TypeOfResponse::NOT_FOUND, 'message' => 'Category with title: '
+                . $categoryTitle . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]);
         }
 
         $prompt = $this->promptService->update($id, $promptTitle, $categoryTitle, $newNotesJustToAdd);
@@ -118,16 +120,19 @@ class PromptApiController extends BaseApiController
 
         if (null === $promptForDeletionShouldntBeNull) {
             return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Prompt for deletion with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Prompt for deletion with id: {$id}"
+                    . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
         }
 
         $this->promptService->delete($id);
         $promptHopefullyNull = $this->promptService->show($id);
         if (null !== $promptHopefullyNull) {
-            return $this->json($this->appendTimeStampToApiResponse(['message' => ["Deletion of Prompt with id: {$id}" . MessageOfResponse::NOT_SUCCESS . json_encode($promptHopefullyNull->jsonSerialize())]]));
+            return $this->json($this->appendTimeStampToApiResponse(['message' => ["Deletion of Prompt with id: {$id}"
+                . MessageOfResponse::NOT_SUCCESS . json_encode($promptHopefullyNull->jsonSerialize())]]));
         }
 
-        return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Prompt with id: {$id}" . MessageOfResponse::SUCCESS]));
+        return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Prompt with id: {$id}"
+            . MessageOfResponse::SUCCESS]));
     }
 }
 

@@ -205,7 +205,8 @@ class Note
      * @param bool $withFolder
      * @return array
      */
-    public function jsonSerialize(bool $withContent = true, bool $withCategory = true, bool $withPrompt = true, bool $withTags = true, bool $withFolder = true): array
+    public function jsonSerialize(bool $withContent = true, bool $withCategory = true, bool $withPrompt = true,
+                                  bool $withTags = true, bool $withFolder = true): array
     {
         $json = [
             'id' => $this->id,

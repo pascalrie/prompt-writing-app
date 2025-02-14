@@ -53,8 +53,7 @@ class CategoryApiController extends BaseApiController
         $title = $bodyParameters->title;
 
         $category = $this->categoryService->create($title);
-
-        return $this->json($category->jsonSerialize());
+        return $this->json($this->appendTimeStampToApiResponse($category->jsonSerialize()));
     }
 
     /**
@@ -128,15 +127,18 @@ class CategoryApiController extends BaseApiController
 
         if (null === $categoryForDeletionShouldntBeNull) {
             return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Category for deletion with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Category for deletion with id: {$id}"
+                    . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
         }
 
         $this->categoryService->delete($id);
         $categoryHopefullyNull = $this->categoryService->show($id);
         if (null !== $categoryHopefullyNull) {
-            return $this->json($this->appendTimeStampToApiResponse(['message' => ['Deletion of Category ' . MessageOfResponse::NOT_SUCCESS . json_encode($categoryHopefullyNull->jsonSerialize())]]));
+            return $this->json($this->appendTimeStampToApiResponse(['message' => ['Deletion of Category '
+                . MessageOfResponse::NOT_SUCCESS . json_encode($categoryHopefullyNull->jsonSerialize())]]));
         }
-        return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Category with id: {$id}" . MessageOfResponse::SUCCESS]));
+        return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Category with id: {$id}"
+            . MessageOfResponse::SUCCESS]));
     }
 }
 

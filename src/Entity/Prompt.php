@@ -97,7 +97,6 @@ class Prompt
     public function removeNote(Note $note): self
     {
         if ($this->getNotes()->removeElement($note)) {
-            // set the owning side to null (unless already changed)
             if ($note->getPrompt() === $this) {
                 $note->setPrompt(null);
             }
@@ -125,7 +124,8 @@ class Prompt
         if ($withNotes) {
             /**@var Note $note */
             foreach ($this->getNotes() as $note) {
-                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, true, true, false)];
+                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, true,
+                    true, false)];
             }
         }
 

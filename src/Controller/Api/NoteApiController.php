@@ -118,7 +118,8 @@ class NoteApiController extends BaseApiController
 
         if (null === $noteForUpdateShouldntBeNull) {
             return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Note for update with id: {$id}" . MessageOfResponse::NOT_FOUND
+                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Note for update with id: {$id}"
+                    . MessageOfResponse::NOT_FOUND
                     . MessageOfResponse::USE_EXISTING]));
         }
 
@@ -153,7 +154,8 @@ class NoteApiController extends BaseApiController
         $noteForDeletionShouldntBeNull = $this->noteService->show($id);
         if (null === $noteForDeletionShouldntBeNull) {
             return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Note for deletion with id: {$id}" . MessageOfResponse::NOT_FOUND
+                ['code' => TypeOfResponse::NOT_FOUND,
+                    'message' => "Note for deletion with id: {$id}" . MessageOfResponse::NOT_FOUND
                     . MessageOfResponse::USE_EXISTING]));
         }
         $this->noteService->delete($id);
