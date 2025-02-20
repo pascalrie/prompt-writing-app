@@ -48,18 +48,18 @@ This application provides a powerful and flexible way to record, categorize, and
 ```cd prompt-writing-project```
 
 #### First: Make sure the docker application is started!
-**Second:**
-
 start the docker-container to run more commands in it:
 ```docker-compose up -d```
 
-### 2. Generate database
-
-#### 2.1 Create/Copy (old) .env - file into the project-directory
-
+#### create/copy (old) .env - file into the project-root directory:
+```cp path/to/own/.env path/to/prompt-writing-project/```
 **"This application was tested on mariadb-10.6.0"**
 
-#### 2.1.1 Execute command to create database in ddev-docker-container
+#### install composer-dependencies:
+```docker-compose exec app composer install```
+### 2. Generate database
+
+#### 2.1 Execute command to create database in ddev-docker-container
 ```docker-compose exec app php bin/console doctrine:database:create```
 
 #### 2.2 Update the schema of the database (to use the structure of the entities)
@@ -119,7 +119,7 @@ start the docker-container to run more commands in it:
 
 #### 3.2 Usage of random prompts in terminal
 - **Prerequisites**:
-  - at least 1 prompt in the database, thus at least 1 category (category is required for prompt)
+  - at least 1 prompt in the database, thus at least 1 category is required for prompt-creation
 
 ```docker-compose exec app php bin/console api:random-prompt```
 - follow the instructions.
