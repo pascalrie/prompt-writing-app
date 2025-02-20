@@ -30,10 +30,10 @@ services:
     container_name: symfony_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: CHANGE-ME
       MYSQL_DATABASE: prompt-writing-db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_USER: CHANGE-ME
+      MYSQL_PASSWORD: CHANGE-ME
     ports:
       - "3309:3309"
     networks:

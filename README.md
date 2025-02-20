@@ -48,6 +48,8 @@ This application provides a powerful and flexible way to record, categorize, and
 ```cd prompt-writing-project```
 
 #### First: Make sure the docker application is started!
+#### Second: Update the database-credentials in docker-compose.yml (!)
+
 start the docker-container to run more commands in it:
 ```docker-compose up -d```
 
