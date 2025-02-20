@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use _PHPStan_c4c026984\Nette\Neon\Exception;
 use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
@@ -112,9 +113,15 @@ class PromptService implements IService
         return $prompts[0];
     }
 
+    /**
+     * @throws \Exception
+     */
     public function showRandomPrompt(): Prompt
     {
         $prompts = $this->promptRepository->findAll();
+        if (empty($prompts)) {
+            throw new \Exception("Please create a prompt first.");
+        }
         $key = array_rand($prompts);
         return $this->show($prompts[$key]->getId());
     }
