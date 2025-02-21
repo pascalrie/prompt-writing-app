@@ -68,6 +68,9 @@ start the docker-container to run more commands in it:
 
 ```docker-compose exec app php bin/console doctrine:schema:update --force```
 
+#### 2.3 Optional: Load DataFixtures for an example DataSet
+```docker-compose exec app php bin/console doctrine:fixtures:load```
+
 ### 3. Usage:
 
 #### 3.1 Possible Routes of API
@@ -124,6 +127,7 @@ start the docker-container to run more commands in it:
   - at least 1 prompt in the database, thus at least 1 category is required for prompt-creation
 
 ```docker-compose exec app php bin/console api:random-prompt```
+
 - follow the instructions.
 ### 4. Execute tests in terminal:
 ```./vendor/bin/phpunit```
