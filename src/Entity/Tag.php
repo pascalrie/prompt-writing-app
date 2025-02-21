@@ -21,7 +21,7 @@ class Tag
     private ?int $id = null;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=false)
      */
     private ?string $title;
 
@@ -32,6 +32,7 @@ class Tag
 
     /**
      * @ORM\ManyToMany(targetEntity=Note::class, inversedBy="tags")
+     * @ORM\JoinTable(name="tag_note")
      */
     private Collection $notes;
 
