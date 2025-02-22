@@ -2,6 +2,10 @@
 
 namespace App\Tests\Integration;
 
+use App\DataFixtures\CategoryFixtures;
+use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
+use Doctrine\Common\DataFixtures\Loader;
+use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -31,7 +35,19 @@ class CategoryServiceIntegrationTest extends KernelTestCase
         $commandTester->execute([
             '--env' => 'test'
         ]);
+        // Step 2: Load fixtures using Doctrine ORM Executor
+        $entityManager = self::$kernel->getContainer()->get('doctrine')->getManager();
+
+        $loader = new Loader();
+        $loader->addFixture(new CategoryFixtures());
+
+        $purger = new ORMPurger();
+        $executor = new ORMExecutor($entityManager, $purger);
+        $executor->execute($loader->getFixtures());
+
+        // Fetch the CategoryService for testing
         $this->categoryService = static::getContainer()->get('App\Service\CategoryService');
+
     }
 
     protected function tearDown(): void
@@ -56,10 +72,17 @@ class CategoryServiceIntegrationTest extends KernelTestCase
         parent::tearDown();
     }
 
-
     public function testCategoryCreation(): void
     {
         $category = $this->categoryService->create('Example Category');
         $this->assertNotNull($category->getId());
     }
+
+    public function testShowExistingCategoryFromDataFixture(): void
+    {
+        $existingCategory = $this->categoryService->showByTitle('Category 1');
+        $this->assertNotNull($existingCategory);
+        $this->assertEquals('Category 1', $existingCategory->getTitle());
+    }
+
 }
