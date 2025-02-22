@@ -29,7 +29,7 @@ class TagRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return void
      */
-    public function add(Tag $entity, bool $flush = false): void
+    public function add(Tag $entity, bool $flush = true): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -43,7 +43,7 @@ class TagRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return void
      */
-    public function remove(Tag $entity, bool $flush = false): void
+    public function remove(Tag $entity, bool $flush = true): void
     {
         $this->getEntityManager()->remove($entity);
 

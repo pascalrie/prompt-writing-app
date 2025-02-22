@@ -30,7 +30,7 @@ class NoteRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return void
      */
-    public function add(Note $entity, bool $flush = false): void
+    public function add(Note $entity, bool $flush = true): void
     {
         $this->persist($entity);
 
@@ -44,7 +44,7 @@ class NoteRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return void
      */
-    public function remove(Note $entity, bool $flush = false): void
+    public function remove(Note $entity, bool $flush = true): void
     {
         $this->getEntityManager()->remove($entity);
 

@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use _PHPStan_c4c026984\Nette\Neon\Exception;
 use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
@@ -33,6 +32,7 @@ class PromptService implements IService
             $prompt->setCategory($category);
         }
 
+        $this->promptRepository->add($prompt, true);
         return $prompt;
     }
 

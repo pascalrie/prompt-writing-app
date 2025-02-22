@@ -29,7 +29,7 @@ class CategoryRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return Category
      */
-    public function add(Category $category, bool $flush = false): Category
+    public function add(Category $category, bool $flush = true): Category
     {
         $this->persist($category);
 
@@ -45,7 +45,7 @@ class CategoryRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return void
      */
-    public function remove(Category $category, bool $flush = false): void
+    public function remove(Category $category, bool $flush = true): void
     {
         $this->getEntityManager()->remove($category);
 
