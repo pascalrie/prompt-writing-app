@@ -10,7 +10,7 @@ class TagFixtures extends Fixture
 {
     public const TAG_REFERENCE = 'tag_fixture';
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $tag = new Tag();
         $tag->setTitle('#exampletag');

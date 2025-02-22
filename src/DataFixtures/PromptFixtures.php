@@ -12,7 +12,7 @@ class PromptFixtures extends Fixture implements DependentFixtureInterface
 {
     public const PROMPT_REFERENCE = 'prompt_fixture';
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $prompt = new Prompt();
         $prompt->setTitle('Prompt 1?');

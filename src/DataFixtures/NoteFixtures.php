@@ -14,7 +14,7 @@ class NoteFixtures extends Fixture implements DependentFixtureInterface
 {
     public const NOTE_REFERENCE = 'note_fixture';
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $note = new Note();
         $note->addContent('This is my first note.');

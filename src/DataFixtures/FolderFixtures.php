@@ -10,7 +10,7 @@ class FolderFixtures extends Fixture
 {
     public const FOLDER_REFERENCE = 'folder_fixture';
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $folder = new Folder();
         $folder->setTitle('Folder 1');
