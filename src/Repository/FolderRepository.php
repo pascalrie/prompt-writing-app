@@ -29,7 +29,7 @@ class FolderRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return void
      */
-    public function add(Folder $entity, bool $flush = false): Folder
+    public function add(Folder $entity, bool $flush = true): Folder
     {
         $this->getEntityManager()->persist($entity);
 
@@ -45,7 +45,7 @@ class FolderRepository extends ServiceEntityRepository implements IRepository
      * @param bool $flush
      * @return void
      */
-    public function remove(Folder $entity, bool $flush = false): void
+    public function remove(Folder $entity, bool $flush = true): void
     {
         $this->getEntityManager()->remove($entity);
 
