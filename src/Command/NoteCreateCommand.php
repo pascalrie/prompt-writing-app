@@ -14,14 +14,33 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class NoteCreateCommand extends Command
 {
-    protected NoteService  $noteService;
+    /**
+     * @var NoteService The service for managing notes.
+     */
+    protected NoteService $noteService;
 
+    /**
+     * @var CategoryService The service for managing categories.
+     */
     protected CategoryService $categoryService;
 
+    /**
+     * @var TagService The service for managing tags.
+     */
     protected TagService $tagService;
 
+    /**
+     * @var string The default command name.
+     */
     protected static $defaultName = 'api:create-note';
 
+    /**
+     * NoteCreateCommand constructor.
+     *
+     * @param NoteService $noteService The note service instance.
+     * @param CategoryService $categoryService The category service instance.
+     * @param TagService $tagService The tag service instance.
+     */
     public function __construct(NoteService $noteService, CategoryService $categoryService, TagService $tagService)
     {
         $this->noteService = $noteService;
@@ -31,7 +50,12 @@ class NoteCreateCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    /**
+     * Configures the command options and arguments.
+     *
+     * @return void
+     */
+    protected function configure(): void
     {
         $this
             ->setHelp('This command allows you to create a note');
@@ -39,6 +63,14 @@ class NoteCreateCommand extends Command
         $this->addArgument('prompt', InputArgument::REQUIRED, 'The prompt of the Note.');
     }
 
+    /**
+     * Executes the command to create a note.
+     *
+     * @param InputInterface $input The input interface.
+     * @param OutputInterface $output The output interface.
+     *
+     * @return int Returns the command success status.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $tag = $this->tagService->showOneBy('title', '#toSort');
@@ -66,5 +98,4 @@ class NoteCreateCommand extends Command
         $output->writeln('<info>Note generated!</info>');
         return Command::SUCCESS;
     }
-
 }

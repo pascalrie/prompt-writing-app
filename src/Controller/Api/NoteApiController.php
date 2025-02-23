@@ -15,12 +15,37 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Class NoteApiController
+ *
+ * This controller handles API requests for managing notes, including creating, listing,
+ * showing, updating, and deleting notes. It also manages associated tags and categories.
+ */
 class NoteApiController extends BaseApiController
 {
+    /**
+     * @var NoteService Handles note-related business logic.
+     */
     protected NoteService $noteService;
+
+    /**
+     * @var TagService Handles tag-related business logic.
+     */
     protected TagService $tagService;
+
+    /**
+     * @var CategoryService Handles category-related business logic.
+     */
     protected CategoryService $categoryService;
 
+    /**
+     * Constructor for NoteApiController.
+     *
+     * @param NoteService $noteService Note service for performing operations on notes.
+     * @param TagService $tagService Tag service for handling tags.
+     * @param CategoryService $categoryService Category service for managing categories.
+     * @param EntityManagerInterface $em Doctrine's entity manager for database operations.
+     */
     public function __construct(NoteService $noteService, TagService $tagService, CategoryService $categoryService, EntityManagerInterface $em)
     {
         parent::__construct($em);
@@ -30,7 +55,13 @@ class NoteApiController extends BaseApiController
     }
 
     /**
+     * Creates a new note.
+     *
      * @Route("/note/create", name="api_create_note", methods={"POST"})
+     *
+     * @param Request $request The HTTP request containing the note data in JSON format.
+     *
+     * @return JsonResponse The created note data or an error message if creation failed.
      */
     public function create(Request $request): JsonResponse
     {
@@ -60,7 +91,11 @@ class NoteApiController extends BaseApiController
     }
 
     /**
+     * Lists all notes.
+     *
      * @Route("/note/list", name="api_list_notes", methods={"GET"})
+     *
+     * @return JsonResponse A JSON response containing a list of all notes.
      */
     public function list(): JsonResponse
     {
@@ -71,7 +106,13 @@ class NoteApiController extends BaseApiController
     }
 
     /**
+     * Retrieves a specific note by ID.
+     *
      * @Route("/note/show/{id}", name="api_show_note", methods={"GET"})
+     *
+     * @param int $id The ID of the note to retrieve.
+     *
+     * @return JsonResponse The note details or an error message if the note does not exist.
      */
     public function show(int $id): JsonResponse
     {
@@ -88,7 +129,14 @@ class NoteApiController extends BaseApiController
     }
 
     /**
+     * Updates a specific note by ID.
+     *
      * @Route("/note/update/{id}", name="api_update_note", methods={"PUT"})
+     *
+     * @param Request $request The HTTP request containing updated note data.
+     * @param int $id The ID of the note to update.
+     *
+     * @return JsonResponse The updated note data or an error message if the note does not exist or the update failed.
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -130,7 +178,13 @@ class NoteApiController extends BaseApiController
     }
 
     /**
+     * Deletes a specific note by ID.
+     *
      * @Route("/note/delete/{id}", name="api_delete_note", methods={"DELETE"})
+     *
+     * @param int $id The ID of the note to delete.
+     *
+     * @return JsonResponse A success or error message indicating the result of the deletion operation.
      */
     public function delete(int $id): JsonResponse
     {
@@ -155,7 +209,14 @@ class NoteApiController extends BaseApiController
             'message' => "Note deletion with id: {$id}" . MessageOfResponse::SUCCESS
         ]));
     }
-    
+
+    /**
+     * Creates a new tag or retrieves an existing tag by its title.
+     *
+     * @param string $title The title of the tag to create or fetch.
+     *
+     * @return Tag The created or existing tag entity.
+     */
     private function createTagIfNonExistentByTitle(string $title): Tag
     {
         return $this->tagService->showOneBy('title', $title)
