@@ -288,7 +288,8 @@ class Note
      */
     public function removeTag(Tag $tag): self
     {
-        if ($this->tags->removeElement($tag)) {
+        if ($this->tags->contains($tag)) {
+            $this->tags->removeElement($tag);
             $tag->removeNote($this);
         }
 

@@ -138,12 +138,14 @@ class Tag
      */
     public function addNote(Note $note): self
     {
-        if (!$this->getNotes()->contains($note)) {
+        if (!$this->notes->contains($note)) {
             $this->notes[] = $note;
+            $note->addTag($this);
         }
 
         return $this;
     }
+
 
     /**
      * Remove a note from the tag's collection.
@@ -153,10 +155,14 @@ class Tag
      */
     public function removeNote(Note $note): self
     {
-        $this->getNotes()->removeElement($note);
+        if ($this->notes->contains($note)) {
+            $this->notes->removeElement($note);
+            $note->removeTag($this);
+        }
 
         return $this;
     }
+
 
     /**
      * Serialize the tag into a JSON-compatible array.
