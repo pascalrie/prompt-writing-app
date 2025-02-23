@@ -13,20 +13,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TagApiController extends BaseApiController
 {
-    /**
-     * @var TagService $tagService
-     */
     protected TagService $tagService;
-
-    /**
-     * @var NoteService $noteService
-     */
     protected NoteService $noteService;
 
     /**
-     * @param TagService $tagService
-     * @param NoteService $noteService
-     * @param EntityManagerInterface $em
+     * Constructor for TagApiController.
+     *
+     * @param TagService $tagService The service layer for managing tags.
+     * @param NoteService $noteService The service layer for managing notes.
+     * @param EntityManagerInterface $em The Doctrine EntityManager instance.
      */
     public function __construct(TagService $tagService, NoteService $noteService, EntityManagerInterface $em)
     {
@@ -36,100 +31,141 @@ class TagApiController extends BaseApiController
     }
 
     /**
+     * Create a new tag.
+     *
      * @Route("/tag/create", name="api_create_tag", methods={"POST"})
+     *
+     * @param Request $request The HTTP request object containing the JSON payload.
+     *
+     * @return JsonResponse The created tag as a JSON response, or an error message if the creation fails.
      */
     public function create(Request $request): JsonResponse
     {
-        $bodyParameters = json_decode($request->getContent());
-        $title = $bodyParameters->title;
-        $noteTitleList = $bodyParameters->noteTitles;
-        $color = $bodyParameters->color;
+        $bodyParameters = json_decode($request->getContent(), true);
 
-        $createdTag = $this->tagService->create($title, $noteTitleList, $color);
+        $title = $bodyParameters['title'] ?? null;
+        $noteTitles = $bodyParameters['noteTitles'] ?? [];
+        $color = $bodyParameters['color'] ?? null;
 
-        return $this->json($this->appendTimeStampToApiResponse($createdTag->jsonSerialize()));
-
-    }
-
-    /**
-     * @Route("/tag/list", name="api_list_tags", methods={"GET"})
-     */
-    public function list(): JsonResponse
-    {
-        $tags = $this->tagService->list();
-        $response = [];
-        foreach ($tags as $tag) {
-            $response += [$tag->jsonSerialize()];
-        }
-        return $this->json($this->appendTimeStampToApiResponse($response));
-    }
-
-    /**
-     * @Route("/tag/show/{id}", name="api_show_tag", methods={"GET"})
-     */
-    public function show(int $id): JsonResponse
-    {
-        $tag = $this->tagService->show($id);
-        if (null === $tag) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND,
-                'message' => 'Tag with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
-        }
-        return $this->json($this->appendTimeStampToApiResponse($tag->jsonSerialize()));
-    }
-
-    /**
-     * @Route("/tag/update/{id}", name="api_update_tag", methods={"PUT"})
-     */
-    public function update(Request $request, int $id): JsonResponse
-    {
-        $tagToUpdate = $this->tagService->show($id);
-        if (null === $tagToUpdate) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND,
-                'message' => 'Tag with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
-        }
-
-        $bodyParameters = json_decode($request->getContent());
-        if (null === $bodyParameters) {
+        if (!$title) {
             return $this->json($this->appendTimeStampToApiResponse([
                 'message' => MessageOfResponse::NO_BODY_PARAMETERS
             ]));
         }
-        $title = $bodyParameters->title;
-        $color = $bodyParameters->color;
-        $potentialNewNotes = $bodyParameters->notes;
 
-        $noteObjectsToAdd = [];
-        foreach ($potentialNewNotes as $note) {
-            $noteObjectsToAdd += $this->noteService->show($note);
-        }
+        $createdTag = $this->tagService->create($title, $noteTitles, $color);
 
-        $finalTag = $this->tagService->update($id, $title, $noteObjectsToAdd, $color);
-
-        return $this->json($this->appendTimeStampToApiResponse($finalTag->jsonSerialize()));
+        return $this->json($this->appendTimeStampToApiResponse($createdTag->jsonSerialize()));
     }
 
     /**
+     * List all existing tags.
+     *
+     * @Route("/tag/list", name="api_list_tags", methods={"GET"})
+     *
+     * @return JsonResponse A JSON response containing a list of all tags.
+     */
+    public function list(): JsonResponse
+    {
+        $tags = $this->tagService->list();
+        $response = array_map(fn($tag) => $tag->jsonSerialize(), $tags);
+
+        return $this->json($this->appendTimeStampToApiResponse($response));
+    }
+
+    /**
+     * Show details of a specific tag by ID.
+     *
+     * @Route("/tag/show/{id}", name="api_show_tag", methods={"GET"})
+     *
+     * @param int $id The ID of the tag to retrieve.
+     *
+     * @return JsonResponse The requested tag data as a JSON response, or an error message if not found.
+     */
+    public function show(int $id): JsonResponse
+    {
+        $tag = $this->tagService->show($id);
+
+        if (!$tag) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Tag with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
+        }
+
+        return $this->json($this->appendTimeStampToApiResponse($tag->jsonSerialize()));
+    }
+
+    /**
+     * Update an existing tag by ID.
+     *
+     * @Route("/tag/update/{id}", name="api_update_tag", methods={"PUT"})
+     *
+     * @param Request $request The HTTP request object containing the JSON payload for the update.
+     * @param int $id The ID of the tag to update.
+     *
+     * @return JsonResponse The updated tag as a JSON response, or an error message if the update fails.
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $tag = $this->tagService->show($id);
+
+        if (!$tag) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Tag with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
+        }
+
+        $bodyParameters = json_decode($request->getContent(), true);
+
+        if (!$bodyParameters) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => MessageOfResponse::NO_BODY_PARAMETERS
+            ]));
+        }
+
+        $title = $bodyParameters['title'] ?? $tag->getTitle();
+        $color = $bodyParameters['color'] ?? $tag->getColor();
+        $noteTitles = $bodyParameters['notes'] ?? [];
+
+        $noteEntities = array_map(fn($noteTitle) => $this->noteService->show($noteTitle), $noteTitles);
+
+        $updatedTag = $this->tagService->update($id, $title, $noteEntities, $color);
+
+        return $this->json($this->appendTimeStampToApiResponse($updatedTag->jsonSerialize()));
+    }
+
+    /**
+     * Delete an existing tag by ID.
+     *
      * @Route("/tag/delete/{id}", name="api_delete_tag", methods={"DELETE"})
+     *
+     * @param int $id The ID of the tag to delete.
+     *
+     * @return JsonResponse A confirmation message as a JSON response, or an error message if the deletion fails.
      */
     public function delete(int $id): JsonResponse
     {
-        $tagForDeletionShouldntBeNull = $this->tagService->show($id);
-        if (null === $tagForDeletionShouldntBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Tag for deletion with id: {$id}"
-                    . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
-        }
-        $this->tagService->delete($id);
-        $tagAfterDeletionShouldBeNull = $this->tagService->show($id);
-        if (null !== $tagAfterDeletionShouldBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['message' => "Tag for deletion with id: {$id}" . MessageOfResponse::NOT_SUCCESS]
-            ));
+        $tag = $this->tagService->show($id);
+
+        if (!$tag) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Tag with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
-        return $this->json($this->json($this->appendTimeStampToApiResponse(
-            ['message' => "Tag for deletion with id: {$id}" . MessageOfResponse::SUCCESS]
-        )));
+        $this->tagService->delete($id);
+
+        if ($this->tagService->show($id)) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => "Tag with id: {$id} could not be deleted" . MessageOfResponse::NOT_SUCCESS
+            ]));
+        }
+
+        return $this->json($this->appendTimeStampToApiResponse([
+            'message' => "Tag with id: {$id} successfully deleted" . MessageOfResponse::SUCCESS
+        ]));
     }
 }
-

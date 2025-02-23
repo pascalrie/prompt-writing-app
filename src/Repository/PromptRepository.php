@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Prompt;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -14,27 +15,31 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Prompt[]    findAll()
  * @method Prompt[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PromptRepository extends ServiceEntityRepository implements IRepository
+class PromptRepository extends ServiceEntityRepository
 {
+    private EntityManagerInterface $entityManager;
+
     /**
      * @param ManagerRegistry $registry
+     * @param EntityManagerInterface $entityManager
      */
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, Prompt::class);
+        $this->entityManager = $entityManager;
     }
 
     /**
      * @param Prompt $entity
      * @param bool $flush
-     * @return void
+     * @return Prompt
      */
     public function add(Prompt $entity, bool $flush = true): Prompt
     {
-        $this->getEntityManager()->persist($entity);
+        $this->entityManager->persist($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
         return $entity;
     }
@@ -46,10 +51,10 @@ class PromptRepository extends ServiceEntityRepository implements IRepository
      */
     public function remove(Prompt $promptForDeletion, bool $flush = true): void
     {
-        $this->getEntityManager()->remove($promptForDeletion);
+        $this->entityManager->remove($promptForDeletion);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
     }
 
@@ -58,7 +63,7 @@ class PromptRepository extends ServiceEntityRepository implements IRepository
      */
     public function flush(): void
     {
-        $this->getEntityManager()->flush();
+        $this->entityManager->flush();
     }
 
     /**
@@ -67,6 +72,6 @@ class PromptRepository extends ServiceEntityRepository implements IRepository
      */
     public function persist(Prompt $prompt): void
     {
-        $this->getEntityManager()->persist($prompt);
+        $this->entityManager->persist($prompt);
     }
 }

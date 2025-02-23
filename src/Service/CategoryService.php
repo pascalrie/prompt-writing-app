@@ -12,7 +12,9 @@ class CategoryService implements IService
     protected CategoryRepository $categoryRepository;
 
     /**
-     * @param CategoryRepository $categoryRepository
+     * CategoryService constructor.
+     *
+     * @param CategoryRepository $categoryRepository The repository used for managing Category entities.
      */
     public function __construct(CategoryRepository $categoryRepository)
     {
@@ -20,24 +22,23 @@ class CategoryService implements IService
     }
 
     /**
-     * @param string $title
-     * @param Note|null $firstNote
-     * @param Prompt|null $firstPrompt
-     * @return Category
+     * Creates a new category with an optional first note and/or first prompt.
+     *
+     * @param string $title The title of the new category.
+     * @param Note|null $firstNote An optional Note object to associate with the category.
+     * @param Prompt|null $firstPrompt An optional Prompt object to associate with the category.
+     * @return Category The newly created Category entity.
      */
-    public function create(string $title = "", Note $firstNote = null, Prompt $firstPrompt = null): Category
+    public function create(string $title = "", ?Note $firstNote = null, ?Prompt $firstPrompt = null): Category
     {
         $category = new Category();
+        $category->setTitle($title);
 
-        if (null !== $title) {
-            $category->setTitle($title);
-        }
-
-        if (null !== $firstNote) {
+        if ($firstNote) {
             $category->addNote($firstNote);
         }
 
-        if (null !== $firstPrompt) {
+        if ($firstPrompt) {
             $category->addPrompt($firstPrompt);
         }
 
@@ -45,56 +46,53 @@ class CategoryService implements IService
     }
 
     /**
-     * @param int $id
-     * @param string $newTitle
-     * @param array|null $newPotentialPrompts
-     * @param array|null $newPotentialNotes
-     * @param bool $promptsShouldBeReplaced
-     * @return Category
+     * Updates an existing category by its ID and modifies its properties.
+     *
+     * @param int $id The ID of the Category to update.
+     * @param string|null $newTitle The new title for the category (if provided).
+     * @param Prompt[] $newPrompts An array of Prompt objects to add to the category.
+     * @param Note[] $newNotes An array of Note objects to add to the category.
+     * @param bool $replacePrompts Set to true to clear and replace the current Prompts in the category.
+     * @return Category The updated Category entity.
+     * @throws \InvalidArgumentException If the Category with the given ID is not found.
      */
-    public function update(int   $id, string $newTitle = "", array $newPotentialPrompts = [],
-                           array $newPotentialNotes = [], bool $promptsShouldBeReplaced = false): Category
+    public function update(int $id, string $newTitle = null, array $newPrompts = [], array $newNotes = [], bool $replacePrompts = false): Category
     {
-        $oldCategoryFromDb = $this->categoryRepository->findBy(['id' => $id])[0];
+        $category = $this->findCategoryById($id);
 
-        if ("" !== $newTitle) {
-            $oldCategoryFromDb->setTitle($newTitle);
+        if ($category === null) {
+            throw new \InvalidArgumentException("Category with ID {$id} not found.");
         }
 
-        if ($promptsShouldBeReplaced) {
-            foreach ($oldCategoryFromDb->getPrompts() as $oldPromptToDelete) {
-                $oldCategoryFromDb->removePrompt($oldPromptToDelete);
-                $this->categoryRepository->flush();
-            }
-
-            foreach ($newPotentialPrompts as $newPotentialPrompt) {
-                $oldCategoryFromDb->addPrompt($newPotentialPrompt);
-            }
+        if (!empty($newTitle)) {
+            $category->setTitle($newTitle);
         }
 
-        if ([] !== $newPotentialPrompts && !$promptsShouldBeReplaced) {
-            foreach ($newPotentialPrompts as $prompt) {
-                if ($prompt instanceof Prompt) {
-                    $oldCategoryFromDb->addPrompt($prompt);
-                }
+        if ($replacePrompts) {
+            $category->clearPrompts();
+        }
+
+        foreach ($newPrompts as $prompt) {
+            if ($prompt instanceof Prompt) {
+                $category->addPrompt($prompt);
             }
         }
 
-        if ([] !== $newPotentialNotes) {
-            foreach ($newPotentialNotes as $note) {
-                if ($note instanceof Note) {
-                    $oldCategoryFromDb->addNote($note);
-                }
+        foreach ($newNotes as $note) {
+            if ($note instanceof Note) {
+                $category->addNote($note);
             }
         }
 
         $this->categoryRepository->flush();
 
-        return $oldCategoryFromDb;
+        return $category;
     }
 
     /**
-     * @return array
+     * Retrieves a list of all available categories.
+     *
+     * @return Category[]|array An array of all Category entities.
      */
     public function list(): array
     {
@@ -102,44 +100,53 @@ class CategoryService implements IService
     }
 
     /**
-     * @param int $id
+     * Deletes a category by its ID.
+     *
+     * @param int $id The ID of the Category to delete.
      * @return void
+     * @throws \InvalidArgumentException If the Category with the given ID is not found.
      */
     public function delete(int $id): void
     {
-        $category = $this->categoryRepository->findBy(['id' => $id])[0];
+        $category = $this->findCategoryById($id);
+
+        if ($category === null) {
+            throw new \InvalidArgumentException("Category with ID {$id} not found.");
+        }
 
         $this->categoryRepository->remove($category, true);
     }
 
     /**
-     * @param int $id
-     * @return Category|null
+     * Finds a category by its ID.
+     *
+     * @param int $id The ID of the Category to retrieve.
+     * @return Category|null The Category entity if found, or null otherwise.
      */
     public function show(int $id): ?Category
     {
-        $categories = $this->categoryRepository->findBy(['id' => $id]);
-        if (empty($categories)) {
-            return null;
-        }
-        return $categories[0];
+        return $this->findCategoryById($id) ?: null;
     }
 
     /**
-     * @param string $title
-     * @return Category|null
+     * Finds a category by its title.
+     *
+     * @param string $title The title of the Category to retrieve.
+     * @return Category|null The Category entity if found, or null otherwise.
      */
     public function showByTitle(string $title): ?Category
     {
-        $categories = $this->categoryRepository->findBy(['title' => $title]);
-        if (empty($categories)) {
-            return null;
-        }
+        return $this->categoryRepository->findOneBy(['title' => $title]) ?? null;
+    }
 
-        if (is_array($categories)) {
-            // only show first result if there are duplicates
-            return $categories[0];
-        }
-        return $categories;
+    /**
+     * Helper method to find a category by its ID.
+     *
+     * @param int $id The ID of the Category to search for.
+     * @return Category|null The Category entity if found, or null otherwise.
+     */
+    private function findCategoryById(int $id): ?Category
+    {
+        return $this->categoryRepository->findOneBy(['id' => $id]) ?? null;
     }
 }

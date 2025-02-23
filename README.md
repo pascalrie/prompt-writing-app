@@ -4,7 +4,6 @@
 
 - implement random prompt "homepage" to create a quick note, based on random prompt, Maybe fixed: since there is a random prompt select command
 - fix color-selection in easyadmin, in adjusting tags
-- implement validity checks in every service-class
 
 ## Features & Functions
 
@@ -47,8 +46,12 @@ This application provides a powerful and flexible way to record, categorize, and
 
 ```cd prompt-writing-project```
 
-#### First: Make sure the docker application is started!
-#### Second: Update the database-credentials in docker-compose.yml (!)
+#### 1.3 Make sure you put the right credentials into docker-compose.yaml (marked with: !ChangeMe)
+- MYSQL_ROOT_PASSWORD
+- MYSQL_USER
+- MYSQL_PASSWORD
+
+#### Make sure the docker application is started!
 
 start the docker-container to run more commands in it:
 ```docker-compose up -d```

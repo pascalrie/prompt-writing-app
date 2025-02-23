@@ -6,143 +6,228 @@ use App\Entity\Folder;
 use App\Entity\Note;
 use App\Repository\FolderRepository;
 use App\Service\FolderService;
-use Doctrine\Persistence\ManagerRegistry;
-use PHPUnit\Framework\MockObject\MockObject;
+use Doctrine\ORM\EntityNotFoundException;
 use PHPUnit\Framework\TestCase;
 
 class FolderServiceTest extends TestCase
 {
-    protected ManagerRegistry $managerRegistry;
+    private FolderService $folderService;
+    private FolderRepository $folderRepository;
 
-    protected ?Folder $exampleFolder;
-
-    protected ?MockObject $repoMock;
-
-    protected ?FolderService $folderService;
-
-    public function setUp(): void
+    protected function setUp(): void
     {
-        $this->managerRegistry = $this->createMock(ManagerRegistry::class);
-        $title = 'Folder 1';
+        // Create a mock for the FolderRepository
+        $this->folderRepository = $this->createMock(FolderRepository::class);
 
-        $this->exampleFolder = new Folder();
-        $this->exampleFolder->setId(1);
-        $this->exampleFolder->setTitle($title);
-
-        $this->repoMock = $this->getMockBuilder(FolderRepository::class)
-            ->setConstructorArgs([$this->managerRegistry])
-            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'remove'])
-            ->getMock();
-
-        $this->folderService = new FolderService($this->repoMock);
+        // Initialize the FolderService with the mocked repository
+        $this->folderService = new FolderService($this->folderRepository);
     }
 
-    public function tearDown(): void
+    public function testCreateFolderWithoutNote(): void
     {
-        $this->exampleFolder = null;
-        $this->folderService = null;
-        $this->repoMock = null;
+        $folderTitle = 'New Folder';
+
+        // Expect the `add` method to be called once with the folder and flush set to true
+        $this->folderRepository->expects($this->once())
+            ->method('add')
+            ->with(
+                $this->callback(function (Folder $folder) use ($folderTitle) {
+                    return $folder->getTitle() === $folderTitle && $folder->getNotes()->isEmpty();
+                }),
+                true
+            );
+
+        $folder = $this->folderService->create($folderTitle);
+
+        // Assert that the returned folder has the correct title and no notes
+        $this->assertInstanceOf(Folder::class, $folder);
+        $this->assertEquals($folderTitle, $folder->getTitle());
+        $this->assertEmpty($folder->getNotes());
     }
 
-    public function testUpdateTitleOfFolder(): void
+    public function testCreateFolderWithNote(): void
     {
-        $this->repoMock
-            ->method('findBy')
-            ->willReturn([$this->exampleFolder]);
+        $folderTitle = 'New Folder';
+        $note = new Note();
+        $note->setContent('Hello World');
 
-        $newTitle = 'New Title';
+        // Expect the `add` method to be called once with the correct folder and flush set to true
+        $this->folderRepository->expects($this->once())
+            ->method('add')
+            ->with(
+                $this->callback(function (Folder $folder) use ($folderTitle, $note) {
+                    return $folder->getTitle() === $folderTitle && $folder->getNotes()->contains($note);
+                }),
+                true
+            );
 
-        $updatedFolder = $this->folderService->update($this->exampleFolder->getId(), $newTitle);
-        $this->assertNotNull($updatedFolder);
-        $this->assertEquals($newTitle, $updatedFolder->getTitle());
+        $folder = $this->folderService->create($folderTitle, $note);
+
+        // Assert that the returned folder has the correct title and contains the note
+        $this->assertInstanceOf(Folder::class, $folder);
+        $this->assertEquals($folderTitle, $folder->getTitle());
+        $this->assertTrue($folder->getNotes()->contains($note));
     }
 
-    public function testFolderUpdateNotes(): void
+    public function testUpdateFolderTitle(): void
     {
-        $this->repoMock
-            ->method('findBy')->willReturn([$this->exampleFolder]);
+        $existingFolder = new Folder();
+        $existingFolder->setId(1);
+        $existingFolder->setTitle('Old Title');
 
+        $newFolderTitle = 'Updated Title';
 
-        $firstNote = new Note();
-        $firstNote->setContent('Hallo Welt 1');
-        $newNotes = [$firstNote];
+        // Mock the `find` method to return the existing folder
+        $this->folderRepository->expects($this->once())
+            ->method('find')
+            ->with($existingFolder->getId())
+            ->willReturn($existingFolder);
 
-        $updatedFolder = $this->folderService->update($this->exampleFolder->getId(), "", $newNotes);
+        // Expect the `add` method to save the updated folder
+        $this->folderRepository->expects($this->once())
+            ->method('add')
+            ->with($existingFolder, true);
 
-        $this->assertNotNull($updatedFolder);
-        $this->assertNotNull($updatedFolder->getNotes());
-        $this->assertEquals($firstNote, $updatedFolder->getNotes()[0]);
+        $updatedFolder = $this->folderService->update($existingFolder->getId(), $newFolderTitle);
+
+        // Assert that the returned folder has the updated title
+        $this->assertEquals($newFolderTitle, $updatedFolder->getTitle());
     }
 
-    public function testFolderUpdateAndReplaceNotes(): void
+    public function testUpdateFolderNotesReplace(): void
     {
-        $this->repoMock
-            ->method('findBy')->willReturn([$this->exampleFolder]);
+        $existingFolder = new Folder();
+        $existingFolder->setId(1);
+        $note1 = new Note();
+        $note1->setContent('Old Note');
+        $existingFolder->addNote($note1);
 
-        $newNoteToAdd = new Note();
-        $newNoteToAdd->setContent('New Note 2 - Hallo Welt');
-        $newNoteToAdd->setTitle('New Note 2');
-        $newNoteToAdd->setId(2);
+        $newNote = new Note();
+        $newNote->setContent('New Note');
 
-        $oldNoteToReplace = new Note();
-        $oldNoteToReplace->setContent('Old Note 1- Hallo Welt ');
-        $oldNoteToReplace->setTitle('Old Note 1');
-        $oldNoteToReplace->setId(1);
+        // Mock the `find` method to return the existing folder
+        $this->folderRepository->expects($this->once())
+            ->method('find')
+            ->with($existingFolder->getId())
+            ->willReturn($existingFolder);
 
-        // step 1: add the old note to replace with new one later
-        $this->exampleFolder = $this->folderService->update($this->exampleFolder->getId(), "", [$oldNoteToReplace]);
+        // Expect the `add` method to save the updated folder
+        $this->folderRepository->expects($this->once())
+            ->method('add')
+            ->with($existingFolder, true);
 
-        $this->assertEquals($oldNoteToReplace, $this->exampleFolder->getNotes()[0]);
+        $updatedFolder = $this->folderService->update($existingFolder->getId(), '', [$newNote], true);
 
-        // step 2: replace old note with the new one
-        $this->exampleFolder = $this->folderService->update($this->exampleFolder->getId(), "", [$newNoteToAdd], true);
-
-        // index is +1 compared to first (deleted) note
-        $this->assertNull($this->exampleFolder->getNotes()[0]);
-        $this->assertNotNull($this->exampleFolder->getNotes()[1]);
-        $this->assertEquals($newNoteToAdd, $this->exampleFolder->getNotes()[1]);
+        // Assert that the folder's notes were replaced
+        $this->assertCount(1, $updatedFolder->getNotes());
+        $this->assertTrue($updatedFolder->getNotes()->contains($newNote));
+        $this->assertFalse($updatedFolder->getNotes()->contains($note1));
     }
 
-    public function testListFolders()
+    public function testUpdateFolderNotesAppend(): void
     {
-        $secondFolderForList = new Folder();
-        $title = 'Folder 2';
-        $secondFolderForList->setId(2);
-        $secondFolderForList->setTitle($title);
+        $existingFolder = new Folder();
+        $existingFolder->setId(1);
+        $note1 = new Note();
+        $note1->setContent('Existing Note');
+        $existingFolder->addNote($note1);
 
-        $this->repoMock->method('findAll')->willReturn([$this->exampleFolder, $secondFolderForList]);
+        $newNote = new Note();
+        $newNote->setContent('New Note');
+
+        // Mock the `find` method to return the existing folder
+        $this->folderRepository->expects($this->once())
+            ->method('find')
+            ->with($existingFolder->getId())
+            ->willReturn($existingFolder);
+
+        // Expect the `add` method to save the updated folder
+        $this->folderRepository->expects($this->once())
+            ->method('add')
+            ->with($existingFolder, true);
+
+        $updatedFolder = $this->folderService->update($existingFolder->getId(), '', [$newNote]);
+
+        // Assert that the folder's notes were appended
+        $this->assertCount(2, $updatedFolder->getNotes());
+        $this->assertTrue($updatedFolder->getNotes()->contains($newNote));
+        $this->assertTrue($updatedFolder->getNotes()->contains($note1));
+    }
+
+    public function testDeleteFolder(): void
+    {
+        $existingFolder = new Folder();
+        $existingFolder->setId(1);
+
+        // Mock the `find` method to return the folder
+        $this->folderRepository->expects($this->once())
+            ->method('find')
+            ->with($existingFolder->getId())
+            ->willReturn($existingFolder);
+
+        // Expect the `remove` method to delete the folder
+        $this->folderRepository->expects($this->once())
+            ->method('remove')
+            ->with($existingFolder, true);
+
+        $this->folderService->delete($existingFolder->getId());
+    }
+
+    public function testDeleteFolderNotFound(): void
+    {
+        // Mock the `find` method to return null
+        $this->folderRepository->expects($this->once())
+            ->method('find')
+            ->willReturn(null);
+
+        $this->expectException(EntityNotFoundException::class);
+        $this->folderService->delete(999);
+    }
+
+    public function testListFolders(): void
+    {
+        $folder1 = new Folder();
+        $folder2 = new Folder();
+
+        // Mock the `findAll` method to return a list of folders
+        $this->folderRepository->expects($this->once())
+            ->method('findAll')
+            ->willReturn([$folder1, $folder2]);
 
         $folders = $this->folderService->list();
 
+        // Assert that two folders are returned
         $this->assertCount(2, $folders);
-        $this->assertNotNull($folders[0]);
-        $this->assertNotNull($folders[1]);
-        $this->assertEquals('Folder 1', $folders[0]->getTitle());
-        $this->assertEquals($title, $folders[1]->getTitle());
+        $this->assertContainsOnlyInstancesOf(Folder::class, $folders);
     }
 
-    public function testShowNonExistentFolder(): void
+    public function testShowFolderById(): void
     {
-        $this->repoMock->method('findBy')->willReturn([]);
-        $this->exampleFolder->setId(1000);
-        $shouldBeNull = $this->folderService->show(1000);
+        $folder = new Folder();
 
-        $this->assertNull($shouldBeNull);
+        // Mock the `findOneBy` method to return the folder
+        $this->folderRepository->expects($this->once())
+            ->method('findOneBy')
+            ->with(['id' => 1])
+            ->willReturn($folder);
+
+        $result = $this->folderService->show(1);
+
+        $this->assertEquals($folder, $result);
     }
 
-    public function testShowFolderByTitle()
+    public function testShowFolderByCriteria(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->exampleFolder]);
-        $folder = $this->folderService->showBy('title', $this->exampleFolder->getTitle());
+        $folder = new Folder();
 
-        $this->assertNotNull($folder);
-    }
+        // Mock the `findOneBy` method to return the folder
+        $this->folderRepository->expects($this->once())
+            ->method('findOneBy')
+            ->with(['title' => 'Test Folder'])
+            ->willReturn($folder);
 
-    public function testNonExistentFolderByTitle(): void
-    {
-        $this->repoMock->method('findBy')->willReturn([]);
-        $folderShouldBeNull = $this->folderService->showBy('title', 'non-existent-title');
+        $result = $this->folderService->showBy('title', 'Test Folder');
 
-        $this->assertNull($folderShouldBeNull);
+        $this->assertEquals($folder, $result);
     }
 }

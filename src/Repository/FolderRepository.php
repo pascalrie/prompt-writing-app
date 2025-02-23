@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Folder;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @extends ServiceEntityRepository<Folder>
@@ -14,61 +15,44 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Folder[]    findAll()
  * @method Folder[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class FolderRepository extends ServiceEntityRepository implements IRepository
+class FolderRepository extends ServiceEntityRepository
 {
-    /**
-     * @param ManagerRegistry $registry
-     */
-    public function __construct(ManagerRegistry $registry)
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, Folder::class);
+        $this->entityManager = $entityManager;
     }
 
-    /**
-     * @param Folder $entity
-     * @param bool $flush
-     * @return void
-     */
     public function add(Folder $entity, bool $flush = true): Folder
     {
-        $this->getEntityManager()->persist($entity);
+        $this->entityManager->persist($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
 
         return $entity;
     }
 
-    /**
-     * @param Folder $entity
-     * @param bool $flush
-     * @return void
-     */
     public function remove(Folder $entity, bool $flush = true): void
     {
-        $this->getEntityManager()->remove($entity);
+        $this->entityManager->remove($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
     }
 
-    /**
-     * @return void
-     */
-    public function flush()
+    public function flush(): void
     {
-        $this->getEntityManager()->flush();
+        $this->entityManager->flush();
     }
 
-    /**
-     * @param Folder $folder
-     * @return void
-     */
     public function persist(Folder $folder): void
     {
-        $this->getEntityManager()->persist($folder);
+        $this->entityManager->persist($folder);
     }
 }
 

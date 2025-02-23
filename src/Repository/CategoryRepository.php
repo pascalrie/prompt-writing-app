@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -14,14 +15,19 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Category[]    findAll()
  * @method Category[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class CategoryRepository extends ServiceEntityRepository implements IRepository
+class CategoryRepository extends ServiceEntityRepository
 {
+    protected EntityManagerInterface $entityManager;
+
     /**
      * @param ManagerRegistry $registry
+     * @param EntityManagerInterface $entityManager
      */
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, Category::class);
+
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -47,7 +53,7 @@ class CategoryRepository extends ServiceEntityRepository implements IRepository
      */
     public function remove(Category $category, bool $flush = true): void
     {
-        $this->getEntityManager()->remove($category);
+        $this->entityManager->remove($category);
 
         if ($flush) {
             $this->flush();
@@ -60,7 +66,7 @@ class CategoryRepository extends ServiceEntityRepository implements IRepository
      */
     public function persist(Category $category): void
     {
-        $this->getEntityManager()->persist($category);
+        $this->entityManager->persist($category);
     }
 
     /**
@@ -68,7 +74,7 @@ class CategoryRepository extends ServiceEntityRepository implements IRepository
      */
     public function flush(): void
     {
-        $this->getEntityManager()->flush();
+        $this->entityManager->flush();
     }
 }
 

@@ -10,118 +10,122 @@ use App\Repository\NoteRepository;
 use App\Repository\TagRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityNotFoundException;
+use InvalidArgumentException;
 
 class NoteService implements IService
 {
-    protected NoteRepository $noteRepository;
+    private NoteRepository $noteRepository;
 
-    protected TagRepository $tagRepository;
+    private TagRepository $tagRepository;
 
-    protected CategoryRepository $categoryRepository;
+    private CategoryRepository $categoryRepository;
 
-    /**
-     * @param NoteRepository $noteRepository
-     * @param TagRepository $tagRepository
-     * @param CategoryRepository $categoryRepository
-     */
     public function __construct(NoteRepository     $noteRepository, TagRepository $tagRepository,
                                 CategoryRepository $categoryRepository)
     {
         $this->noteRepository = $noteRepository;
+
         $this->tagRepository = $tagRepository;
+
         $this->categoryRepository = $categoryRepository;
     }
 
     /**
-     * @param string $title
-     * @param string $content
-     * @param ArrayCollection|null $tags
-     * @param Category|null $category
-     * @return Note
+     * Creates and persists a new note with the given attributes.
+     *
+     * @param string $title The title of the note. If empty, a default title will be generated from the content.
+     * @param string $content The content of the note.
+     * @param ArrayCollection|null $tags A collection of tags to be associated with the note.
+     * @param Category|null $category The category to assign the note to.
+     * @return Note The newly created note entity.
      */
-    public function create(string $title = "", string $content = "", ArrayCollection $tags = null,
-                           Category $category = null): Note
+    public function create(string $title = "", string $content = "", ?ArrayCollection $tags = null, ?Category $category = null): Note
     {
         $note = new Note();
 
-        if (null === $title) {
-            $title = substr($content, 0, 15) . '...';
-        }
-
-        $note->setTitle($title);
+        // Automatically generate title if not provided
+        $note->setTitle($title ?: substr($content, 0, 15) . '...');
 
         $note->setContent($content);
 
-        if (!$tags->isEmpty()) {
-            $tagsForForeach = $tags->toArray();
-            foreach ($tagsForForeach as $tag) {
+        if ($tags !== null) {
+            foreach ($tags as $tag) {
                 if ($tag instanceof Tag) {
                     $note->addTag($tag);
                 }
             }
         }
 
-        if (null !== $category) {
+        if ($category !== null) {
             $note->setCategory($category);
         }
 
         $this->noteRepository->add($note, true);
+
         return $note;
     }
 
     /**
-     * @param int $noteId
-     * @param string $newTitle
-     * @param string $content
-     * @param bool $contentShouldBeAdded
-     * @param bool $contentShouldBeRemoved
-     * @param array|null $newTags
-     * @param string|null $newCategoryTitle
-     * @return void
+     * Updates an existing note with the given parameters.
+     *
+     * @param int $noteId The ID of the note to update.
+     * @param string $newTitle The new title for the note, if provided.
+     * @param string $content The updated content for the note.
+     * @param bool $contentShouldBeAdded Whether the provided content should be appended to the current content.
+     * @param bool $contentShouldBeRemoved Whether the content of the note should be cleared.
+     * @param array $newTags A list of tag titles to associate with the note.
+     * @param string|null $newCategoryTitle The title of the new category to associate with the note, if applicable.
+     * @return Note The updated note entity.
+     * @throws EntityNotFoundException If the note with the specified ID is not found.
      */
     public function update(int  $noteId, string $newTitle = "", string $content = "", bool $contentShouldBeAdded = false,
-                           bool $contentShouldBeRemoved = false, array $newTags = [], ?string $newCategoryTitle = ""): Note
+                           bool $contentShouldBeRemoved = false, array $newTags = [], ?string $newCategoryTitle = null): Note
     {
-        $noteFromDb = $this->noteRepository->findBy(['id' => $noteId])[0];
+        $note = $this->noteRepository->findOneBy(['id' => $noteId]);
 
-        if ($contentShouldBeAdded && $content !== "" && !$contentShouldBeRemoved) {
-            $noteFromDb->addContent($content);
+        if (!$note) {
+            throw new EntityNotFoundException("Note with ID {$noteId} not found.");
         }
 
-        if (!$contentShouldBeAdded && $content !== "" && !$contentShouldBeRemoved) {
-            $noteFromDb->setContent($content);
+        if ($contentShouldBeAdded && $content) {
+            $note->addContent($content);
+        } elseif ($contentShouldBeRemoved) {
+            $note->setContent("");
+        } elseif ($content) {
+            $note->setContent($content);
         }
 
-        if ($contentShouldBeRemoved) {
-            $noteFromDb->setContent("");
+        if ($newTitle) {
+            $note->setTitle($newTitle);
         }
 
-        if ("" !== $newTitle) {
-            $noteFromDb->setTitle($newTitle);
-        }
-
-        if ([] !== $newTags) {
-            foreach ($newTags as $tag) {
-                $tagFromDb = $this->tagRepository->findBy(['title' => $tag])[0];
-                if ($tagFromDb instanceof Tag) {
-                    $noteFromDb->addTag($tag);
+        if (!empty($newTags)) {
+            foreach ($newTags as $tagTitle) {
+                $tag = $this->tagRepository->findOneBy(['title' => $tagTitle]);
+                if ($tag instanceof Tag) {
+                    $note->addTag($tag);
                 }
             }
         }
 
-        if ("" !== $newCategoryTitle) {
-            $newCategoryFromDb = $this->categoryRepository->findBy(['title' => $newCategoryTitle])[0];
-            $noteFromDb->setCategory($newCategoryFromDb);
+        if ($newCategoryTitle) {
+            $category = $this->categoryRepository->findOneBy(['title' => $newCategoryTitle]);
+            if ($category instanceof Category) {
+                $note->setCategory($category);
+            }
         }
 
-        $noteFromDb->setUpdatedAt(new DateTime('NOW'));
+        $note->setUpdatedAt(new DateTime('NOW'));
         $this->noteRepository->flush();
 
-        return $noteFromDb;
+        return $note;
     }
 
     /**
-     * @return array
+     * Retrieves all notes stored in the repository.
+     *
+     * @return Note[] An array of all note entities.
      */
     public function list(): array
     {
@@ -129,50 +133,60 @@ class NoteService implements IService
     }
 
     /**
-     * @param int $id
+     * Deletes a note with the given ID.
+     *
+     * @param int $id The ID of the note to delete.
      * @return void
+     * @throws EntityNotFoundException If the note with the specified ID is not found.
      */
     public function delete(int $id): void
     {
-        $note = $this->noteRepository->findBy(['id' => $id])[0];
+        $note = $this->noteRepository->findOneBy(['id' => $id]);
+
+        if (!$note) {
+            throw new EntityNotFoundException("Note with ID {$id} not found.");
+        }
+
         $this->noteRepository->remove($note, true);
     }
 
     /**
-     * @param int $id
-     * @return Note|null
+     * Retrieves a specific note by its ID.
+     *
+     * @param int $id The ID of the note to retrieve.
+     * @return Note|null The note entity or null if not found.
      */
     public function show(int $id): ?Note
     {
-        $notes = $this->noteRepository->findBy(['id' => $id]);
-        if (empty($notes)) {
-            return null;
-        }
-
-        return $notes[0];
+        return $this->noteRepository->findOneBy(['id' => $id]);
     }
 
     /**
-     * @param string $criteria
-     * @param $argument
-     * @return Note|null
+     * Retrieves a specific note by an arbitrary criteria.
+     *
+     * @param string $criteria The name of the attribute to use as a filter (e.g., "title", "id").
+     * @param mixed $argument The value to match for the specified criteria.
+     * @return Note|null The note entity or null if no matching record is found.
      */
     public function showBy(string $criteria, $argument): ?Note
     {
-        $notes = $this->noteRepository->findBy([$criteria => $argument]);
-        if (empty($notes)) {
-            return null;
-        }
-        return $notes[0];
+        return $this->noteRepository->findOneBy([$criteria => $argument]);
     }
 
     /**
-     * @param Note|null $note
-     * @param Tag|null $tag
+     * Removes a tag from the given note.
+     *
+     * @param Note|null $note The note entity to remove the tag from.
+     * @param Tag|null $tag The tag entity to be removed.
      * @return void
+     * @throws InvalidArgumentException If the note or tag is null.
      */
-    public function removeTagFromNote(?Note $note, ?Tag $tag)
+    public function removeTagFromNote(?Note $note, ?Tag $tag): void
     {
+        if (!$note || !$tag) {
+            throw new InvalidArgumentException("Note or Tag cannot be null.");
+        }
+
         $note->removeTag($tag);
         $this->noteRepository->flush();
     }

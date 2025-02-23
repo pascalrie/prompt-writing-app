@@ -85,4 +85,34 @@ class CategoryServiceIntegrationTest extends KernelTestCase
         $this->assertEquals('Category 1', $existingCategory->getTitle());
     }
 
+    public function testUpdateCategoryTitle(): void
+    {
+        $category = $this->categoryService->create('Old Title');
+        $updatedCategory = $this->categoryService->update($category->getId(), 'New Title');
+        $this->assertEquals('New Title', $updatedCategory->getTitle());
+    }
+
+    public function testDeleteCategory(): void
+    {
+        $category = $this->categoryService->create('To Be Deleted');
+        $category = $this->categoryService->delete($category->getId());
+        $this->assertNull($category);
+
+    }
+
+    public function testFetchAllCategories(): void
+    {
+        $this->categoryService->create('Category A');
+        $this->categoryService->create('Category B');
+        $categories = $this->categoryService->list();
+        $this->assertCount(3, $categories); // Including the fixture
+    }
+
+    public function testShowCategoryById(): void
+    {
+        $category = $this->categoryService->create('Specific Category');
+        $fetchedCategory = $this->categoryService->show($category->getId());
+        $this->assertNotNull($fetchedCategory);
+        $this->assertEquals('Specific Category', $fetchedCategory->getTitle());
+    }
 }
