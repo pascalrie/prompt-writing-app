@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Tag;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,14 +15,18 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Tag[]    findAll()
  * @method Tag[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TagRepository extends ServiceEntityRepository implements IRepository
+class TagRepository extends ServiceEntityRepository
 {
+    private EntityManagerInterface $entityManager;
+
     /**
      * @param ManagerRegistry $registry
+     * @param EntityManagerInterface $entityManager
      */
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, Tag::class);
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -31,10 +36,10 @@ class TagRepository extends ServiceEntityRepository implements IRepository
      */
     public function add(Tag $entity, bool $flush = true): void
     {
-        $this->getEntityManager()->persist($entity);
+        $this->entityManager->persist($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
     }
 
@@ -45,10 +50,10 @@ class TagRepository extends ServiceEntityRepository implements IRepository
      */
     public function remove(Tag $entity, bool $flush = true): void
     {
-        $this->getEntityManager()->remove($entity);
+        $this->entityManager->remove($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
     }
 
@@ -57,7 +62,7 @@ class TagRepository extends ServiceEntityRepository implements IRepository
      */
     public function flush(): void
     {
-        $this->getEntityManager()->flush();
+        $this->entityManager->flush();
     }
 
     /**
@@ -66,6 +71,6 @@ class TagRepository extends ServiceEntityRepository implements IRepository
      */
     public function persist(Tag $tag): void
     {
-        $this->getEntityManager()->persist($tag);
+        $this->entityManager->persist($tag);
     }
 }

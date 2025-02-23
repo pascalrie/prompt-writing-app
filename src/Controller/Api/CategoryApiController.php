@@ -20,7 +20,7 @@ class CategoryApiController extends BaseApiController
 
     private NoteService $noteService;
 
-    public function __construct(CategoryService        $categoryService, PromptService          $promptService,
+    public function __construct(CategoryService $categoryService, PromptService $promptService,
                                 NoteService $noteService, EntityManagerInterface $em)
     {
         parent::__construct($em);

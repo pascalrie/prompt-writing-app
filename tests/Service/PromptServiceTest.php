@@ -36,7 +36,7 @@ class PromptServiceTest extends TestCase
         $this->examplePrompt->setCategory($category);
 
         $this->repoMock = $this->getMockBuilder(PromptRepository::class)
-            ->setConstructorArgs([$this->managerRegistry])
+            ->setConstructorArgs([$this->managerRegistry, $this->createMock(\Doctrine\ORM\EntityManager::class)])
             ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
     }

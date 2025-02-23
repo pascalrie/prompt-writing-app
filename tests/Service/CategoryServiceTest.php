@@ -32,7 +32,7 @@ class CategoryServiceTest extends TestCase
         $this->exampleCategory->setTitle($title);
 
         $this->repoMock = $this->getMockBuilder(CategoryRepository::class)
-            ->setConstructorArgs([$this->managerRegistry])
+            ->setConstructorArgs([$this->managerRegistry, $this->createMock(\Doctrine\ORM\EntityManager::class)])
             ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
 

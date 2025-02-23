@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Folder;
 use App\Entity\Note;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -15,14 +16,18 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Note[]    findAll()
  * @method Note[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class NoteRepository extends ServiceEntityRepository implements IRepository
+class NoteRepository extends ServiceEntityRepository
 {
+    private EntityManagerInterface $entityManager;
+
     /**
      * @param ManagerRegistry $registry
+     * @param EntityManagerInterface $entityManager
      */
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, Note::class);
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -32,10 +37,10 @@ class NoteRepository extends ServiceEntityRepository implements IRepository
      */
     public function add(Note $entity, bool $flush = true): void
     {
-        $this->persist($entity);
+        $this->entityManager->persist($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
     }
 
@@ -46,10 +51,10 @@ class NoteRepository extends ServiceEntityRepository implements IRepository
      */
     public function remove(Note $entity, bool $flush = true): void
     {
-        $this->getEntityManager()->remove($entity);
+        $this->entityManager->remove($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
     }
 
@@ -58,15 +63,14 @@ class NoteRepository extends ServiceEntityRepository implements IRepository
      */
     public function flush(): void
     {
-        $this->getEntityManager()->flush();
+        $this->entityManager->flush();
     }
 
     /**
      * @param Note $note
-     * @return void
      */
-    private function persist(Note $note): void
+    public function persist(Note $note): void
     {
-        $this->getEntityManager()->persist($note);
+        $this->entityManager->persist($note);
     }
 }
