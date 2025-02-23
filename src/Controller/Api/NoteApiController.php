@@ -17,32 +17,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class NoteApiController extends BaseApiController
 {
-    /**
-     * @var NoteService $noteService
-     */
     protected NoteService $noteService;
-
-    /**
-     * @var TagService $tagService
-     */
     protected TagService $tagService;
-
-    /**
-     * @var CategoryService $categoryService
-     */
     protected CategoryService $categoryService;
 
-    /**
-     * @param NoteService $noteService
-     * @param TagService $tagService
-     * @param CategoryService $categoryService
-     * @param EntityManagerInterface $em
-     */
-    public function __construct(NoteService     $noteService, TagService $tagService,
-                                CategoryService $categoryService, EntityManagerInterface $em)
+    public function __construct(NoteService $noteService, TagService $tagService, CategoryService $categoryService, EntityManagerInterface $em)
     {
         parent::__construct($em);
-
         $this->noteService = $noteService;
         $this->tagService = $tagService;
         $this->categoryService = $categoryService;
@@ -53,30 +34,35 @@ class NoteApiController extends BaseApiController
      */
     public function create(Request $request): JsonResponse
     {
-        $bodyParameters = json_decode($request->getContent());
-        $title = $bodyParameters->title;
-        $content = $bodyParameters->content;
-        $category = $bodyParameters->category;
-        $tagTitles = $bodyParameters->tags;
+        $bodyParameters = json_decode($request->getContent(), true);
 
-        $categoryForCreation = $this->categoryService->create($category);
+        $title = $bodyParameters['title'] ?? null;
+        $content = $bodyParameters['content'] ?? null;
+        $category = $bodyParameters['category'] ?? null;
+        $tagTitles = $bodyParameters['tags'] ?? [];
 
-        $tagsInArrayCollection = new ArrayCollection();
-        foreach ($tagTitles as $tagTitle) {
-            $tagsInArrayCollection->add($this->createTagIfNonExistentByTitle($tagTitle));
+        if (!$title || !$content || !$category) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => MessageOfResponse::NO_BODY_PARAMETERS
+            ]));
         }
 
-        $note = $this->noteService->create($title, $content, $tagsInArrayCollection, $categoryForCreation);
+        $categoryEntity = $this->categoryService->create($category);
+
+        $tagEntities = array_map(
+            fn($tagTitle) => $this->createTagIfNonExistentByTitle($tagTitle),
+            $tagTitles
+        );
+
+        $note = $this->noteService->create($title, $content, new ArrayCollection($tagEntities), $categoryEntity);
+
         return $this->json($this->appendTimeStampToApiResponse($note->jsonSerialize()));
     }
 
     private function createTagIfNonExistentByTitle(string $title): Tag
     {
-        $oldTag = $this->tagService->showBy('title', $title);
-        if (null === $oldTag) {
-            $oldTag = $this->tagService->create($title);
-        }
-        return $oldTag;
+        return $this->tagService->showBy('title', $title)
+            ?? $this->tagService->create($title);
     }
 
     /**
@@ -85,11 +71,8 @@ class NoteApiController extends BaseApiController
     public function list(): JsonResponse
     {
         $notes = $this->noteService->list();
-        $response = [];
-        /** @var Note $note */
-        foreach ($notes as $note) {
-            $response += [$note->jsonSerialize()];
-        }
+        $response = array_map(fn(Note $note) => $note->jsonSerialize(), $notes);
+
         return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
@@ -100,10 +83,11 @@ class NoteApiController extends BaseApiController
     {
         $note = $this->noteService->show($id);
 
-        if (null === $note) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND,
-                'message' => 'Note with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
-
+        if (!$note) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Note with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
         return $this->json($this->appendTimeStampToApiResponse($note->jsonSerialize()));
@@ -114,36 +98,41 @@ class NoteApiController extends BaseApiController
      */
     public function update(Request $request, int $id): JsonResponse
     {
-        $noteForUpdateShouldntBeNull = $this->noteService->show($id);
+        $existingNote = $this->noteService->show($id);
 
-        if (null === $noteForUpdateShouldntBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Note for update with id: {$id}"
-                    . MessageOfResponse::NOT_FOUND
-                    . MessageOfResponse::USE_EXISTING]));
+        if (!$existingNote) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Note with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
-        $bodyParameters = json_decode($request->getContent());
-        if (null === $bodyParameters) {
+        $bodyParameters = json_decode($request->getContent(), true);
+
+        if (!$bodyParameters) {
             return $this->json($this->appendTimeStampToApiResponse([
                 'message' => MessageOfResponse::NO_BODY_PARAMETERS
             ]));
         }
-        $content = $bodyParameters->content;
-        $newTitle = $bodyParameters->title;
-        $newCategoryTitle = $bodyParameters->category;
-        $newTagTitles = $bodyParameters->tags;
-        $contentIsAdded = $bodyParameters->contentIsAdded;
-        $contentShouldBeRemoved = $bodyParameters->contentShouldBeRemoved;
 
-        if (null === $contentIsAdded) {
-            $contentIsAdded = false;
-        }
+        $title = $bodyParameters['title'] ?? $existingNote->getTitle();
+        $content = $bodyParameters['content'] ?? $existingNote->getContent();
+        $categoryTitle = $bodyParameters['category'] ?? null;
+        $tagTitles = $bodyParameters['tags'] ?? [];
+        $contentIsAdded = $bodyParameters['contentIsAdded'] ?? false;
+        $contentShouldBeRemoved = $bodyParameters['contentShouldBeRemoved'] ?? false;
 
-        $updatedNoteFromDb = $this->noteService->update($id, $newTitle, $content, $contentIsAdded,
-            $contentShouldBeRemoved, $newTagTitles, $newCategoryTitle);
+        $updatedNote = $this->noteService->update(
+            $id,
+            $title,
+            $content,
+            $contentIsAdded,
+            $contentShouldBeRemoved,
+            $tagTitles,
+            $categoryTitle
+        );
 
-        return $this->json($this->appendTimeStampToApiResponse($updatedNoteFromDb->jsonSerialize()));
+        return $this->json($this->appendTimeStampToApiResponse($updatedNote->jsonSerialize()));
     }
 
     /**
@@ -151,23 +140,25 @@ class NoteApiController extends BaseApiController
      */
     public function delete(int $id): JsonResponse
     {
-        $noteForDeletionShouldntBeNull = $this->noteService->show($id);
-        if (null === $noteForDeletionShouldntBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND,
-                    'message' => "Note for deletion with id: {$id}" . MessageOfResponse::NOT_FOUND
-                    . MessageOfResponse::USE_EXISTING]));
-        }
-        $this->noteService->delete($id);
-        $noteAfterDeletionShouldBeNull = $this->noteService->show($id);
-        if (null !== $noteAfterDeletionShouldBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['message' => "Note deletion with id: {$id}" . MessageOfResponse::NOT_SUCCESS]
-            ));
+        $note = $this->noteService->show($id);
+
+        if (!$note) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Note with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
-        return $this->json($this->json($this->appendTimeStampToApiResponse(
-            ['message' => "Note deletion with id: {$id}" . MessageOfResponse::SUCCESS]
-        )));
+        $this->noteService->delete($id);
+
+        if ($this->noteService->show($id)) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => "Note deletion with id: {$id}" . MessageOfResponse::NOT_SUCCESS
+            ]));
+        }
+
+        return $this->json($this->appendTimeStampToApiResponse([
+            'message' => "Note deletion with id: {$id}" . MessageOfResponse::SUCCESS
+        ]));
     }
 }

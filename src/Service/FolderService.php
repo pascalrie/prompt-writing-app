@@ -5,25 +5,25 @@ namespace App\Service;
 use App\Entity\Folder;
 use App\Entity\Note;
 use App\Repository\FolderRepository;
+use Doctrine\ORM\EntityNotFoundException;
 
 class FolderService implements IService
 {
     protected FolderRepository $folderRepository;
 
-    /**
-     * @param FolderRepository $folderRepository
-     */
     public function __construct(FolderRepository $folderRepository)
     {
         $this->folderRepository = $folderRepository;
     }
 
     /**
+     * Creates a new Folder with an optional first Note.
+     *
      * @param string $title
      * @param Note|null $firstNote
      * @return Folder
      */
-    public function create(string $title, Note $firstNote = null): Folder
+    public function create(string $title, ?Note $firstNote = null): Folder
     {
         $folder = new Folder();
         $folder->setTitle($title);
@@ -32,55 +32,60 @@ class FolderService implements IService
             $folder->addNote($firstNote);
         }
 
-        return $this->folderRepository->add($folder);
+        $this->folderRepository->add($folder, true); // Persist and flush in one step
+
+        return $folder;
     }
 
     /**
+     * Updates an existing Folder by its ID.
+     *
      * @param int $folderId
      * @param string $newTitle
-     * @param array|null $potentialNewNotes
+     * @param Note[] $potentialNewNotes
      * @param bool $notesShouldBeReplaced
      * @return Folder
+     * @throws EntityNotFoundException if the folder is not found
      */
-    public function update(int $folderId, string $newTitle = "", array $potentialNewNotes = [],
-                           bool $notesShouldBeReplaced = false): Folder
+    public function update(int $folderId, string $newTitle = "", array $potentialNewNotes = [], bool $notesShouldBeReplaced = false): Folder
     {
-        $folderEntityFromDb = $this->folderRepository->findBy(['id' => $folderId])[0];
+        $folder = $this->folderRepository->find($folderId);
 
-        if (null !== $newTitle) {
-            $folderEntityFromDb->setTitle($newTitle);
+        if (!$folder) {
+            throw new EntityNotFoundException('Folder not found for the given ID.');
+        }
+
+        if ($newTitle !== "") {
+            $folder->setTitle($newTitle);
         }
 
         if ($notesShouldBeReplaced) {
-            foreach ($folderEntityFromDb->getNotes() as $noteToRemove) {
-                if ($noteToRemove instanceof Note) {
-                    $folderEntityFromDb->removeNote($noteToRemove);
-                    $this->folderRepository->flush();
-                }
-            }
+            $folder->clearNotes();
 
-            foreach ($potentialNewNotes as $noteToAdd) {
-                $folderEntityFromDb->addNote($noteToAdd);
-                $noteToAdd->setFolder($folderEntityFromDb);
-            }
-        }
-
-        if ([] !== $potentialNewNotes && !$notesShouldBeReplaced) {
             foreach ($potentialNewNotes as $note) {
                 if ($note instanceof Note) {
-                    $folderEntityFromDb->addNote($note);
-                    $note->setFolder($folderEntityFromDb);
+                    $folder->addNote($note);
+                    $note->setFolder($folder);
+                }
+            }
+        } elseif (!empty($potentialNewNotes)) {
+            foreach ($potentialNewNotes as $note) {
+                if ($note instanceof Note) {
+                    $folder->addNote($note);
+                    $note->setFolder($folder);
                 }
             }
         }
 
-        $this->folderRepository->flush();
+        $this->folderRepository->add($folder, true);
 
-        return $folderEntityFromDb;
+        return $folder;
     }
 
     /**
-     * @return array
+     * Lists all Folders.
+     *
+     * @return Folder[]
      */
     public function list(): array
     {
@@ -88,39 +93,50 @@ class FolderService implements IService
     }
 
     /**
+     * Deletes a Folder by its ID.
+     *
      * @param int $id
      * @return void
+     * @throws EntityNotFoundException if the folder is not found
      */
     public function delete(int $id): void
     {
-        $category = $this->folderRepository->findBy(['id' => $id])[0];
-        $this->folderRepository->remove($category);
+        $folder = $this->folderRepository->find($id);
+
+        if (!$folder) {
+            throw new EntityNotFoundException('Folder not found for the given ID.');
+        }
+
+        $this->folderRepository->remove($folder, true); // Remove and flush in one step
     }
 
     /**
+     * Shows details of a Folder by its ID.
+     *
      * @param int $id
      * @return Folder|null
      */
     public function show(int $id): ?Folder
     {
-        $folders = $this->folderRepository->findBy(['id' => $id]);
-        if (empty($folders)) {
-            return null;
-        }
-        return $folders[0];
+        return $this->folderRepository->findOneBy(['id' => $id]);
     }
 
     /**
+     * Finds a Folder by arbitrary criteria.
+     *
      * @param string $criteria
-     * @param $argument
+     * @param mixed $argument
      * @return Folder|null
+     * @throws \InvalidArgumentException if the criteria or argument is invalid
      */
     public function showBy(string $criteria, $argument): ?Folder
     {
-        $folders = $this->folderRepository->findBy([$criteria, $argument]);
-        if (empty($folders)) {
-            return null;
+        if (empty($criteria)) {
+            throw new \InvalidArgumentException('Criteria must be a valid field.');
         }
-        return $folders[0];
+
+        $result = $this->folderRepository->findOneBy([$criteria => $argument]);
+
+        return $result ?: null;
     }
 }

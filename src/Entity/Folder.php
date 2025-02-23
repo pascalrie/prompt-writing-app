@@ -109,4 +109,11 @@ class Folder
 
         return $json;
     }
+
+    public function clearNotes()
+    {
+        foreach ($this->notes as $note) {
+            $this->removeNote($note);
+        }
+    }
 }

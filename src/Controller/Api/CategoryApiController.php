@@ -14,29 +14,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CategoryApiController extends BaseApiController
 {
-    /**
-     * @var CategoryService $categoryService
-     */
-    protected CategoryService $categoryService;
+    private CategoryService $categoryService;
 
-    /**
-     * @var PromptService $promptService
-     */
-    protected PromptService $promptService;
+    private PromptService $promptService;
 
-    /**
-     * @var NoteService $noteService
-     */
-    protected NoteService $noteService;
+    private NoteService $noteService;
 
-    /**
-     * @param CategoryService $categoryService
-     * @param PromptService $promptService
-     * @param NoteService $noteService
-     * @param EntityManagerInterface $em
-     */
-    public function __construct(CategoryService        $categoryService, PromptService $promptService, NoteService $noteService,
-                                EntityManagerInterface $em)
+    public function __construct(CategoryService        $categoryService, PromptService          $promptService,
+                                NoteService $noteService, EntityManagerInterface $em)
     {
         parent::__construct($em);
         $this->categoryService = $categoryService;
@@ -49,10 +34,16 @@ class CategoryApiController extends BaseApiController
      */
     public function create(Request $request): JsonResponse
     {
-        $bodyParameters = json_decode($request->getContent());
-        $title = $bodyParameters->title;
+        $bodyParameters = json_decode($request->getContent(), true);
 
-        $category = $this->categoryService->create($title);
+        if (!isset($bodyParameters['title'])) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => MessageOfResponse::NO_BODY_PARAMETERS
+            ]));
+        }
+
+        $category = $this->categoryService->create($bodyParameters['title']);
+
         return $this->json($this->appendTimeStampToApiResponse($category->jsonSerialize()));
     }
 
@@ -62,10 +53,8 @@ class CategoryApiController extends BaseApiController
     public function list(): JsonResponse
     {
         $categories = $this->categoryService->list();
-        $response = [];
-        foreach ($categories as $category) {
-            $response += [$category->jsonSerialize()];
-        }
+        $response = array_map(fn($category) => $category->jsonSerialize(), $categories);
+
         return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
@@ -75,10 +64,14 @@ class CategoryApiController extends BaseApiController
     public function show(int $id): JsonResponse
     {
         $category = $this->categoryService->show($id);
-        if (null === $category) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND, 'message' =>
-                "Category with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+
+        if (!$category) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Category with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
+
         return $this->json($this->appendTimeStampToApiResponse($category->jsonSerialize(true)));
     }
 
@@ -87,33 +80,30 @@ class CategoryApiController extends BaseApiController
      */
     public function update(Request $request, int $id): JsonResponse
     {
-        $bodyParameters = json_decode($request->getContent());
-        if (null === $bodyParameters) {
+        $bodyParameters = json_decode($request->getContent(), true);
+
+        if (!$bodyParameters) {
             return $this->json($this->appendTimeStampToApiResponse([
                 'message' => MessageOfResponse::NO_BODY_PARAMETERS
             ]));
         }
-        $newTitle = $bodyParameters->title;
-        $potentialNewPromptIds = $bodyParameters->potentialNewPrompts;
-        $potentialNewNoteIds = $bodyParameters->potentialNewNotes;
 
-        $categoryForUpdateShouldntBeNull = $this->categoryService->show($id);
-        if (null === $categoryForUpdateShouldntBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Category for update with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+        $category = $this->categoryService->show($id);
+
+        if (!$category) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Category for update with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
-        $promptObjectsForGivenIds = [];
-        foreach ($potentialNewPromptIds as $potentialNewPromptId) {
-            $promptObjectsForGivenIds += $this->promptService->show($potentialNewPromptId);
-        }
+        $promptIds = $bodyParameters['potentialNewPrompts'] ?? [];
+        $noteIds = $bodyParameters['potentialNewNotes'] ?? [];
 
-        $noteObjectsForGivenIds = [];
-        foreach ($potentialNewNoteIds as $potentialNewNoteId) {
-            $noteObjectsForGivenIds += $this->noteService->show($potentialNewNoteId);
-        }
+        $prompts = array_map(fn($promptId) => $this->promptService->show($promptId), $promptIds);
+        $notes = array_map(fn($noteId) => $this->noteService->show($noteId), $noteIds);
 
-        $updatedCategory = $this->categoryService->update($id, $newTitle, $promptObjectsForGivenIds, $noteObjectsForGivenIds);
+        $updatedCategory = $this->categoryService->update($id, $bodyParameters['title'], $prompts, $notes);
 
         return $this->json($this->appendTimeStampToApiResponse($updatedCategory->jsonSerialize()));
     }
@@ -123,22 +113,25 @@ class CategoryApiController extends BaseApiController
      */
     public function delete(int $id): JsonResponse
     {
-        $categoryForDeletionShouldntBeNull = $this->categoryService->show($id);
+        $category = $this->categoryService->show($id);
 
-        if (null === $categoryForDeletionShouldntBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Category for deletion with id: {$id}"
-                    . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+        if (!$category) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Category for deletion with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
         $this->categoryService->delete($id);
-        $categoryHopefullyNull = $this->categoryService->show($id);
-        if (null !== $categoryHopefullyNull) {
-            return $this->json($this->appendTimeStampToApiResponse(['message' => ['Deletion of Category '
-                . MessageOfResponse::NOT_SUCCESS . json_encode($categoryHopefullyNull->jsonSerialize())]]));
+
+        if ($this->categoryService->show($id)) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => "Deletion of Category " . MessageOfResponse::NOT_SUCCESS
+            ]));
         }
-        return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Category with id: {$id}"
-            . MessageOfResponse::SUCCESS]));
+
+        return $this->json($this->appendTimeStampToApiResponse([
+            'message' => "Deletion of Category with id: {$id}" . MessageOfResponse::SUCCESS
+        ]));
     }
 }
-

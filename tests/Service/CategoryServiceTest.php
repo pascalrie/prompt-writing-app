@@ -33,7 +33,7 @@ class CategoryServiceTest extends TestCase
 
         $this->repoMock = $this->getMockBuilder(CategoryRepository::class)
             ->setConstructorArgs([$this->managerRegistry])
-            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll'])
+            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
 
         $this->categoryService = new CategoryService($this->repoMock);
@@ -137,7 +137,7 @@ class CategoryServiceTest extends TestCase
 
     public function testCategoryShowByTitleShouldExist(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
         $shownCategory = $this->categoryService->showByTitle($this->exampleCategory->getTitle());
 
         $this->assertNotNull($shownCategory);

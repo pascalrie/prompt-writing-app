@@ -13,21 +13,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TagApiController extends BaseApiController
 {
-    /**
-     * @var TagService $tagService
-     */
     protected TagService $tagService;
-
-    /**
-     * @var NoteService $noteService
-     */
     protected NoteService $noteService;
 
-    /**
-     * @param TagService $tagService
-     * @param NoteService $noteService
-     * @param EntityManagerInterface $em
-     */
     public function __construct(TagService $tagService, NoteService $noteService, EntityManagerInterface $em)
     {
         parent::__construct($em);
@@ -40,15 +28,21 @@ class TagApiController extends BaseApiController
      */
     public function create(Request $request): JsonResponse
     {
-        $bodyParameters = json_decode($request->getContent());
-        $title = $bodyParameters->title;
-        $noteTitleList = $bodyParameters->noteTitles;
-        $color = $bodyParameters->color;
+        $bodyParameters = json_decode($request->getContent(), true);
 
-        $createdTag = $this->tagService->create($title, $noteTitleList, $color);
+        $title = $bodyParameters['title'] ?? null;
+        $noteTitles = $bodyParameters['noteTitles'] ?? [];
+        $color = $bodyParameters['color'] ?? null;
+
+        if (!$title) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => MessageOfResponse::NO_BODY_PARAMETERS
+            ]));
+        }
+
+        $createdTag = $this->tagService->create($title, $noteTitles, $color);
 
         return $this->json($this->appendTimeStampToApiResponse($createdTag->jsonSerialize()));
-
     }
 
     /**
@@ -57,10 +51,8 @@ class TagApiController extends BaseApiController
     public function list(): JsonResponse
     {
         $tags = $this->tagService->list();
-        $response = [];
-        foreach ($tags as $tag) {
-            $response += [$tag->jsonSerialize()];
-        }
+        $response = array_map(fn($tag) => $tag->jsonSerialize(), $tags);
+
         return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
@@ -70,10 +62,14 @@ class TagApiController extends BaseApiController
     public function show(int $id): JsonResponse
     {
         $tag = $this->tagService->show($id);
-        if (null === $tag) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND,
-                'message' => 'Tag with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+
+        if (!$tag) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Tag with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
+
         return $this->json($this->appendTimeStampToApiResponse($tag->jsonSerialize()));
     }
 
@@ -82,30 +78,32 @@ class TagApiController extends BaseApiController
      */
     public function update(Request $request, int $id): JsonResponse
     {
-        $tagToUpdate = $this->tagService->show($id);
-        if (null === $tagToUpdate) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND,
-                'message' => 'Tag with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+        $tag = $this->tagService->show($id);
+
+        if (!$tag) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Tag with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
-        $bodyParameters = json_decode($request->getContent());
-        if (null === $bodyParameters) {
+        $bodyParameters = json_decode($request->getContent(), true);
+
+        if (!$bodyParameters) {
             return $this->json($this->appendTimeStampToApiResponse([
                 'message' => MessageOfResponse::NO_BODY_PARAMETERS
             ]));
         }
-        $title = $bodyParameters->title;
-        $color = $bodyParameters->color;
-        $potentialNewNotes = $bodyParameters->notes;
 
-        $noteObjectsToAdd = [];
-        foreach ($potentialNewNotes as $note) {
-            $noteObjectsToAdd += $this->noteService->show($note);
-        }
+        $title = $bodyParameters['title'] ?? $tag->getTitle();
+        $color = $bodyParameters['color'] ?? $tag->getColor();
+        $noteTitles = $bodyParameters['notes'] ?? [];
 
-        $finalTag = $this->tagService->update($id, $title, $noteObjectsToAdd, $color);
+        $noteEntities = array_map(fn($noteTitle) => $this->noteService->show($noteTitle), $noteTitles);
 
-        return $this->json($this->appendTimeStampToApiResponse($finalTag->jsonSerialize()));
+        $updatedTag = $this->tagService->update($id, $title, $noteEntities, $color);
+
+        return $this->json($this->appendTimeStampToApiResponse($updatedTag->jsonSerialize()));
     }
 
     /**
@@ -113,23 +111,25 @@ class TagApiController extends BaseApiController
      */
     public function delete(int $id): JsonResponse
     {
-        $tagForDeletionShouldntBeNull = $this->tagService->show($id);
-        if (null === $tagForDeletionShouldntBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeOfResponse::NOT_FOUND, 'message' => "Tag for deletion with id: {$id}"
-                    . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
-        }
-        $this->tagService->delete($id);
-        $tagAfterDeletionShouldBeNull = $this->tagService->show($id);
-        if (null !== $tagAfterDeletionShouldBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['message' => "Tag for deletion with id: {$id}" . MessageOfResponse::NOT_SUCCESS]
-            ));
+        $tag = $this->tagService->show($id);
+
+        if (!$tag) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Tag with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
-        return $this->json($this->json($this->appendTimeStampToApiResponse(
-            ['message' => "Tag for deletion with id: {$id}" . MessageOfResponse::SUCCESS]
-        )));
+        $this->tagService->delete($id);
+
+        if ($this->tagService->show($id)) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => "Tag with id: {$id} could not be deleted" . MessageOfResponse::NOT_SUCCESS
+            ]));
+        }
+
+        return $this->json($this->appendTimeStampToApiResponse([
+            'message' => "Tag with id: {$id} successfully deleted" . MessageOfResponse::SUCCESS
+        ]));
     }
 }
-

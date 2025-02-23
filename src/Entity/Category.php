@@ -92,6 +92,19 @@ class Category
         return $this;
     }
 
+    /**
+     * Removes all prompts associated with this category.
+     *
+     * @return void
+     */
+    public function clearPrompts(): void
+    {
+        foreach ($this->prompts as $prompt) {
+            $this->removePrompt($prompt);
+        }
+    }
+
+
     public function getNotes(): ArrayCollection
     {
         return ConversionUtil::convertCollectionIntoArrayCollection($this->notes);

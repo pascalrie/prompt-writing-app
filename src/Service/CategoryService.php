@@ -20,24 +20,23 @@ class CategoryService implements IService
     }
 
     /**
+     * Creates a new category with optional first note and first prompt.
+     *
      * @param string $title
      * @param Note|null $firstNote
      * @param Prompt|null $firstPrompt
      * @return Category
      */
-    public function create(string $title = "", Note $firstNote = null, Prompt $firstPrompt = null): Category
+    public function create(string $title = "", ?Note $firstNote = null, ?Prompt $firstPrompt = null): Category
     {
         $category = new Category();
+        $category->setTitle($title);
 
-        if (null !== $title) {
-            $category->setTitle($title);
-        }
-
-        if (null !== $firstNote) {
+        if ($firstNote) {
             $category->addNote($firstNote);
         }
 
-        if (null !== $firstPrompt) {
+        if ($firstPrompt) {
             $category->addPrompt($firstPrompt);
         }
 
@@ -46,54 +45,49 @@ class CategoryService implements IService
 
     /**
      * @param int $id
-     * @param string $newTitle
-     * @param array|null $newPotentialPrompts
-     * @param array|null $newPotentialNotes
-     * @param bool $promptsShouldBeReplaced
+     * @param string|null $newTitle
+     * @param Prompt[] $newPrompts
+     * @param Note[] $newNotes
+     * @param bool $replacePrompts
      * @return Category
      */
-    public function update(int   $id, string $newTitle = "", array $newPotentialPrompts = [],
-                           array $newPotentialNotes = [], bool $promptsShouldBeReplaced = false): Category
+    public function update(int   $id, string $newTitle = null, array $newPrompts = [],
+                           array $newNotes = [], bool $replacePrompts = false): Category
     {
-        $oldCategoryFromDb = $this->categoryRepository->findBy(['id' => $id])[0];
+        $category = $this->findCategoryById($id);
 
-        if ("" !== $newTitle) {
-            $oldCategoryFromDb->setTitle($newTitle);
+        if ($category === null) {
+            throw new \InvalidArgumentException("Category with ID {$id} not found.");
         }
 
-        if ($promptsShouldBeReplaced) {
-            foreach ($oldCategoryFromDb->getPrompts() as $oldPromptToDelete) {
-                $oldCategoryFromDb->removePrompt($oldPromptToDelete);
-                $this->categoryRepository->flush();
-            }
-
-            foreach ($newPotentialPrompts as $newPotentialPrompt) {
-                $oldCategoryFromDb->addPrompt($newPotentialPrompt);
-            }
+        if (!empty($newTitle)) {
+            $category->setTitle($newTitle);
         }
 
-        if ([] !== $newPotentialPrompts && !$promptsShouldBeReplaced) {
-            foreach ($newPotentialPrompts as $prompt) {
-                if ($prompt instanceof Prompt) {
-                    $oldCategoryFromDb->addPrompt($prompt);
-                }
+        if ($replacePrompts) {
+           $category->clearPrompts();
+        }
+
+        foreach ($newPrompts as $prompt) {
+            if ($prompt instanceof Prompt) {
+                $category->addPrompt($prompt);
             }
         }
 
-        if ([] !== $newPotentialNotes) {
-            foreach ($newPotentialNotes as $note) {
-                if ($note instanceof Note) {
-                    $oldCategoryFromDb->addNote($note);
-                }
+        foreach ($newNotes as $note) {
+            if ($note instanceof Note) {
+                $category->addNote($note);
             }
         }
 
         $this->categoryRepository->flush();
 
-        return $oldCategoryFromDb;
+        return $category;
     }
 
     /**
+     * Returns a list of all categories.
+     *
      * @return array
      */
     public function list(): array
@@ -102,44 +96,46 @@ class CategoryService implements IService
     }
 
     /**
+     * Deletes a category by its ID.
+     *
      * @param int $id
      * @return void
      */
     public function delete(int $id): void
     {
-        $category = $this->categoryRepository->findBy(['id' => $id])[0];
+        $category = $this->findCategoryById($id);
+
+        if ($category === null) {
+            throw new \InvalidArgumentException("Category with ID {$id} not found.");
+        }
 
         $this->categoryRepository->remove($category, true);
     }
 
     /**
+     * Finds a category by its ID.
+     *
      * @param int $id
      * @return Category|null
      */
     public function show(int $id): ?Category
     {
-        $categories = $this->categoryRepository->findBy(['id' => $id]);
-        if (empty($categories)) {
-            return null;
-        }
-        return $categories[0];
+        return $this->findCategoryById($id) ?: null;
     }
 
     /**
+     * Finds a category by its title.
+     *
      * @param string $title
      * @return Category|null
      */
     public function showByTitle(string $title): ?Category
     {
-        $categories = $this->categoryRepository->findBy(['title' => $title]);
-        if (empty($categories)) {
-            return null;
-        }
+        return $this->categoryRepository->findOneBy(['title' => $title]);
+    }
 
-        if (is_array($categories)) {
-            // only show first result if there are duplicates
-            return $categories[0];
-        }
-        return $categories;
+    private function findCategoryById(int $id): ?Category
+    {
+        return $this->categoryRepository->findBy(['id' => $id])[0] ?? null;
     }
 }

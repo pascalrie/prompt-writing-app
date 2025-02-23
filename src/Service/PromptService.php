@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
 use App\Repository\PromptRepository;
+use Exception;
 
 class PromptService implements IService
 {
@@ -20,15 +21,17 @@ class PromptService implements IService
     }
 
     /**
+     * Creates a new prompt with an optional category
      * @param string $title
      * @param Category|null $category
      * @return Prompt
      */
-    public function create(string $title, Category $category = null): Prompt
+    public function create(string $title, ?Category $category = null): Prompt
     {
         $prompt = new Prompt();
         $prompt->setTitle($title);
-        if (null !== $category) {
+
+        if ($category !== null) {
             $prompt->setCategory($category);
         }
 
@@ -37,39 +40,45 @@ class PromptService implements IService
     }
 
     /**
+     * Updates a prompt's details (title, category, and notes).
+     *
      * @param int $promptId
-     * @param string $title
+     * @param string|null $title
      * @param Category|null $newCategory
      * @param array $newNotes
      * @return Prompt
      */
-    public function update(int $promptId, string $title = "", ?Category $newCategory = null, array $newNotes = []): Prompt
+    public function update(int $promptId, ?string $title = "", ?Category $newCategory = null, array $newNotes = []): Prompt
     {
-        $promptFromDb = $this->promptRepository->findBy(['promptId' => $promptId])[0];
+        $prompt = $this->findPromptById($promptId);
 
-        if ("" !== $title) {
-            $promptFromDb->setTitle($title);
+        if ($prompt === null) {
+            throw new \InvalidArgumentException("Prompt with ID {$promptId} not found.");
         }
 
-        if (null !== $newCategory) {
-            $promptFromDb->setCategory($newCategory);
+        if (!empty($title)) {
+            $prompt->setTitle($title);
         }
 
-        if ([] !== $newNotes) {
-            foreach ($newNotes as $note) {
-                if ($note instanceof Note) {
-                    $promptFromDb->addNote($note);
-                }
+        if ($newCategory !== null) {
+            $prompt->setCategory($newCategory);
+        }
+
+        foreach ($newNotes as $note) {
+            if ($note instanceof Note) {
+                $prompt->addNote($note);
             }
         }
 
         $this->promptRepository->flush();
 
-        return $this->promptRepository->findBy(['promptId' => $promptId])[0];
+        return $prompt;
     }
 
     /**
-     * @return array
+     * Returns a list of all prompts.
+     *
+     * @return Prompt[]
      */
     public function list(): array
     {
@@ -77,12 +86,18 @@ class PromptService implements IService
     }
 
     /**
+     * Deletes a prompt by its ID.
+     *
      * @param int $id
      * @return void
      */
     public function delete(int $id): void
     {
-        $promptForDeletion = $this->promptRepository->findBy(['id' => $id])[0];
+        $promptForDeletion = $this->findPromptById($id);
+        if ($promptForDeletion === null) {
+            throw new \InvalidArgumentException("Prompt with ID {$id} not found.");
+        }
+
         $this->promptRepository->remove($promptForDeletion);
     }
 
@@ -92,14 +107,11 @@ class PromptService implements IService
      */
     public function show(int $id): ?Prompt
     {
-        $prompts = $this->promptRepository->findBy(['id' => $id]);
-        if (empty($prompts)) {
-            return null;
-        }
-        return $prompts[0];
+        return $this->findPromptById($id);
     }
 
     /**
+     *  Finds a prompt using a specific criteria.
      * @param string $criteria
      * @param $argument
      * @return Prompt|null
@@ -114,15 +126,23 @@ class PromptService implements IService
     }
 
     /**
-     * @throws \Exception
+     * Returns a random prompt from the repository.
+     * @throws Exception
      */
     public function showRandomPrompt(): Prompt
     {
         $prompts = $this->promptRepository->findAll();
+
         if (empty($prompts)) {
-            throw new \Exception("Please create a prompt first.");
+            throw new Exception("Please create a prompt first.");
         }
-        $key = array_rand($prompts);
-        return $this->show($prompts[$key]->getId());
+
+        return $prompts[array_rand($prompts)];
+
+    }
+
+    private function findPromptById(int $id): ?Prompt
+    {
+        return $this->promptRepository->findBy(['id' => $id])[0] ?? null;
     }
 }

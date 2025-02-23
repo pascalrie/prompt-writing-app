@@ -37,7 +37,7 @@ class PromptServiceTest extends TestCase
 
         $this->repoMock = $this->getMockBuilder(PromptRepository::class)
             ->setConstructorArgs([$this->managerRegistry])
-            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll'])
+            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
     }
 

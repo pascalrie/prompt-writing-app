@@ -12,15 +12,8 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class FolderApiController extends BaseApiController
 {
-    /**
-     * @var FolderService $folderService
-     */
     protected FolderService $folderService;
 
-    /**
-     * @param FolderService $folderService
-     * @param EntityManagerInterface $em
-     */
     public function __construct(FolderService $folderService, EntityManagerInterface $em)
     {
         parent::__construct($em);
@@ -32,8 +25,14 @@ class FolderApiController extends BaseApiController
      */
     public function create(Request $request): JsonResponse
     {
-        $bodyParameters = json_decode($request->getContent());
-        $title = $bodyParameters->title;
+        $bodyParameters = json_decode($request->getContent(), true);
+        $title = $bodyParameters['title'] ?? null;
+
+        if (!$title) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => MessageOfResponse::NO_BODY_PARAMETERS
+            ]));
+        }
 
         $folder = $this->folderService->create($title);
 
@@ -46,10 +45,8 @@ class FolderApiController extends BaseApiController
     public function list(): JsonResponse
     {
         $folders = $this->folderService->list();
-        $response = [];
-        foreach ($folders as $folder) {
-            $response += [$folder->jsonSerialize()];
-        }
+        $response = array_map(fn($folder) => $folder->jsonSerialize(), $folders);
+
         return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
@@ -59,10 +56,14 @@ class FolderApiController extends BaseApiController
     public function show(int $id): JsonResponse
     {
         $folder = $this->folderService->show($id);
-        if (null === $folder) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND,
-                'message' => 'Folder with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+
+        if (!$folder) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Folder with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
+
         return $this->json($this->appendTimeStampToApiResponse($folder->jsonSerialize(true)));
     }
 
@@ -71,30 +72,36 @@ class FolderApiController extends BaseApiController
      */
     public function update(Request $request, int $id): JsonResponse
     {
-        $bodyParameters = json_decode($request->getContent());
-        if (null === $bodyParameters) {
+        $bodyParameters = json_decode($request->getContent(), true);
+
+        if (!$bodyParameters) {
             return $this->json($this->appendTimeStampToApiResponse([
                 'message' => MessageOfResponse::NO_BODY_PARAMETERS
             ]));
         }
-        $newTitle = $bodyParameters->title;
-        $potentialNewNoteIds = $bodyParameters->potentialNewNotes;
+
+        $newTitle = $bodyParameters['title'] ?? null;
+        $potentialNewNoteIds = $bodyParameters['potentialNewNotes'] ?? [];
+
+        if (!$newTitle) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => "Title is missing."
+            ]));
+        }
 
         $folder = $this->folderService->show($id);
-
-        if (null === $folder) {
-            return $this->json($this->appendTimeStampToApiResponse(['code' => TypeOfResponse::NOT_FOUND,
-                'message' => 'Folder with id: ' . $id . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+        if (!$folder) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Folder with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
-        $potentialNewNoteObjects = [];
-        foreach ($potentialNewNoteIds as $potentialNewNoteId) {
-            $potentialNewNoteObjects += $this->folderService->show($potentialNewNoteId);
-        }
+        $newNoteObjects = array_map(fn($noteId) => $this->folderService->show($noteId), $potentialNewNoteIds);
 
-        $folder = $this->folderService->update($id, $newTitle, $potentialNewNoteObjects);
+        $updatedFolder = $this->folderService->update($id, $newTitle, $newNoteObjects);
 
-        return $this->json($this->appendTimeStampToApiResponse($folder->jsonSerialize()));
+        return $this->json($this->appendTimeStampToApiResponse($updatedFolder->jsonSerialize()));
     }
 
     /**
@@ -102,24 +109,25 @@ class FolderApiController extends BaseApiController
      */
     public function delete(int $id): JsonResponse
     {
-        $folderForDeletionShouldntBeNull = $this->folderService->show($id);
+        $folder = $this->folderService->show($id);
 
-        if (null === $folderForDeletionShouldntBeNull) {
-            return $this->json($this->appendTimeStampToApiResponse(
-                ['code' => TypeofResponse::NOT_FOUND, 'message' => "Folder for deletion with id: {$id}"
-                    . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING]));
+        if (!$folder) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'code' => TypeOfResponse::NOT_FOUND,
+                'message' => "Folder with id: {$id}" . MessageOfResponse::NOT_FOUND . MessageOfResponse::USE_EXISTING
+            ]));
         }
 
         $this->folderService->delete($id);
 
-        $folderHopefullyNull = $this->folderService->show($id);
-        if (null !== $folderHopefullyNull) {
-            return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Folder with {$id}"
-                . MessageOfResponse::NOT_SUCCESS]));
+        if ($this->folderService->show($id)) {
+            return $this->json($this->appendTimeStampToApiResponse([
+                'message' => "Deletion of Folder with id: {$id}" . MessageOfResponse::NOT_SUCCESS
+            ]));
         }
 
-        return $this->json($this->appendTimeStampToApiResponse(['message' => "Deletion of Folder with {$id}"
-            . MessageOfResponse::SUCCESS]));
+        return $this->json($this->appendTimeStampToApiResponse([
+            'message' => "Deletion of Folder with id: {$id}" . MessageOfResponse::SUCCESS
+        ]));
     }
 }
-

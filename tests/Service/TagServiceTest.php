@@ -40,7 +40,7 @@ class TagServiceTest extends TestCase
 
         $this->repoMock = $this->getMockBuilder(TagRepository::class)
             ->setConstructorArgs([$this->managerRegistry])
-            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll'])
+            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
 
         $this->tagService = new TagService($this->repoMock);

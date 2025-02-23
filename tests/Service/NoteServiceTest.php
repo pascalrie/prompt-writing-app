@@ -34,17 +34,17 @@ class NoteServiceTest extends TestCase
 
         $this->repoMock = $this->getMockBuilder(NoteRepository::class)
             ->setConstructorArgs([$this->managerRegistry])
-            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll'])
+            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
 
         $this->repoMockTag = $this->getMockBuilder(TagRepository::class)
             ->setConstructorArgs([$this->managerRegistry])
-            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll'])
+            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
 
         $this->repoMockCategory = $this->getMockBuilder(CategoryRepository::class)
             ->setConstructorArgs([$this->managerRegistry])
-            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll'])
+            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
 
         $this->noteService = new NoteService($this->repoMock, $this->repoMockTag, $this->repoMockCategory);
