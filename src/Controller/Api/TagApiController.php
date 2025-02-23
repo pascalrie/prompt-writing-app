@@ -16,6 +16,13 @@ class TagApiController extends BaseApiController
     protected TagService $tagService;
     protected NoteService $noteService;
 
+    /**
+     * Constructor for TagApiController.
+     *
+     * @param TagService $tagService The service layer for managing tags.
+     * @param NoteService $noteService The service layer for managing notes.
+     * @param EntityManagerInterface $em The Doctrine EntityManager instance.
+     */
     public function __construct(TagService $tagService, NoteService $noteService, EntityManagerInterface $em)
     {
         parent::__construct($em);
@@ -24,7 +31,13 @@ class TagApiController extends BaseApiController
     }
 
     /**
+     * Create a new tag.
+     *
      * @Route("/tag/create", name="api_create_tag", methods={"POST"})
+     *
+     * @param Request $request The HTTP request object containing the JSON payload.
+     *
+     * @return JsonResponse The created tag as a JSON response, or an error message if the creation fails.
      */
     public function create(Request $request): JsonResponse
     {
@@ -46,7 +59,11 @@ class TagApiController extends BaseApiController
     }
 
     /**
+     * List all existing tags.
+     *
      * @Route("/tag/list", name="api_list_tags", methods={"GET"})
+     *
+     * @return JsonResponse A JSON response containing a list of all tags.
      */
     public function list(): JsonResponse
     {
@@ -57,7 +74,13 @@ class TagApiController extends BaseApiController
     }
 
     /**
+     * Show details of a specific tag by ID.
+     *
      * @Route("/tag/show/{id}", name="api_show_tag", methods={"GET"})
+     *
+     * @param int $id The ID of the tag to retrieve.
+     *
+     * @return JsonResponse The requested tag data as a JSON response, or an error message if not found.
      */
     public function show(int $id): JsonResponse
     {
@@ -74,7 +97,14 @@ class TagApiController extends BaseApiController
     }
 
     /**
+     * Update an existing tag by ID.
+     *
      * @Route("/tag/update/{id}", name="api_update_tag", methods={"PUT"})
+     *
+     * @param Request $request The HTTP request object containing the JSON payload for the update.
+     * @param int $id The ID of the tag to update.
+     *
+     * @return JsonResponse The updated tag as a JSON response, or an error message if the update fails.
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -107,7 +137,13 @@ class TagApiController extends BaseApiController
     }
 
     /**
+     * Delete an existing tag by ID.
+     *
      * @Route("/tag/delete/{id}", name="api_delete_tag", methods={"DELETE"})
+     *
+     * @param int $id The ID of the tag to delete.
+     *
+     * @return JsonResponse A confirmation message as a JSON response, or an error message if the deletion fails.
      */
     public function delete(int $id): JsonResponse
     {

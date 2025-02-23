@@ -21,7 +21,7 @@ class CategoryApiController extends BaseApiController
     private NoteService $noteService;
 
     public function __construct(CategoryService $categoryService, PromptService $promptService,
-                                NoteService $noteService, EntityManagerInterface $em)
+                                NoteService     $noteService, EntityManagerInterface $em)
     {
         parent::__construct($em);
         $this->categoryService = $categoryService;
@@ -30,7 +30,15 @@ class CategoryApiController extends BaseApiController
     }
 
     /**
+     * Creates a new category entity.
+     *
+     * This endpoint accepts JSON-encoded body parameters, including the `title` of the new category.
+     * If the `title` is not provided, a response with missing parameters is returned.
+     *
      * @Route("/category/create", name="api_create_category", methods={"POST"})
+     *
+     * @param Request $request The HTTP request containing the category details.
+     * @return JsonResponse The JSON response containing either the created category data or an error message.
      */
     public function create(Request $request): JsonResponse
     {
@@ -48,7 +56,14 @@ class CategoryApiController extends BaseApiController
     }
 
     /**
+     * Fetches a list of all categories.
+     *
+     * This endpoint returns an array of categories, where each category is represented
+     * in a serialized JSON format.
+     *
      * @Route("/category/list", name="api_list_categories", methods={"GET"})
+     *
+     * @return JsonResponse The JSON response containing a list of categories.
      */
     public function list(): JsonResponse
     {
@@ -59,7 +74,14 @@ class CategoryApiController extends BaseApiController
     }
 
     /**
+     * Displays details of a specific category by ID.
+     *
+     * If the category does not exist, a 404 error with an appropriate message is returned.
+     *
      * @Route("/category/show/{id}", name="api_show_category", methods={"GET"})
+     *
+     * @param int $id The unique identifier of the category.
+     * @return JsonResponse The JSON response containing the category details or an error message if not found.
      */
     public function show(int $id): JsonResponse
     {
@@ -76,7 +98,16 @@ class CategoryApiController extends BaseApiController
     }
 
     /**
+     * Updates an existing category by its ID.
+     *
+     * The update operation expects JSON-encoded body parameters such as `title`, `potentialNewPrompts`, and `potentialNewNotes`.
+     * If the category is not found or if the body parameters are missing, an appropriate error message is returned.
+     *
      * @Route("/category/update/{id}", name="api_update_category", methods={"PUT"})
+     *
+     * @param Request $request The HTTP request containing data to update the category.
+     * @param int $id The unique identifier of the category to be updated.
+     * @return JsonResponse The JSON response containing the updated category data or an error message.
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -109,7 +140,15 @@ class CategoryApiController extends BaseApiController
     }
 
     /**
+     * Deletes a specific category by ID.
+     *
+     * If the category does not exist, a 404 error with an appropriate message is returned.
+     * After deletion, a confirmation message is sent.
+     *
      * @Route("/category/delete/{id}", name="api_delete_category", methods={"DELETE"})
+     *
+     * @param int $id The unique identifier of the category to be deleted.
+     * @return JsonResponse The JSON response confirming deletion or providing an error message.
      */
     public function delete(int $id): JsonResponse
     {

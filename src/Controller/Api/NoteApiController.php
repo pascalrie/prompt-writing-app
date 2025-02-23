@@ -59,12 +59,6 @@ class NoteApiController extends BaseApiController
         return $this->json($this->appendTimeStampToApiResponse($note->jsonSerialize()));
     }
 
-    private function createTagIfNonExistentByTitle(string $title): Tag
-    {
-        return $this->tagService->showOneBy('title', $title)
-            ?? $this->tagService->create($title);
-    }
-
     /**
      * @Route("/note/list", name="api_list_notes", methods={"GET"})
      */
@@ -160,5 +154,11 @@ class NoteApiController extends BaseApiController
         return $this->json($this->appendTimeStampToApiResponse([
             'message' => "Note deletion with id: {$id}" . MessageOfResponse::SUCCESS
         ]));
+    }
+    
+    private function createTagIfNonExistentByTitle(string $title): Tag
+    {
+        return $this->tagService->showOneBy('title', $title)
+            ?? $this->tagService->create($title);
     }
 }

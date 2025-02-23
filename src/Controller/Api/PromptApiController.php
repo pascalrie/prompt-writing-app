@@ -17,6 +17,13 @@ class PromptApiController extends BaseApiController
 
     protected CategoryService $categoryService;
 
+    /**
+     * Constructor for PromptApiController.
+     *
+     * @param PromptService $promptService The service handling prompts.
+     * @param CategoryService $categoryService The service handling categories.
+     * @param EntityManagerInterface $em The entity manager interface.
+     */
     public function __construct(PromptService $promptService, CategoryService $categoryService, EntityManagerInterface $em)
     {
         parent::__construct($em);
@@ -25,7 +32,12 @@ class PromptApiController extends BaseApiController
     }
 
     /**
+     * Create a new prompt.
+     *
      * @Route("/prompt/create", name="api_create_prompt", methods={"POST"})
+     *
+     * @param Request $request The HTTP request object.
+     * @return JsonResponse The JSON response containing the created prompt data or an error message.
      */
     public function create(Request $request): JsonResponse
     {
@@ -49,7 +61,11 @@ class PromptApiController extends BaseApiController
     }
 
     /**
+     * List all prompts.
+     *
      * @Route("/prompt/list", name="api_list_prompts", methods={"GET"})
+     *
+     * @return JsonResponse A JSON response containing a list of all prompts.
      */
     public function list(): JsonResponse
     {
@@ -60,7 +76,12 @@ class PromptApiController extends BaseApiController
     }
 
     /**
+     * Show the details of a specific prompt by ID.
+     *
      * @Route("/prompt/show/{id}", name="api_show_prompt", methods={"GET"})
+     *
+     * @param int $id The ID of the prompt to display.
+     * @return JsonResponse A JSON response containing the prompt data or an error message if not found.
      */
     public function show(int $id): JsonResponse
     {
@@ -77,7 +98,13 @@ class PromptApiController extends BaseApiController
     }
 
     /**
+     * Update an existing prompt.
+     *
      * @Route("/prompt/update/{id}", name="api_update_prompt", methods={"PUT"})
+     *
+     * @param Request $request The HTTP request object.
+     * @param int $id The ID of the prompt to update.
+     * @return JsonResponse A JSON response containing the updated prompt data or an error message if not found.
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -117,7 +144,12 @@ class PromptApiController extends BaseApiController
     }
 
     /**
+     * Delete an existing prompt by ID.
+     *
      * @Route("/prompt/delete/{id}", name="api_delete_prompt", methods={"DELETE"})
+     *
+     * @param int $id The ID of the prompt to delete.
+     * @return JsonResponse A JSON response indicating success or failure of the deletion process.
      */
     public function delete(int $id): JsonResponse
     {
@@ -144,8 +176,12 @@ class PromptApiController extends BaseApiController
     }
 
     /**
+     * Select a random prompt.
+     *
      * @Route("/prompt/choose/random", name="api_prompt_choose", methods={"GET"})
+     * @return JsonResponse A JSON response containing a randomly selected prompt.
      * @throws \Exception
+     *
      */
     public function chooseRandom(): JsonResponse
     {

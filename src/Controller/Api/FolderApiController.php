@@ -14,6 +14,12 @@ class FolderApiController extends BaseApiController
 {
     protected FolderService $folderService;
 
+    /**
+     * FolderApiController constructor.
+     *
+     * @param FolderService $folderService The service responsible for handling folder-related operations.
+     * @param EntityManagerInterface $em The entity manager for database interactions.
+     */
     public function __construct(FolderService $folderService, EntityManagerInterface $em)
     {
         parent::__construct($em);
@@ -21,7 +27,13 @@ class FolderApiController extends BaseApiController
     }
 
     /**
+     * Create a new folder.
+     *
      * @Route("/folder/create", name="api_create_folder", methods={"POST"})
+     *
+     * @param Request $request The HTTP request containing the folder title.
+     *
+     * @return JsonResponse JSON response containing the created folder details or an error message.
      */
     public function create(Request $request): JsonResponse
     {
@@ -40,7 +52,11 @@ class FolderApiController extends BaseApiController
     }
 
     /**
+     * Get the list of all folders.
+     *
      * @Route("/folder/list", name="api_list_folders", methods={"GET"})
+     *
+     * @return JsonResponse JSON response containing a list of all folders.
      */
     public function list(): JsonResponse
     {
@@ -51,7 +67,13 @@ class FolderApiController extends BaseApiController
     }
 
     /**
+     * Retrieve a specific folder by its ID.
+     *
      * @Route("/folder/show/{id}", name="api_show_folder", methods={"GET"})
+     *
+     * @param int $id The unique identifier of the folder to be retrieved.
+     *
+     * @return JsonResponse JSON response containing the folder details or an error message if not found.
      */
     public function show(int $id): JsonResponse
     {
@@ -68,7 +90,14 @@ class FolderApiController extends BaseApiController
     }
 
     /**
+     * Update the details of a specific folder.
+     *
      * @Route("/folder/update/{id}", name="api_update_folder", methods={"PUT"})
+     *
+     * @param Request $request The HTTP request containing updated folder details.
+     * @param int $id The unique identifier of the folder to be updated.
+     *
+     * @return JsonResponse JSON response containing the updated folder details or an error message.
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -105,7 +134,13 @@ class FolderApiController extends BaseApiController
     }
 
     /**
+     * Delete a specific folder by its ID.
+     *
      * @Route("/folder/delete/{id}", name="api_delete_folder", methods={"DELETE"})
+     *
+     * @param int $id The unique identifier of the folder to be deleted.
+     *
+     * @return JsonResponse JSON response containing the result of the deletion operation.
      */
     public function delete(int $id): JsonResponse
     {
