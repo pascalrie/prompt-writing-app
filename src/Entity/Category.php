@@ -9,11 +9,15 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * Represents a category entity which holds associated prompts and notes.
+ *
  * @ORM\Entity(repositoryClass=CategoryRepository::class)
  */
 class Category
 {
     /**
+     * The unique identifier of the category.
+     *
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -21,20 +25,29 @@ class Category
     private ?int $id = null;
 
     /**
+     * The title of the category.
+     *
      * @ORM\Column(type="string", length=255)
      */
     private string $title;
 
     /**
+     * The collection of prompts associated with this category.
+     *
      * @ORM\OneToMany(targetEntity=Prompt::class, mappedBy="category")
      */
     private Collection $prompts;
 
     /**
+     * The collection of notes associated with this category.
+     *
      * @ORM\OneToMany(targetEntity=Note::class, mappedBy="category")
      */
     private Collection $notes;
 
+    /**
+     * Initializes the collections for prompts and notes.
+     */
     public function __construct()
     {
         $this->prompts = new ArrayCollection();
@@ -42,7 +55,10 @@ class Category
     }
 
     /**
-     * only for testing
+     * Sets the ID of the category (only for testing purposes).
+     *
+     * @param int|null $id The ID to be set.
+     * @return $this
      */
     public function setId(?int $id): self
     {
@@ -50,16 +66,32 @@ class Category
         return $this;
     }
 
+    /**
+     * Gets the unique identifier of the category.
+     *
+     * @return int|null The ID of the category.
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * Gets the title of the category.
+     *
+     * @return string|null The title of the category.
+     */
     public function getTitle(): ?string
     {
         return $this->title;
     }
 
+    /**
+     * Sets the title of the category.
+     *
+     * @param string $title The title to set.
+     * @return $this
+     */
     public function setTitle(string $title): self
     {
         $this->title = $title;
@@ -67,11 +99,22 @@ class Category
         return $this;
     }
 
+    /**
+     * Gets the collection of prompts associated with this category as an ArrayCollection.
+     *
+     * @return ArrayCollection The converted collection of prompts.
+     */
     public function getPrompts(): ArrayCollection
     {
         return ConversionUtil::convertCollectionIntoArrayCollection($this->prompts);
     }
 
+    /**
+     * Adds a prompt to the category and associates it.
+     *
+     * @param Prompt $prompt The prompt to add.
+     * @return $this
+     */
     public function addPrompt(Prompt $prompt): self
     {
         if (!$this->getPrompts()->contains($prompt)) {
@@ -81,6 +124,12 @@ class Category
         return $this;
     }
 
+    /**
+     * Removes a prompt from the category and disassociates it.
+     *
+     * @param Prompt $prompt The prompt to remove.
+     * @return $this
+     */
     public function removePrompt(Prompt $prompt): self
     {
         if ($this->prompts->removeElement($prompt)) {
@@ -104,12 +153,22 @@ class Category
         }
     }
 
-
+    /**
+     * Gets the collection of notes associated with this category as an ArrayCollection.
+     *
+     * @return ArrayCollection The converted collection of notes.
+     */
     public function getNotes(): ArrayCollection
     {
         return ConversionUtil::convertCollectionIntoArrayCollection($this->notes);
     }
 
+    /**
+     * Adds a note to the category and associates it.
+     *
+     * @param Note $note The note to add.
+     * @return $this
+     */
     public function addNote(Note $note): self
     {
         if (!$this->getNotes()->contains($note)) {
@@ -120,6 +179,12 @@ class Category
         return $this;
     }
 
+    /**
+     * Removes a note from the category and disassociates it.
+     *
+     * @param Note $note The note to remove.
+     * @return $this
+     */
     public function removeNote(Note $note): self
     {
         if ($this->notes->removeElement($note)) {
@@ -132,9 +197,11 @@ class Category
     }
 
     /**
-     * @param bool $withPrompts
-     * @param bool $withNotes
-     * @return array|string[]
+     * Serializes the category into a JSON-compatible array.
+     *
+     * @param bool $withPrompts Whether to include associated prompts in the serialization.
+     * @param bool $withNotes Whether to include associated notes in the serialization.
+     * @return array The serialized data of the category.
      */
     public function jsonSerialize(bool $withPrompts = false, bool $withNotes = false): array
     {
