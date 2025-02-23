@@ -33,7 +33,7 @@ class TagApiController extends BaseApiController
     /**
      * Create a new tag.
      *
-     * @Route("/tag/create", name="api_create_tag", methods={"POST"})
+     * @Route("/api/tag/create", name="api_create_tag", methods={"POST"})
      *
      * @param Request $request The HTTP request object containing the JSON payload.
      *
@@ -61,7 +61,7 @@ class TagApiController extends BaseApiController
     /**
      * List all existing tags.
      *
-     * @Route("/tag/list", name="api_list_tags", methods={"GET"})
+     * @Route("/api/tag/list", name="api_list_tags", methods={"GET"})
      *
      * @return JsonResponse A JSON response containing a list of all tags.
      */
@@ -76,7 +76,7 @@ class TagApiController extends BaseApiController
     /**
      * Show details of a specific tag by ID.
      *
-     * @Route("/tag/show/{id}", name="api_show_tag", methods={"GET"})
+     * @Route("/api/tag/show/{id}", name="api_show_tag", methods={"GET"})
      *
      * @param int $id The ID of the tag to retrieve.
      *
@@ -99,7 +99,7 @@ class TagApiController extends BaseApiController
     /**
      * Update an existing tag by ID.
      *
-     * @Route("/tag/update/{id}", name="api_update_tag", methods={"PUT"})
+     * @Route("/api/tag/update/{id}", name="api_update_tag", methods={"PUT"})
      *
      * @param Request $request The HTTP request object containing the JSON payload for the update.
      * @param int $id The ID of the tag to update.
@@ -139,7 +139,7 @@ class TagApiController extends BaseApiController
     /**
      * Delete an existing tag by ID.
      *
-     * @Route("/tag/delete/{id}", name="api_delete_tag", methods={"DELETE"})
+     * @Route("/api/tag/delete/{id}", name="api_delete_tag", methods={"DELETE"})
      *
      * @param int $id The ID of the tag to delete.
      *

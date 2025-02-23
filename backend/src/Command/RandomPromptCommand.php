@@ -25,7 +25,7 @@ class RandomPromptCommand extends Command
     /**
      * @var string|null The default name of the command.
      */
-    protected static $defaultName = 'api:random-prompt';
+    protected static $defaultName = 'api:random:prompt';
 
     /**
      * RandomPromptCommand constructor.

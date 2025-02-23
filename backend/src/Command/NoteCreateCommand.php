@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Entity\Category;
 use App\Service\CategoryService;
 use App\Service\NoteService;
 use App\Service\TagService;
@@ -32,7 +31,7 @@ class NoteCreateCommand extends Command
     /**
      * @var string The default command name.
      */
-    protected static $defaultName = 'api:create-note';
+    protected static $defaultName = 'api:create:note';
 
     /**
      * NoteCreateCommand constructor.

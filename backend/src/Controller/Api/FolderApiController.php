@@ -29,7 +29,7 @@ class FolderApiController extends BaseApiController
     /**
      * Create a new folder.
      *
-     * @Route("/folder/create", name="api_create_folder", methods={"POST"})
+     * @Route("/api/folder/create", name="api_create_folder", methods={"POST"})
      *
      * @param Request $request The HTTP request containing the folder title.
      *
@@ -54,7 +54,7 @@ class FolderApiController extends BaseApiController
     /**
      * Get the list of all folders.
      *
-     * @Route("/folder/list", name="api_list_folders", methods={"GET"})
+     * @Route("/api/folder/list", name="api_list_folders", methods={"GET"})
      *
      * @return JsonResponse JSON response containing a list of all folders.
      */
@@ -69,7 +69,7 @@ class FolderApiController extends BaseApiController
     /**
      * Retrieve a specific folder by its ID.
      *
-     * @Route("/folder/show/{id}", name="api_show_folder", methods={"GET"})
+     * @Route("/api/folder/show/{id}", name="api_show_folder", methods={"GET"})
      *
      * @param int $id The unique identifier of the folder to be retrieved.
      *
@@ -92,7 +92,7 @@ class FolderApiController extends BaseApiController
     /**
      * Update the details of a specific folder.
      *
-     * @Route("/folder/update/{id}", name="api_update_folder", methods={"PUT"})
+     * @Route("/api/folder/update/{id}", name="api_update_folder", methods={"PUT"})
      *
      * @param Request $request The HTTP request containing updated folder details.
      * @param int $id The unique identifier of the folder to be updated.
@@ -136,7 +136,7 @@ class FolderApiController extends BaseApiController
     /**
      * Delete a specific folder by its ID.
      *
-     * @Route("/folder/delete/{id}", name="api_delete_folder", methods={"DELETE"})
+     * @Route("/api/folder/delete/{id}", name="api_delete_folder", methods={"DELETE"})
      *
      * @param int $id The unique identifier of the folder to be deleted.
      *

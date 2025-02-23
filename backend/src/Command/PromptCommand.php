@@ -29,7 +29,7 @@ class PromptCommand extends Command
     /**
      * @var string The default name of the command.
      */
-    protected static $defaultName = 'api:create-prompt';
+    protected static $defaultName = 'api:create:prompt';
 
     /**
      * PromptCommand constructor.

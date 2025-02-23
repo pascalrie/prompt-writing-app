@@ -11,6 +11,7 @@ use App\Service\NoteService;
 use App\Service\TagService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -57,7 +58,7 @@ class NoteApiController extends BaseApiController
     /**
      * Creates a new note.
      *
-     * @Route("/note/create", name="api_create_note", methods={"POST"})
+     * @Route("/api/note/create", name="api_create_note", methods={"POST"})
      *
      * @param Request $request The HTTP request containing the note data in JSON format.
      *
@@ -93,7 +94,7 @@ class NoteApiController extends BaseApiController
     /**
      * Lists all notes.
      *
-     * @Route("/note/list", name="api_list_notes", methods={"GET"})
+     * @Route("/api/note/list", name="api_list_notes", methods={"GET"})
      *
      * @return JsonResponse A JSON response containing a list of all notes.
      */
@@ -108,7 +109,7 @@ class NoteApiController extends BaseApiController
     /**
      * Retrieves a specific note by ID.
      *
-     * @Route("/note/show/{id}", name="api_show_note", methods={"GET"})
+     * @Route("/api/note/show/{id}", name="api_show_note", methods={"GET"})
      *
      * @param int $id The ID of the note to retrieve.
      *
@@ -131,12 +132,13 @@ class NoteApiController extends BaseApiController
     /**
      * Updates a specific note by ID.
      *
-     * @Route("/note/update/{id}", name="api_update_note", methods={"PUT"})
+     * @Route("/api/note/update/{id}", name="api_update_note", methods={"PUT"})
      *
      * @param Request $request The HTTP request containing updated note data.
      * @param int $id The ID of the note to update.
      *
      * @return JsonResponse The updated note data or an error message if the note does not exist or the update failed.
+     * @throws EntityNotFoundException
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -180,11 +182,12 @@ class NoteApiController extends BaseApiController
     /**
      * Deletes a specific note by ID.
      *
-     * @Route("/note/delete/{id}", name="api_delete_note", methods={"DELETE"})
+     * @Route("/api/note/delete/{id}", name="api_delete_note", methods={"DELETE"})
      *
      * @param int $id The ID of the note to delete.
      *
      * @return JsonResponse A success or error message indicating the result of the deletion operation.
+     * @throws EntityNotFoundException
      */
     public function delete(int $id): JsonResponse
     {

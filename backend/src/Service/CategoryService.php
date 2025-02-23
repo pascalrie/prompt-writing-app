@@ -34,6 +34,11 @@ class CategoryService implements IService
         $category = new Category();
         $category->setTitle($title);
 
+        $existingCategory = $this->categoryRepository->findOneBy(['title' => $title]);
+        if ($existingCategory) {
+            throw new \InvalidArgumentException('A category with this title already exists.');
+        }
+
         if ($firstNote) {
             $category->addNote($firstNote);
         }
