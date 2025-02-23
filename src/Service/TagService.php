@@ -5,13 +5,19 @@ namespace App\Service;
 use App\Entity\Note;
 use App\Entity\Tag;
 use App\Repository\TagRepository;
+use InvalidArgumentException;
 
+/**
+ * Service class to manage Tag entities.
+ */
 class TagService implements IService
 {
-    public TagRepository $tagRepository;
+    private TagRepository $tagRepository;
 
     /**
-     * @param TagRepository $tagRepository
+     * TagService constructor.
+     *
+     * @param TagRepository $tagRepository Repository for Tag entities.
      */
     public function __construct(TagRepository $tagRepository)
     {
@@ -19,26 +25,31 @@ class TagService implements IService
     }
 
     /**
-     * @param string $title
-     * @param array|null $notes
-     * @param string $color
-     * @return Tag
+     * Creates a new Tag entity and adds it to the database.
+     *
+     * @param string $title The title of the tag.
+     * @param array|null $notes An array of Note entities to associate with the tag (optional).
+     * @param string $color The color of the tag (optional).
+     *
+     * @return Tag The created Tag entity.
      */
     public function create(string $title = "", array $notes = null, string $color = ""): Tag
     {
         $tag = new Tag();
 
-        if ("" !== $title) {
+        if ($title !== "") {
             $tag->setTitle($title);
         }
 
-        if (null !== $notes) {
+        if (!empty($notes)) {
             foreach ($notes as $note) {
-                $tag->addNote($note);
+                if ($note instanceof Note) {
+                    $tag->addNote($note);
+                }
             }
         }
 
-        if ("" !== $color) {
+        if ($color !== "") {
             $tag->setColor($color);
         }
 
@@ -48,21 +59,30 @@ class TagService implements IService
     }
 
     /**
-     * @param int $tagId
-     * @param string $title
-     * @param array|null $potentialNewNotes
-     * @param string $color
-     * @return void
+     * Updates an existing Tag entity.
+     *
+     * @param int $tagId The ID of the tag to update.
+     * @param string $title The new title of the tag (optional).
+     * @param array $potentialNewNotes An array of Note entities to associate with the tag (optional).
+     * @param string $color The new color of the tag (optional).
+     *
+     * @return Tag The updated Tag entity.
+     *
+     * @throws InvalidArgumentException If the tag with the given ID is not found.
      */
     public function update(int $tagId, string $title = "", array $potentialNewNotes = [], string $color = ""): Tag
     {
-        $tagFromDb = $this->tagRepository->findBy(['id' => $tagId])[0];
+        $tagFromDb = $this->showOneBy('id', $tagId);
 
-        if ("" !== $title) {
+        if (!$tagFromDb) {
+            throw new InvalidArgumentException("Tag with ID $tagId not found.");
+        }
+
+        if ($title !== "") {
             $tagFromDb->setTitle($title);
         }
 
-        if (null !== $potentialNewNotes) {
+        if (!empty($potentialNewNotes)) {
             foreach ($potentialNewNotes as $note) {
                 if ($note instanceof Note) {
                     $tagFromDb->addNote($note);
@@ -70,7 +90,7 @@ class TagService implements IService
             }
         }
 
-        if ("" !== $color) {
+        if ($color !== "") {
             $tagFromDb->setColor($color);
         }
 
@@ -80,7 +100,9 @@ class TagService implements IService
     }
 
     /**
-     * @return array
+     * Lists all Tag entities.
+     *
+     * @return Tag[] An array of Tag entities.
      */
     public function list(): array
     {
@@ -88,39 +110,45 @@ class TagService implements IService
     }
 
     /**
-     * @param int $id
-     * @return void
+     * Deletes a Tag entity by its ID.
+     *
+     * @param int $id The ID of the tag to delete.
+     *
+     * @throws InvalidArgumentException If the tag with the given ID is not found.
      */
-    public function delete(int $id)
+    public function delete(int $id): void
     {
-        $tag = $this->tagRepository->findBy(['id' => $id])[0];
+        $tag = $this->tagRepository->find($id);
+
+        if (!$tag) {
+            throw new InvalidArgumentException("Tag with ID $id not found.");
+        }
+
         $this->tagRepository->remove($tag);
     }
 
     /**
-     * @param int $id
-     * @return Tag|null
+     * Finds a Tag entity by its ID.
+     *
+     * @param int $id The ID of the tag.
+     *
+     * @return Tag|null The found Tag entity or null if not found.
      */
     public function show(int $id): ?Tag
     {
-        $tags = $this->tagRepository->findBy(['id' => $id]);
-        if (empty($tags)) {
-            return null;
-        }
-        return $tags[0];
+        return $this->tagRepository->findOneBy(['id' => $id]);
     }
 
     /**
-     * @param string $criteria
-     * @param $argument
-     * @return Tag|null
+     * Finds a Tag entity by a specific criterion.
+     *
+     * @param string $criteria The field name to search by.
+     * @param mixed $argument The value of the field to search for.
+     *
+     * @return Tag|null The found Tag entity or null if not found.
      */
-    public function showBy(string $criteria, $argument): ?Tag
+    public function showOneBy(string $criteria, $argument): ?Tag
     {
-        $tags = $this->tagRepository->findBy([$criteria => $argument]);
-        if (empty($tags)) {
-            return null;
-        }
-        return $tags[0];
+        return $this->tagRepository->findOneBy([$criteria => $argument]) ?? null;
     }
 }

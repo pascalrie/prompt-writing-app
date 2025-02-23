@@ -41,7 +41,7 @@ class NoteCreateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $tag = $this->tagService->showBy('title', '#toSort');
+        $tag = $this->tagService->showOneBy('title', '#toSort');
         if (null === $tag) {
             $tag = $this->tagService->create('#toSort');
         }

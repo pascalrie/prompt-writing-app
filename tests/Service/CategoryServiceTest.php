@@ -48,7 +48,7 @@ class CategoryServiceTest extends TestCase
 
     public function testCategoryUpdateTitle(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
         $newTitle = 'new category title';
         $updatedCategory = $this->categoryService->update($this->exampleCategory->getId(), $newTitle);
 
@@ -58,7 +58,7 @@ class CategoryServiceTest extends TestCase
 
     public function testCategoryUpdatePrompts(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
         $newPromptToAdd = new Prompt();
         $newPromptToAdd->setTitle('new prompt');
         $newPromptToAdd->setId(1);
@@ -70,7 +70,7 @@ class CategoryServiceTest extends TestCase
 
     public function testUpdateCategoryReplacePrompts(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
 
         $newPromptToAdd = new Prompt();
         $newPromptToAdd->setTitle('new prompt after overwrite');
@@ -95,7 +95,7 @@ class CategoryServiceTest extends TestCase
 
     public function testCategoryUpdateNotes(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
         $newNote = new Note();
         $newNote->setTitle('new note');
         $newNote->setId(1);
@@ -108,7 +108,7 @@ class CategoryServiceTest extends TestCase
 
     public function testCategoryShowShouldBeNonExisting(): void
     {
-        $this->repoMock->method('findBy')->willReturn([]);
+        $this->repoMock->method('findOneBy')->willReturn(null);
         $this->exampleCategory->setId(1000);
 
         $shownCategoryShouldBeNull = $this->categoryService->show($this->exampleCategory->getId());
@@ -118,7 +118,7 @@ class CategoryServiceTest extends TestCase
 
     public function testCategoryShow(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->exampleCategory]);
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
         $shownCategory = $this->categoryService->show($this->exampleCategory->getId());
 
         $this->assertNotNull($shownCategory);
@@ -127,11 +127,10 @@ class CategoryServiceTest extends TestCase
 
     public function testCategoryShowByTitleShouldBeNonExisting(): void
     {
-        $this->repoMock->method('findBy')->willReturn([]);
-        $title = 'impossible category';
+        $this->repoMock->method('findOneBy')->willReturn(null);
+        $title = 'impossible category 123';
 
         $shownCategory = $this->categoryService->showByTitle($title);
-
         $this->assertNull($shownCategory);
     }
 

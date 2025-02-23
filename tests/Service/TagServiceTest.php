@@ -56,7 +56,7 @@ class TagServiceTest extends TestCase
     public function testUpdateTitle(): void
     {
         $newTitle = 'New Title of tag';
-        $this->repoMock->method('findBy')->willReturn([$this->exampleTag]);
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleTag);
         $updatedTag = $this->tagService->update($this->exampleTag->getId(), $newTitle);
 
         $this->assertNotNull($updatedTag);
@@ -66,7 +66,7 @@ class TagServiceTest extends TestCase
     public function testUpdateColor(): void
     {
         $newColor = '#111111';
-        $this->repoMock->method('findBy')->willReturn([$this->exampleTag]);
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleTag);
         $updatedTag = $this->tagService->update($this->exampleTag->getId(), "", [], $newColor);
 
         $this->assertNotNull($updatedTag);
@@ -80,7 +80,7 @@ class TagServiceTest extends TestCase
         $newNote->setTitle('2 Note title');
         $newNote->setContent('2 Note content');
 
-        $this->repoMock->method('findBy')->willReturn([$this->exampleTag]);
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleTag);
         $updatedTag = $this->tagService->update($this->exampleTag->getId(), '', [$newNote]);
 
         $this->assertNotNull($updatedTag);

@@ -61,7 +61,7 @@ class NoteApiController extends BaseApiController
 
     private function createTagIfNonExistentByTitle(string $title): Tag
     {
-        return $this->tagService->showBy('title', $title)
+        return $this->tagService->showOneBy('title', $title)
             ?? $this->tagService->create($title);
     }
 
