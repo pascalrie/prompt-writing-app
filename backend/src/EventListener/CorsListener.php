@@ -3,13 +3,18 @@
 namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class CorsListener implements EventSubscriberInterface
 {
+    private array $allowedOrigins = [
+        'http://localhost:3000',
+        'http://192.168.64.8:3000'
+    ];
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -26,11 +31,16 @@ class CorsListener implements EventSubscriberInterface
         $request = $event->getRequest();
         $method = $request->getRealMethod();
 
-        if ($method === 'OPTIONS') {
+        if ($method === 'OPTIONS') { // Preflight request
+            $origin = $request->headers->get('Origin');
+
             $response = new Response();
             $response->setStatusCode(Response::HTTP_NO_CONTENT);
 
-            $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
+            if (in_array($origin, $this->allowedOrigins, true)) {
+                $response->headers->set('Access-Control-Allow-Origin', $origin);
+            }
+
             $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
             $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
             $response->headers->set('Access-Control-Max-Age', '3600'); // Cache for 1 hour
@@ -43,14 +53,15 @@ class CorsListener implements EventSubscriberInterface
     {
         $response = $event->getResponse();
         $request = $event->getRequest();
+        $origin = $request->headers->get('Origin');
 
-        // Add CORS headers for all responses
-        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
+        if (in_array($origin, $this->allowedOrigins, true)) {
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+        }
+
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         $response->headers->set('Access-Control-Max-Age', '3600');
-
-        // Allow credentials if needed
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
     }
 }
