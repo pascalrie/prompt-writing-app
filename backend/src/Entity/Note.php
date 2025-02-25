@@ -330,7 +330,7 @@ class Note
      * @return array The serialized note as an associative array.
      */
     public function jsonSerialize(bool $withContent = true, bool $withCategory = true, bool $withPrompt = true,
-                                  bool $withTags = true, bool $withFolder = true): array
+                                  bool $withTags = true, bool $withFolder = false): array
     {
         $json = [
             'id' => $this->id,

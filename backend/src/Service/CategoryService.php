@@ -123,7 +123,7 @@ class CategoryService implements IService
     }
 
     /**
-     * Finds a category by its ID.
+     * Shows a category by its ID.
      *
      * @param int $id The ID of the Category to retrieve.
      * @return Category|null The Category entity if found, or null otherwise.
@@ -134,7 +134,7 @@ class CategoryService implements IService
     }
 
     /**
-     * Finds a category by its title.
+     * Shows a category by its title.
      *
      * @param string $title The title of the Category to retrieve.
      * @return Category|null The Category entity if found, or null otherwise.

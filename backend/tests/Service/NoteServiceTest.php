@@ -7,6 +7,7 @@ use App\Entity\Note;
 use App\Entity\Tag;
 use App\Repository\CategoryRepository;
 use App\Repository\NoteRepository;
+use App\Repository\PromptRepository;
 use App\Repository\TagRepository;
 use App\Service\NoteService;
 use Doctrine\ORM\EntityNotFoundException;
@@ -22,7 +23,13 @@ class NoteServiceTest extends TestCase
 
     protected ?NoteService $noteService;
 
-    protected ?MockObject $repoMock;
+    protected ?MockObject $repoMockNote;
+
+    protected ?MockObject $repoMockTag;
+
+    protected ?MockObject $repoMockCategory;
+
+    protected ?MockObject $repoMockPrompt;
 
     public function setUp(): void
     {
@@ -33,7 +40,7 @@ class NoteServiceTest extends TestCase
         $this->exampleNote->setTitle('Note title');
         $this->exampleNote->setContent('Note content');
 
-        $this->repoMock = $this->getMockBuilder(NoteRepository::class)
+        $this->repoMockNote = $this->getMockBuilder(NoteRepository::class)
             ->setConstructorArgs([$this->managerRegistry, $this->createMock(\Doctrine\ORM\EntityManager::class)])
             ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
@@ -43,18 +50,23 @@ class NoteServiceTest extends TestCase
             ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
 
+        $this->repoMockPrompt = $this->getMockBuilder(PromptRepository::class)
+            ->setConstructorArgs([$this->managerRegistry, $this->createMock(\Doctrine\ORM\EntityManager::class)])
+            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
+            ->getMock();
+
         $this->repoMockCategory = $this->getMockBuilder(CategoryRepository::class)
             ->setConstructorArgs([$this->managerRegistry, $this->createMock(\Doctrine\ORM\EntityManager::class)])
             ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
 
-        $this->noteService = new NoteService($this->repoMock, $this->repoMockTag, $this->repoMockCategory);
+        $this->noteService = new NoteService($this->repoMockNote, $this->repoMockTag, $this->repoMockCategory, $this->repoMockPrompt);
     }
 
     public function tearDown(): void
     {
         $this->exampleNote = null;
-        $this->repoMock = null;
+        $this->repoMockNote = null;
         $this->noteService = null;
     }
 
@@ -64,7 +76,7 @@ class NoteServiceTest extends TestCase
     public function testNoteUpdateTitle(): void
     {
         $newTitle = 'New title for note';
-        $this->repoMock->method('findOneBy')->willReturn($this->exampleNote);
+        $this->repoMockNote->method('findOneBy')->willReturn($this->exampleNote);
         $updatedNote = $this->noteService->update($this->exampleNote->getId(), $newTitle, "", false);
 
         $this->assertNotNull($updatedNote);
@@ -77,7 +89,7 @@ class NoteServiceTest extends TestCase
     public function testNoteUpdateContentReplaceOld(): void
     {
         $newContent = 'New content for note';
-        $this->repoMock->method('findOneBy')->willReturn($this->exampleNote);
+        $this->repoMockNote->method('findOneBy')->willReturn($this->exampleNote);
         $updatedNote = $this->noteService->update($this->exampleNote->getId(), "", $newContent);
 
         $this->assertNotNull($updatedNote);
@@ -91,7 +103,7 @@ class NoteServiceTest extends TestCase
     {
         $newContent = '- New content for note';
         $resultContent = $this->exampleNote->getContent() . $newContent;
-        $this->repoMock->method('findOneBy')->willReturn($this->exampleNote);
+        $this->repoMockNote->method('findOneBy')->willReturn($this->exampleNote);
         $updatedNote = $this->noteService->update($this->exampleNote->getId(), "", $newContent, true);
 
         $this->assertNotNull($updatedNote);
@@ -109,7 +121,7 @@ class NoteServiceTest extends TestCase
         $tagToAdd->setTitle('Tag title 23');
         $tagToAdd->setColor('#FFFFFF');
 
-        $this->repoMock->method('findOneBy')->willReturn($this->exampleNote);
+        $this->repoMockNote->method('findOneBy')->willReturn($this->exampleNote);
         $this->repoMockTag->method('findOneBy')->willReturn($tagToAdd);
         $updatedNote = $this->noteService->update($this->exampleNote->getId(), "",
             "", false, false, [$tagToAdd]);
@@ -128,7 +140,7 @@ class NoteServiceTest extends TestCase
         $categoryToAdd->setId(1);
         $categoryToAdd->setTitle('Exciting Category title');
 
-        $this->repoMock->method('findOneBy')->willReturn($this->exampleNote);
+        $this->repoMockNote->method('findOneBy')->willReturn($this->exampleNote);
         $this->repoMockCategory->method('findOneBy')->willReturn($categoryToAdd);
         $updatedNote = $this->noteService->update($this->exampleNote->getId(), "", "", false,
             false, [], $categoryToAdd->getTitle());
@@ -143,7 +155,7 @@ class NoteServiceTest extends TestCase
      */
     public function testUpdateNoteRemoveContent(): void
     {
-        $this->repoMock
+        $this->repoMockNote
             ->method('findOneBy')->willReturn($this->exampleNote);
 
         $this->exampleNote = $this->noteService->update($this->exampleNote->getId(), "", "", false, true);
@@ -156,7 +168,7 @@ class NoteServiceTest extends TestCase
 
     public function testShowNoteWithImpossibleId(): void
     {
-        $this->repoMock->method('findOneBy')->willReturn(null);
+        $this->repoMockNote->method('findOneBy')->willReturn(null);
         $this->exampleNote->setId(100);
         $shownNoteHopefullyNull = $this->noteService->show($this->exampleNote->getId());
 
@@ -165,7 +177,7 @@ class NoteServiceTest extends TestCase
 
     public function testShowNote(): void
     {
-        $this->repoMock->method('findOneBy')->willReturn($this->exampleNote);
+        $this->repoMockNote->method('findOneBy')->willReturn($this->exampleNote);
         $shownNote = $this->noteService->show($this->exampleNote->getId());
 
         $this->assertNotNull($shownNote);
@@ -174,7 +186,7 @@ class NoteServiceTest extends TestCase
 
     public function testShowNoteByTitleNotFound(): void
     {
-        $this->repoMock->method('findOneBy')->willReturn(null);
+        $this->repoMockNote->method('findOneBy')->willReturn(null);
         $noteShouldBeNull = $this->noteService->showBy('title', 'impossible title');
 
         $this->assertNull($noteShouldBeNull);
@@ -182,7 +194,7 @@ class NoteServiceTest extends TestCase
 
     public function testShowNotesByTitle(): void
     {
-        $this->repoMock->method('findOneBy')->willReturn($this->exampleNote);
+        $this->repoMockNote->method('findOneBy')->willReturn($this->exampleNote);
         $shownNote = $this->noteService->showBy('title', $this->exampleNote->getTitle());
 
         $this->assertNotNull($shownNote);

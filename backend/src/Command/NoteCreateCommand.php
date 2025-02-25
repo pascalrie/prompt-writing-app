@@ -93,7 +93,7 @@ class NoteCreateCommand extends Command
             $category = $this->categoryService->create('Console');
         }
 
-        $this->noteService->create((new \DateTime('NOW'))->format('d-m-Y H:i'), $input->getArgument('content'), $tags, $category, $input->getArgument('prompt'));
+        $this->noteService->create((new \DateTime('NOW'))->format('d-m-Y H:i'), $input->getArgument('content'), null, $tags, $category, $input->getArgument('prompt'));
         $output->writeln('<info>Note generated!</info>');
         return Command::SUCCESS;
     }

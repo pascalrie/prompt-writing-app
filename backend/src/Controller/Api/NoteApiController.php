@@ -8,6 +8,7 @@ use App\Enum\MessageOfResponse;
 use App\Enum\TypeOfResponse;
 use App\Service\CategoryService;
 use App\Service\NoteService;
+use App\Service\PromptService;
 use App\Service\TagService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,7 +48,8 @@ class NoteApiController extends BaseApiController
      * @param CategoryService $categoryService Category service for managing categories.
      * @param EntityManagerInterface $em Doctrine's entity manager for database operations.
      */
-    public function __construct(NoteService $noteService, TagService $tagService, CategoryService $categoryService, EntityManagerInterface $em)
+    public function __construct(NoteService $noteService, TagService $tagService, CategoryService $categoryService,
+                                EntityManagerInterface $em)
     {
         parent::__construct($em);
         $this->noteService = $noteService;
@@ -72,6 +74,7 @@ class NoteApiController extends BaseApiController
         $content = $bodyParameters['content'] ?? null;
         $category = $bodyParameters['category'] ?? null;
         $tagTitles = $bodyParameters['tags'] ?? [];
+        $promptId = $bodyParameters['promptId'] ?? null;
 
         if (!$title || !$content || !$category) {
             return $this->json($this->appendTimeStampToApiResponse([
@@ -79,14 +82,14 @@ class NoteApiController extends BaseApiController
             ]));
         }
 
-        $categoryEntity = $this->categoryService->create($category);
+        $categoryEntity = $this->categoryService->show($category);
 
         $tagEntities = array_map(
             fn($tagTitle) => $this->createTagIfNonExistentByTitle($tagTitle),
             $tagTitles
         );
 
-        $note = $this->noteService->create($title, $content, new ArrayCollection($tagEntities), $categoryEntity);
+        $note = $this->noteService->create($title, $content, $promptId, new ArrayCollection($tagEntities), $categoryEntity);
 
         return $this->json($this->appendTimeStampToApiResponse($note->jsonSerialize()));
     }

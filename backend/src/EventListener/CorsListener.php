@@ -26,12 +26,11 @@ class CorsListener implements EventSubscriberInterface
         $request = $event->getRequest();
         $method = $request->getRealMethod();
 
-        // Handle OPTIONS preflight requests
         if ($method === 'OPTIONS') {
             $response = new Response();
             $response->setStatusCode(Response::HTTP_NO_CONTENT);
 
-            $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000'); // Single origin allowed
+            $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
             $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
             $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
             $response->headers->set('Access-Control-Max-Age', '3600'); // Cache for 1 hour
@@ -46,10 +45,10 @@ class CorsListener implements EventSubscriberInterface
         $request = $event->getRequest();
 
         // Add CORS headers for all responses
-        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000'); // Single origin allowed
+        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        $response->headers->set('Access-Control-Max-Age', '3600'); // Cache for 1 hour
+        $response->headers->set('Access-Control-Max-Age', '3600');
 
         // Allow credentials if needed
         $response->headers->set('Access-Control-Allow-Credentials', 'true');

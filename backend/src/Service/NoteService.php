@@ -7,6 +7,7 @@ use App\Entity\Note;
 use App\Entity\Tag;
 use App\Repository\CategoryRepository;
 use App\Repository\NoteRepository;
+use App\Repository\PromptRepository;
 use App\Repository\TagRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -21,14 +22,18 @@ class NoteService implements IService
 
     private CategoryRepository $categoryRepository;
 
+    private PromptRepository $promptRepository;
+
     public function __construct(NoteRepository     $noteRepository, TagRepository $tagRepository,
-                                CategoryRepository $categoryRepository)
+                                CategoryRepository $categoryRepository, PromptRepository $promptRepository)
     {
         $this->noteRepository = $noteRepository;
 
         $this->tagRepository = $tagRepository;
 
         $this->categoryRepository = $categoryRepository;
+
+        $this->promptRepository = $promptRepository;
     }
 
     /**
@@ -36,11 +41,13 @@ class NoteService implements IService
      *
      * @param string $title The title of the note. If empty, a default title will be generated from the content.
      * @param string $content The content of the note.
+     * @param int|null $promptId The id of the associated prompt.
      * @param ArrayCollection|null $tags A collection of tags to be associated with the note.
      * @param Category|null $category The category to assign the note to.
      * @return Note The newly created note entity.
      */
-    public function create(string $title = "", string $content = "", ?ArrayCollection $tags = null, ?Category $category = null): Note
+    public function create(string $title = "", string $content = "", int $promptId = null, ?ArrayCollection $tags = null,
+                           ?Category $category = null): Note
     {
         $note = new Note();
 
@@ -48,6 +55,10 @@ class NoteService implements IService
         $note->setTitle($title ?: substr($content, 0, 15) . '...');
 
         $note->setContent($content);
+        if ($promptId !== null) {
+            $prompt = $this->promptRepository->findOneBy(['id' => $promptId]);
+            $note->setPrompt($prompt);
+        }
 
         if ($tags !== null) {
             foreach ($tags as $tag) {
