@@ -42,7 +42,6 @@ const FoldersListForm = () => {
             <h1>Folders</h1>
             <FetchFoldersWithNotes onFetch={setFolders}/>
 
-            {/* Render List of Folders */}
             <div style={styles.folderListContainer}>
                 {folders.length > 0 ? (
                     folders.map((folder) => (
@@ -64,7 +63,6 @@ const FoldersListForm = () => {
                                             <div key={note.id} style={styles.noteCard}>
                                                 <h3 style={styles.noteTitle}>{note.title}</h3>
                                                 <p style={styles.noteContent}>
-                                                    {/* Show full content if expanded, else show a preview */}
                                                     {expandedNotes[note.id]
                                                         ? note.content || "No additional content available."
                                                         : `${note.content?.slice(0, 20) || "No additional content"}...`}
@@ -72,7 +70,7 @@ const FoldersListForm = () => {
                                                 <button
                                                     style={styles.expandButton}
                                                     onClick={(e) => {
-                                                        e.stopPropagation(); // Prevent expanding the folder when clicking the note button
+                                                        e.stopPropagation();
                                                         toggleNoteExpansion(note.id);
                                                     }}
                                                 >

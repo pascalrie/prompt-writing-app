@@ -61,7 +61,7 @@ class FolderApiController extends BaseApiController
     public function list(): JsonResponse
     {
         $folders = $this->folderService->list();
-        $response = array_map(fn($folder) => $folder->jsonSerialize(), $folders);
+        $response = array_map(fn($folder) => $folder->jsonSerialize(true), $folders);
 
         return $this->json($this->appendTimeStampToApiResponse($response));
     }

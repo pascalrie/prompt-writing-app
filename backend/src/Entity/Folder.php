@@ -149,11 +149,14 @@ class Folder
         ];
 
         if ($withNotes) {
-            /**@var Note $note */
+            $notesArray = [];
+
+            /** @var Note $note */
             foreach ($this->getNotes() as $note) {
-                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false,
-                    false, true, false)];
+                $notesArray[] = $note->jsonSerialize(true, false, true, false);
             }
+
+            $json['notes'] = $notesArray;
         }
 
         return $json;
