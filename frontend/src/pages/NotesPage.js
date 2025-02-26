@@ -1,5 +1,7 @@
+import NotesListForm from "../components/NotesListForm";
+
 const NotesPage = () => {
-    return <h1>Welcome to the Notes Page</h1>;
+    return <NotesListForm/>;
 };
 
 export default NotesPage;

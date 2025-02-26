@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import getRandomPrompt from '../fetchPrompt';
 
-const PromptComponent = ({ prompt, setPrompt, setIsLoading }) => {
+const RandomPromptComponent = ({ prompt, setPrompt, setIsLoading }) => {
     useEffect(() => {
         const fetchPrompt = async () => {
             setIsLoading(true);
@@ -35,4 +35,4 @@ const PromptComponent = ({ prompt, setPrompt, setIsLoading }) => {
 
 };
 
-export default PromptComponent;
+export default RandomPromptComponent;

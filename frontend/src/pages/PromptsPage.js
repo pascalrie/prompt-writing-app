@@ -1,5 +1,7 @@
+import PromptsListForm from "../components/PromptsListForm";
+
 const PromptsPage = () => {
-    return <h1>Welcome to the Prompts Page</h1>;
+    return <PromptsListForm/>;
 };
 
 export default PromptsPage;

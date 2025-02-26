@@ -1,5 +1,5 @@
 import React from 'react';
-import './App.css';
+import './styles/App.css';
 import MenuBar from "./components/MenuBar";
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import HomePage from "./pages/HomePage";
@@ -8,6 +8,7 @@ import NotesPage from "./pages/NotesPage";
 import PromptsPage from "./pages/PromptsPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import ContactPage from "./pages/ContactPage";
+import FolderPage from "./pages/FolderPage";
 
 
 const App = () => {
@@ -16,6 +17,7 @@ const App = () => {
             <Router>
                 <MenuBar/>
                 <Routes>
+                    <Route path="/folder" element={<FolderPage/>}/>
                     <Route path="/notes" element={<NotesPage/>}/>
                     <Route path="/prompts" element={<PromptsPage/>}/>
                     <Route path="/categories" element={<CategoriesPage/>}/>

@@ -1,5 +1,7 @@
+import CategoryListForm from "../components/CategoryListForm";
+
 const CategoriesPage = () => {
-    return <h1>Welcome to the categories page.</h1>
+    return <CategoryListForm></CategoryListForm>
 }
 
 export default CategoriesPage;

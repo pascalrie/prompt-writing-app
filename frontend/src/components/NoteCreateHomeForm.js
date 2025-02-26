@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import PromptComponent from './PromptComponent';
+import RandomPromptComponent from './RandomPromptComponent';
 
 const NoteCreateHomeForm = () => {
     const [content, setContent] = useState('');
@@ -51,7 +51,7 @@ const NoteCreateHomeForm = () => {
     return (
         <div>
             <div className="prompt-container">
-                <PromptComponent
+                <RandomPromptComponent
                     prompt={prompt}
                     setPrompt={setPrompt}
                     setIsLoading={setIsPromptLoading}

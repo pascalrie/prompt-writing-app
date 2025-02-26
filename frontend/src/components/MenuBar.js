@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import "./../MenuBar.css";
+import "../styles/MenuBar.css";
 
 const MenuBar = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -26,6 +26,9 @@ const MenuBar = () => {
                             <span className="dropdown-title">Features</span>
                             {dropdownOpen && (
                                 <ul className="dropdown-menu">
+                                    <li>
+                                        <Link to="/folder">Folder</Link>
+                                    </li>
                                     <li>
                                         <Link to="/notes">Notes</Link>
                                     </li>
