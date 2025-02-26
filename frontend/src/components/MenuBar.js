@@ -18,9 +18,6 @@ const MenuBar = () => {
                         <Link to="/home">Home</Link>
                     </li>
                     <li className="menu-item">
-                        <Link to="/about">About</Link>
-                    </li>
-                    <li className="menu-item">
                         <div
                             className="dropdown"
                             onMouseEnter={toggleDropdown}
@@ -41,6 +38,9 @@ const MenuBar = () => {
                                 </ul>
                             )}
                         </div>
+                    </li>
+                    <li className="menu-item">
+                        <Link to="/about">About</Link>
                     </li>
                     <li className="menu-item">
                         <Link to="/contact">Contact</Link>

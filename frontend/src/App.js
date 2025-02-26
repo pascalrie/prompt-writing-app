@@ -1,6 +1,5 @@
 import React from 'react';
 import './App.css';
-import NoteCreateHomeForm from './components/NoteCreateHomeForm';
 import MenuBar from "./components/MenuBar";
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import HomePage from "./pages/HomePage";
@@ -22,7 +21,7 @@ const App = () => {
                     <Route path="/categories" element={<CategoriesPage/>}/>
                     <Route path="/about" element={<AboutPage/>}/>
                     <Route path="/contact" element={<ContactPage/>}/>
-                    <Route path="/home" element={<NoteCreateHomeForm/>}/>
+                    <Route path="/home" element={<HomePage/>}/>
                     <Route path="/" element={<HomePage/>}/>
                 </Routes>
             </Router>

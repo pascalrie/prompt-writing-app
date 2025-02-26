@@ -1,5 +1,7 @@
+import NoteCreateHomeForm from "../components/NoteCreateHomeForm";
+
 const HomePage = () => {
-    return <h1>Welcome to the Home Page</h1>;
+    return <NoteCreateHomeForm />;
 };
 
 export default HomePage;
