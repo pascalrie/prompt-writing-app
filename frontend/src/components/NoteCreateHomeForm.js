@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import PromptComponent from './PromptComponent';
 
-const NoteForm = () => {
+const NoteCreateHomeForm = () => {
     const [content, setContent] = useState('');
     const [tag, setTag] = useState('');
     const [categories, setCategories] = useState([]);
@@ -100,4 +100,4 @@ const NoteForm = () => {
     );
 };
 
-export default NoteForm;
+export default NoteCreateHomeForm;
