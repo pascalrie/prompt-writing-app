@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import getRandomPrompt from './fetchPrompt';
+import getRandomPrompt from '../fetchPrompt';
 
 const PromptComponent = ({ prompt, setPrompt, setIsLoading }) => {
     useEffect(() => {
@@ -24,9 +24,15 @@ const PromptComponent = ({ prompt, setPrompt, setIsLoading }) => {
 
     return (
         <div>
-            <h2>{prompt.title}</h2>
+            <h3>Random Prompt: </h3>
+            {prompt ? (
+                <p>{prompt.title}</p>
+            ) : (
+                <p>Loading...</p>
+            )}
         </div>
     );
+
 };
 
 export default PromptComponent;
