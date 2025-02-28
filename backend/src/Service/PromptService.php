@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
+use App\Repository\CategoryRepository;
 use App\Repository\PromptRepository;
 use Exception;
 
@@ -12,29 +13,33 @@ class PromptService implements IService
 {
     protected PromptRepository $promptRepository;
 
+    protected CategoryRepository $categoryRepository;
+
     /**
      * Constructor for the PromptService.
      *
      * @param PromptRepository $promptRepository The repository for managing Prompt entities.
      */
-    public function __construct(PromptRepository $promptRepository)
+    public function __construct(PromptRepository $promptRepository, CategoryRepository $categoryRepository)
     {
         $this->promptRepository = $promptRepository;
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
      * Creates a new Prompt entity with an optional associated Category.
      *
      * @param string $title The title of the prompt.
-     * @param Category|null $category An optional Category to associate with the prompt.
+     * @param int|null $categoryId A Category-id to associate with the prompt.
      * @return Prompt The created Prompt entity.
      */
-    public function create(string $title, ?Category $category = null): Prompt
+    public function create(string $title, ?int $categoryId = null): Prompt
     {
         $prompt = new Prompt();
         $prompt->setTitle($title);
 
-        if ($category !== null) {
+        if ($categoryId !== null) {
+            $category = $this->categoryRepository->findOneBy(['id' => $categoryId]);
             $prompt->setCategory($category);
         }
 

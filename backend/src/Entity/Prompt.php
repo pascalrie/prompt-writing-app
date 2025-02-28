@@ -173,7 +173,7 @@ class Prompt
      * @param bool $withNotes Whether to include the notes associated with this prompt in the serialization.
      * @return array|string[] Returns an array representation of the prompt.
      */
-    public function jsonSerialize(bool $withCategory = true, bool $withNotes = false): array
+    public function jsonSerialize(bool $withCategory = true, bool $withNotes = true): array
     {
         $json = [
             'id' => $this->id,
@@ -187,8 +187,7 @@ class Prompt
         if ($withNotes) {
             /** @var Note $note */
             foreach ($this->getNotes() as $note) {
-                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false, true,
-                    true, false)];
+                $json['notes'][] = $note->jsonSerialize();
             }
         }
 

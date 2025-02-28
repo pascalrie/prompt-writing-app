@@ -12,7 +12,7 @@ class CorsListener implements EventSubscriberInterface
 {
     private array $allowedOrigins = [
         'http://localhost:3000',
-        'http://192.168.64.8:3000',
+        'http://192.168.64.12:3000',
     ];
 
     private array $allowedRoutes = [
@@ -39,16 +39,22 @@ class CorsListener implements EventSubscriberInterface
         $origin = $request->headers->get('Origin');
         $path = $request->getPathInfo();
 
-        if ($method === 'OPTIONS' && $this->isAllowedOrigin($origin) && $this->isAllowedRoute($path)) {
+        if ($method === 'OPTIONS') {
             $response = new Response();
             $response->setStatusCode(Response::HTTP_NO_CONTENT);
 
-            $response->headers->set('Access-Control-Allow-Origin', $origin);
-            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-            $response->headers->set('Access-Control-Max-Age', '3600'); // Cache for 1 hour
+            if ($this->isAllowedOrigin($origin) && $this->isAllowedRoute($path)) {
+                $response->headers->set('Access-Control-Allow-Origin', $origin);
+                $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+                $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+                $response->headers->set('Access-Control-Max-Age', '3600'); // Cache for 1 hour
+            } else {
+                $response->headers->set('Access-Control-Allow-Origin', '*');
+                $response->headers->set('Access-Control-Allow-Methods', 'OPTIONS');
+            }
 
             $event->setResponse($response);
+            return;
         }
     }
 
@@ -64,7 +70,6 @@ class CorsListener implements EventSubscriberInterface
             $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
             $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
             $response->headers->set('Access-Control-Max-Age', '3600');
-
             $response->headers->set('Access-Control-Allow-Credentials', 'true');
         }
     }

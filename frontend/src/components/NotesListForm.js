@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
-// Component to fetch notes
 const FetchNotes = ({onFetch}) => {
     useEffect(() => {
         const fetchNotes = async () => {
@@ -18,15 +18,14 @@ const FetchNotes = ({onFetch}) => {
         fetchNotes();
     }, [onFetch]);
 
-    return null; // This only handles the data fetching
+    return null;
 };
 
-// Main component
 const NotesListForm = () => {
     const [notes, setNotes] = useState([]);
-    const [expandedNote, setExpandedNote] = useState(null); // Stores the ID of the expanded note
+    const [expandedNote, setExpandedNote] = useState(null);
+        const navigate = useNavigate();
 
-    // Function to toggle note expansion
     const toggleNoteExpansion = (noteId) => {
         setExpandedNote((prev) => (prev === noteId ? null : noteId));
     };
@@ -34,6 +33,7 @@ const NotesListForm = () => {
     return (
         <div>
             <h1>Notes</h1>
+            <button onClick={() => navigate("/create/note")}>Create Note</button>
             <FetchNotes onFetch={setNotes}/>
             <div style={styles.gridContainer}>
                 {notes.length > 0 ? (
@@ -63,8 +63,19 @@ const NotesListForm = () => {
     );
 };
 
-// Inline styles for the grid and notes
 const styles = {
+    button: {
+        backgroundColor: "#007bff",
+        color: "#fff",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
+        padding: "10px 20px",
+        fontSize: "16px",
+    },
+    buttonHover: {
+        backgroundColor: "#0056b3",
+    },
     expandButton: {
         backgroundColor: "#007bff",
         color: "#fff",
@@ -96,7 +107,7 @@ const styles = {
         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     },
     noteCardHover: {
-        boxShadow: "0 8px 12px rgba(0, 0, 0, 0.2)", // Optional: for hover effect
+        boxShadow: "0 8px 12px rgba(0, 0, 0, 0.2)",
     },
     noteTitle: {
         fontSize: "1.25rem",
@@ -105,7 +116,15 @@ const styles = {
     noteContent: {
         fontSize: "0.875rem",
         color: "#555",
+        overflowWrap: "break-word",
+        wordWrap: "break-word",
+        whiteSpace: "pre-wrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        maxHeight: "100em",
+        lineHeight: "1.5em",
     },
+
 };
 
 export default NotesListForm;

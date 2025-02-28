@@ -329,7 +329,7 @@ class Note
      *
      * @return array The serialized note as an associative array.
      */
-    public function jsonSerialize(bool $withContent = true, bool $withCategory = true, bool $withPrompt = true,
+    public function jsonSerialize(bool $withContent = true, bool $withCategory = true, bool $withPrompt = false,
                                   bool $withTags = true, bool $withFolder = false): array
     {
         $json = [
@@ -353,7 +353,7 @@ class Note
 
         if ($withTags) {
             foreach ($this->getTags() as $tag) {
-                $json += ['Tag with id: ' . $tag->getId() => $tag->jsonSerialize()];
+                $json['tags'][] = $tag->jsonSerialize();
             }
         }
 

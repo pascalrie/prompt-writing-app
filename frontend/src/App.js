@@ -9,6 +9,8 @@ import PromptsPage from "./pages/PromptsPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import ContactPage from "./pages/ContactPage";
 import FolderPage from "./pages/FolderPage";
+import NoteCreateFormWithoutPrompts from "./components/NoteCreateFormWithoutPrompts";
+import PromptCreateForm from "./components/PromptCreateForm";
 
 
 const App = () => {
@@ -18,6 +20,8 @@ const App = () => {
                 <MenuBar/>
                 <Routes>
                     <Route path="/folder" element={<FolderPage/>}/>
+                    <Route path="/create/note" element={<NoteCreateFormWithoutPrompts/>}/>
+                    <Route path="/create/prompt" element={<PromptCreateForm/>}/>
                     <Route path="/notes" element={<NotesPage/>}/>
                     <Route path="/prompts" element={<PromptsPage/>}/>
                     <Route path="/categories" element={<CategoriesPage/>}/>
