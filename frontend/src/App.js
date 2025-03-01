@@ -11,6 +11,8 @@ import ContactPage from "./pages/ContactPage";
 import FolderPage from "./pages/FolderPage";
 import NoteCreateFormWithoutPrompts from "./components/NoteCreateFormWithoutPrompts";
 import PromptCreateForm from "./components/PromptCreateForm";
+import CategoryCreateForm from "./components/CategoryCreateForm";
+import CategoryShowForm from "./components/CategoryShowForm";
 
 
 const App = () => {
@@ -22,6 +24,8 @@ const App = () => {
                     <Route path="/folder" element={<FolderPage/>}/>
                     <Route path="/create/note" element={<NoteCreateFormWithoutPrompts/>}/>
                     <Route path="/create/prompt" element={<PromptCreateForm/>}/>
+                    <Route path="/create/category" element={<CategoryCreateForm/>}/>
+                    <Route path="/show/category/:id" element={<CategoryShowForm/>}/>
                     <Route path="/notes" element={<NotesPage/>}/>
                     <Route path="/prompts" element={<PromptsPage/>}/>
                     <Route path="/categories" element={<CategoriesPage/>}/>

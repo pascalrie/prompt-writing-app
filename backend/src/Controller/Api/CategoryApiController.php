@@ -68,7 +68,7 @@ class CategoryApiController extends BaseApiController
     public function list(): JsonResponse
     {
         $categories = $this->categoryService->list();
-        $response = array_map(fn($category) => $category->jsonSerialize(), $categories);
+        $response = array_map(fn($category) => $category->jsonSerialize(true), $categories);
         return $this->json($this->appendTimeStampToApiResponse($response));
     }
 
@@ -82,8 +82,9 @@ class CategoryApiController extends BaseApiController
      * @param int $id The unique identifier of the category.
      * @return JsonResponse The JSON response containing the category details or an error message if not found.
      */
-    public function show(int $id): JsonResponse
+    public function show($id): JsonResponse
     {
+        $id = intval($id);
         $category = $this->categoryService->show($id);
 
         if (!$category) {
@@ -93,7 +94,7 @@ class CategoryApiController extends BaseApiController
             ]));
         }
 
-        return $this->json($this->appendTimeStampToApiResponse($category->jsonSerialize(true)));
+        return $this->json($this->appendTimeStampToApiResponse($category->jsonSerialize(true, true)));
     }
 
     /**

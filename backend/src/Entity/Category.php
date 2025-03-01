@@ -209,19 +209,19 @@ class Category
             'id' => $this->id,
             'title' => $this->title
         ];
-
+        $json['prompts'] = [];
         if ($withPrompts) {
             /** @var Prompt $prompt */
             foreach ($this->getPrompts() as $prompt) {
-                $json += ['Prompt with id: ' . $prompt->getId() => $prompt->jsonSerialize(false)];
+                $json['prompts'][] = [$prompt->jsonSerialize(false, false)];
             }
         }
 
+        $json['notes'] = [];
         if ($withNotes) {
             /**@var Note $note */
             foreach ($this->getNotes() as $note) {
-                $json += ['Note with id: ' . $note->getId() => $note->jsonSerialize(false,
-                    false, false, false)];
+                $json['notes'][] = [$note->jsonSerialize(true, false, false, false)];
             }
         }
 
