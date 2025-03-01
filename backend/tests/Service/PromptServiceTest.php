@@ -5,6 +5,7 @@ namespace App\Tests\Service;
 use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
+use App\Repository\CategoryRepository;
 use App\Repository\PromptRepository;
 use App\Service\PromptService;
 use Doctrine\Persistence\ManagerRegistry;
@@ -17,7 +18,9 @@ class PromptServiceTest extends TestCase
 
     protected ?Prompt $examplePrompt;
 
-    protected ?MockObject $repoMock;
+    protected ?MockObject $promptRepoMock;
+
+    protected ?MockObject $categoryRepoMock;
 
     public function setUp(): void
     {
@@ -35,7 +38,12 @@ class PromptServiceTest extends TestCase
 
         $this->examplePrompt->setCategory($category);
 
-        $this->repoMock = $this->getMockBuilder(PromptRepository::class)
+        $this->promptRepoMock = $this->getMockBuilder(PromptRepository::class)
+            ->setConstructorArgs([$this->managerRegistry, $this->createMock(\Doctrine\ORM\EntityManager::class)])
+            ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
+            ->getMock();
+
+        $this->categoryRepoMock = $this->getMockBuilder(CategoryRepository::class)
             ->setConstructorArgs([$this->managerRegistry, $this->createMock(\Doctrine\ORM\EntityManager::class)])
             ->onlyMethods(['add', 'persist', 'flush', 'findBy', 'findAll', 'findOneBy'])
             ->getMock();
@@ -45,14 +53,14 @@ class PromptServiceTest extends TestCase
     {
         $this->examplePrompt->setId(null);
         $this->examplePrompt = null;
-        $this->repoMock = null;
+        $this->promptRepoMock = null;
     }
 
     public function testUpdateOnlyTitleOfPrompt(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->examplePrompt]);
+        $this->promptRepoMock->method('findBy')->willReturn([$this->examplePrompt]);
 
-        $promptService = new PromptService($this->repoMock);
+        $promptService = new PromptService($this->promptRepoMock, $this->categoryRepoMock);
 
         $newTitle = 'New Title Prompt';
         $updatedPrompt = $promptService->update($this->examplePrompt->getId(), $newTitle);
@@ -63,9 +71,9 @@ class PromptServiceTest extends TestCase
 
     public function testUpdateOnlyCategoryOfPrompt(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->examplePrompt]);
+        $this->promptRepoMock->method('findBy')->willReturn([$this->examplePrompt]);
 
-        $promptService = new PromptService($this->repoMock);
+        $promptService = new PromptService($this->promptRepoMock, $this->categoryRepoMock);
         $newCategory = new Category();
         $newCategory->setTitle('updated example category');
         $newCategory->setId(2);
@@ -79,9 +87,9 @@ class PromptServiceTest extends TestCase
 
     public function testUpdateAddOnlyNoteOfPrompt(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->examplePrompt]);
+        $this->promptRepoMock->method('findBy')->willReturn([$this->examplePrompt]);
 
-        $promptService = new PromptService($this->repoMock);
+        $promptService = new PromptService($this->promptRepoMock, $this->categoryRepoMock);
         $newNoteToAdd = new Note();
         $newNoteToAdd->setId(2);
         $newNoteToAdd->setTitle('new note title');
@@ -93,8 +101,8 @@ class PromptServiceTest extends TestCase
 
     public function testShowOfPrompt(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->examplePrompt]);
-        $promptService = new PromptService($this->repoMock);
+        $this->promptRepoMock->method('findBy')->willReturn([$this->examplePrompt]);
+        $promptService = new PromptService($this->promptRepoMock, $this->categoryRepoMock);
         $shownPrompt = $promptService->show($this->examplePrompt->getId());
         $this->assertNotNull($shownPrompt);
         $this->assertEquals($this->examplePrompt, $shownPrompt);
@@ -102,8 +110,8 @@ class PromptServiceTest extends TestCase
 
     public function testShowOfNonExistingPrompt(): void
     {
-        $this->repoMock->method('findBy')->willReturn(null);
-        $promptService = new PromptService($this->repoMock);
+        $this->promptRepoMock->method('findBy')->willReturn(null);
+        $promptService = new PromptService($this->promptRepoMock, $this->categoryRepoMock);
         // prompt should be null, because id is way too high
         $shownPromptShouldBeNull = $promptService->show(999);
         $this->assertNull($shownPromptShouldBeNull);
@@ -111,8 +119,8 @@ class PromptServiceTest extends TestCase
 
     public function testShowPromptByCriteria(): void
     {
-        $this->repoMock->method('findBy')->willReturn([$this->examplePrompt]);
-        $promptService = new PromptService($this->repoMock);
+        $this->promptRepoMock->method('findBy')->willReturn([$this->examplePrompt]);
+        $promptService = new PromptService($this->promptRepoMock, $this->categoryRepoMock);
 
         $prompt = $promptService->showBy('id', $this->examplePrompt->getId());
         $this->assertNotNull($prompt);
@@ -121,8 +129,8 @@ class PromptServiceTest extends TestCase
 
     public function testShowByNonExistingPrompt(): void
     {
-        $this->repoMock->method('findBy')->willReturn(null);
-        $promptService = new PromptService($this->repoMock);
+        $this->promptRepoMock->method('findBy')->willReturn(null);
+        $promptService = new PromptService($this->promptRepoMock, $this->categoryRepoMock);
         // prompt should be null, because id is way too high
         $shownPromptShouldBeNull = $promptService->showBy('id', 999);
         $this->assertNull($shownPromptShouldBeNull);
