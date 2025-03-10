@@ -27,7 +27,7 @@ const MenuBar = () => {
                             {dropdownOpen && (
                                 <ul className="dropdown-menu">
                                     <li>
-                                        <Link to="/folder">Folder</Link>
+                                        <Link to="/folder">Folders</Link>
                                     </li>
                                     <li>
                                         <Link to="/notes">Notes</Link>

@@ -82,9 +82,8 @@ class CategoryApiController extends BaseApiController
      * @param int $id The unique identifier of the category.
      * @return JsonResponse The JSON response containing the category details or an error message if not found.
      */
-    public function show($id): JsonResponse
+    public function show(int $id): JsonResponse
     {
-        $id = intval($id);
         $category = $this->categoryService->show($id);
 
         if (!$category) {

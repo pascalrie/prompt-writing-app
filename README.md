@@ -1,13 +1,14 @@
-## Prompt Writing App - Work in progress
+# Prompt Writing App - **Work in progress**
 
 ### TODOs
-
-- implement random prompt "homepage" to create a quick note, based on random prompt, Maybe fixed: since there is a random prompt select command
+- integrate frontend into docker-container
+- implement that div-tag from html isn't saved in db 
 - fix color-selection in easyadmin, in adjusting tags
+- prettify the design of the application 
 
 ## Features & Functions
 
-# Prompt-Writing Application
+## Prompt-Writing Application (WIP)
 
 The Prompt-Writing Application-API is a versatile Symfony/PHP-based tool designed for capturing and organizing thoughts, reflections,
 and inspirations. By offering a range of predefined prompts, the application encourages creative and insightful responses,
@@ -22,6 +23,15 @@ database-entries easily. Furthermore, there are several API-routes to send reque
 - Note Creation and Organization: After responding to a prompt, save your response as a note. Notes can be tagged, categorized, and organized into custom folders, allowing you to structure your thoughts intuitively.
 - Customizable Categories: Both notes and prompts can be assigned to specific categories, such as “Journal,”, “Quotes,” or any other relevant label.
 - Tagging System: Add tags to notes for easy retrieval and organization. Tags allow for flexible categorization, making it simple to locate notes by theme or subject.
+
+#### Features in React-Frontend
+
+- Homepage with a random prompt and the possibility to create a note for this prompt.
+- Show and Expand Folders with the associated Notes and their content.
+- Create, List and Show Notes in the Note-Feature-Tab
+- Show, List and Create Prompts.
+- List, Create and Show Categories.
+
 
 ### Use Cases
 
@@ -129,3 +139,24 @@ start the docker-container to run more commands in it:
 - follow the instructions.
 ### 4. Execute tests in terminal:
 ```./vendor/bin/phpunit```
+
+
+## 5. Access and setup Frontend
+### 5.1 Prerequisites
+
+- yarn
+- npm 23.7
+- (nvm)
+
+#### 5.2 Navigate to the frontend folder:
+- From Project root:
+```cd frontend/```
+
+#### 5.3 Use Node 23.7:
+```nvm use 23.7```
+
+#### 5.4 install the project dependencies:
+```yarn install```
+
+#### 5.5 Start the frontend development server:
+```yarn start```
