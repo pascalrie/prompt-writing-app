@@ -33,7 +33,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: !ChangeMe
-      MYSQL_DATABASE: prompt-writing-db3
+      MYSQL_DATABASE: prompt-writing-db
       MYSQL_USER: !ChangeMe
       MYSQL_PASSWORD: !ChangeMe
     ports:

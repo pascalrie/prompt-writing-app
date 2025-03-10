@@ -45,7 +45,7 @@ This application provides a powerful and flexible way to record, categorize, and
 
 - Docker
 - own .env-file for project (standard, when generating a new symfony project, with db-string (preferably: mariadb-10.6.0))
-
+- example .env-file db-url: DATABASE_URL="mysql://mysql-user:mysql-password@db:3306/prompt-writing-db?serverVersion=mariadb-10.6.0"
 ### 1. Installation and setup
 
 #### 1.1 Clone the repository:
