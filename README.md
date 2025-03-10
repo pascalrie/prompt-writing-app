@@ -56,7 +56,7 @@ This application provides a powerful and flexible way to record, categorize, and
 
 ```cd prompt-writing-project```
 
-#### 1.3 Make sure you put the right credentials into docker-compose.yaml (marked with: !ChangeMe)
+#### 1.3 Make sure you put the right credentials into docker-compose.yml (marked with: !ChangeMe)
 - MYSQL_ROOT_PASSWORD
 - MYSQL_USER
 - MYSQL_PASSWORD

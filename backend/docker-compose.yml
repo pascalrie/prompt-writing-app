@@ -1,0 +1,46 @@
+services:
+  app:
+    build: .
+    container_name: symfony_app
+    restart: always
+    working_dir: /var/www/symfony
+    volumes:
+      - .:/var/www/symfony
+    networks:
+      - symfony
+    depends_on:
+      - db
+
+  web:
+    image: nginx:alpine
+    container_name: symfony_nginx
+    restart: always
+    ports:
+      - "8083:83"
+    volumes:
+      - .:/var/www/symfony
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - symfony
+    depends_on:
+      - app
+
+  db:
+    image: mariadb:10.6
+    volumes:
+      - ./my.cnf:/etc/mysql/my.cnf:ro
+    container_name: symfony_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: !ChangeMe
+      MYSQL_DATABASE: prompt-writing-db3
+      MYSQL_USER: !ChangeMe
+      MYSQL_PASSWORD: !ChangeMe
+    ports:
+      - "3309:3309"
+    networks:
+      - symfony
+
+networks:
+  symfony:
+    driver: bridge
