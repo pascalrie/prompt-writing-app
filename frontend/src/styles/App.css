@@ -1,0 +1,123 @@
+/* Overall container styling */
+.container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    font-family: 'Roboto', sans-serif;
+}
+
+/* General form styles */
+input, textarea, select, button {
+    width: 100%;
+    margin-bottom: 20px;
+    font-size: 16px;
+    padding: 12px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    outline: none;
+    box-sizing: border-box;
+    background-color: #f7f7f7;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Input field styling */
+input[type="text"], textarea {
+    background-color: #ffffff;
+}
+
+/* Button styling */
+button {
+    width: 100%;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+button:hover {
+    background-color: #218838;
+    transform: scale(1.02);
+}
+
+/* Placeholder styling */
+input::placeholder, textarea::placeholder {
+    color: #b3b3b3;
+    font-style: italic;
+}
+
+/* Headline design */
+h1 {
+    text-align: center;
+    color: #222222;
+    margin-bottom: 30px;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+/* Textarea styling */
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Select dropdown styling */
+select {
+    appearance: none;
+    background-color: #ffffff;
+    cursor: pointer;
+    padding-right: 30px;
+    position: relative;
+}
+
+/* Focused input, textarea, select */
+input:focus, textarea:focus, select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+}
+
+/* Add subtle hover effect for inputs */
+input:hover, textarea:hover, select:hover {
+    border-color: #aaa;
+    background-color: #fdfdfd;
+}
+
+/* Error message styling (if needed) */
+.error {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* FetchPrompt alignment (if applicable) */
+.fetch-prompt {
+    margin-bottom: 20px;
+    font-style: italic;
+    color: #666666;
+}
+
+/* Make it responsive */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    input, textarea, select, button {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 26px;
+    }
+}

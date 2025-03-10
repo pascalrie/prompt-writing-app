@@ -1,13 +1,14 @@
-## Prompt Writing App - Work in progress
+# Prompt Writing App - **Work in progress**
 
 ### TODOs
-
-- implement random prompt "homepage" to create a quick note, based on random prompt, Maybe fixed: since there is a random prompt select command
+- integrate frontend into docker-container
+- implement that div-tag from html isn't saved in db 
 - fix color-selection in easyadmin, in adjusting tags
+- prettify the design of the application 
 
 ## Features & Functions
 
-# Prompt-Writing Application
+## Prompt-Writing Application (WIP)
 
 The Prompt-Writing Application-API is a versatile Symfony/PHP-based tool designed for capturing and organizing thoughts, reflections,
 and inspirations. By offering a range of predefined prompts, the application encourages creative and insightful responses,
@@ -22,6 +23,15 @@ database-entries easily. Furthermore, there are several API-routes to send reque
 - Note Creation and Organization: After responding to a prompt, save your response as a note. Notes can be tagged, categorized, and organized into custom folders, allowing you to structure your thoughts intuitively.
 - Customizable Categories: Both notes and prompts can be assigned to specific categories, such as “Journal,”, “Quotes,” or any other relevant label.
 - Tagging System: Add tags to notes for easy retrieval and organization. Tags allow for flexible categorization, making it simple to locate notes by theme or subject.
+
+#### Features in React-Frontend
+
+- Homepage with a random prompt and the possibility to create a note for this prompt.
+- Show and Expand Folders with the associated Notes and their content.
+- Create, List and Show Notes in the Note-Feature-Tab
+- Show, List and Create Prompts.
+- List, Create and Show Categories.
+
 
 ### Use Cases
 
@@ -83,42 +93,35 @@ start the docker-container to run more commands in it:
 ##### 3.1.2 Alternatively listed here:
 - possible routes in a table:
 
-| 	identifier         | method	 | route	                   |
-|---------------------|---------|--------------------------|
-| api_create_category | POST    | /category/create         |
-| api_list_categories | GET     | /category/list           |
-| api_show_category   | GET     | /category/show/{id}      |
-| api_update_category | PUT	    | /category/update/{id}    |
-| api_delete_category | DELETE	 | 	/category/delete/{id}   |
-|                     |         |                          |
-|                     |         |                          |
-| api_create_folder   | POST	   | 	/folder/create          |
-| api_list_folders	   | GET	    | 	/folder/list            |
-| api_show_folder	    | GET     | 	/folder/show/{id}       |
-| api_update_folder   | 	PUT    | 	/folder/update/{id}     |
-| api_delete_folder	  | DELETE	 | 	/folder/delete/{id}     |
-| 	                   | 	       | 	                        |
-| 	                   | 	       | 	                        |
-| api_create_note	    | POST	   | 	/note/create            |
-| api_list_notes	     | GET 	   | 	 /note/list             |
-| api_show_note	      | GET	    | 	  /note/show/{id}       |
-| api_update_note	    | PUT	    | 	/note/update/{id}       |
-| api_delete_note	    | DELETE	 | 	/note/delete/{id}       |
-| 	                   | 	       | 	                        |
-| 	                   | 	       | 	                        |
-| api_create_prompt 	 | POST	   | 	 /prompt/create         |
-| api_list_prompts	   | GET	    | 	  /prompt/list          |
-| api_show_prompt	    | GET	    | 	  /prompt/show/{id}     |
-| api_update_prompt	  | PUT	    | 	  /prompt/update/{id}   |
-| api_delete_prompt	  | DELETE	 | 	/prompt/delete/{id}     |
-| api_prompt_choose	  | GET	    | 	  /prompt/choose/random |
-| 	                   | 	       | 	                        |
-| 	                   | 	       | 	                        |
-| api_create_tag	     | POST	   | 	 /tag/create            |
-| api_list_tags	      | GET	    | 	 /tag/list              |
-| api_show_tag	       | GET	    | 	 /tag/show/{id}         |
-| api_update_tag	     | PUT	    | 	 /tag/update/{id}       |
-| api_delete_tag	     | DELETE	 | 	  /tag/delete/{id}      |
+| 	identifier         | method | route                     |
+|---------------------|--------|---------------------------|
+| admin               | ANY    | /admin                    |
+| api_create_category | POST   | /api/category/create      |
+| api_list_categories | GET    | /api/category/list        |
+| api_show_category   | GET    | /api/category/show/{id}   |
+| api_update_category | PUT    | /api/category/update/{id} |
+| api_delete_category | DELETE | /api/category/delete/{id} |
+| api_create_folder   | POST   | /api/folder/create        |
+| api_list_folders    | GET    | /api/folder/list          |
+| api_show_folder     | GET    | /api/folder/show/{id}     |
+| api_update_folder   | PUT    | /api/folder/update/{id}   |
+| api_delete_folder   | DELETE | /api/folder/delete/{id}   |
+| api_create_note     | POST   | /api/note/create          |
+| api_list_notes      | GET    | /api/note/list            |
+| api_show_note       | GET    | /api/note/show/{id}       |
+| api_update_note     | PUT    | /api/note/update/{id}     |
+| api_delete_note     | DELETE | /api/note/delete/{id}     |
+| api_create_prompt   | POST   | /api/prompt/create        |
+| api_list_prompts    | GET    | /api/prompt/list          |
+| api_show_prompt     | GET    | /api/prompt/show/{id}     |
+| api_update_prompt   | PUT    | /api/prompt/update/{id}   |
+| api_delete_prompt   | DELETE | /api/prompt/delete/{id}   |
+| api_prompt_choose   | GET    | /api/prompt/choose/random |
+| api_create_tag      | POST   | /api/tag/create           |
+| api_list_tags       | GET    | /api/tag/list             |
+| api_show_tag        | GET    | /api/tag/show/{id}        |
+| api_update_tag      | PUT    | /api/tag/update/{id}      |
+| api_delete_tag      | DELETE | /api/tag/delete/{id}      |
 
 
 #### 3.1.3 Access Server in Browser (reference: terminal after ```docker-compose up -d```):
@@ -136,3 +139,24 @@ start the docker-container to run more commands in it:
 - follow the instructions.
 ### 4. Execute tests in terminal:
 ```./vendor/bin/phpunit```
+
+
+## 5. Access and setup Frontend
+### 5.1 Prerequisites
+
+- yarn
+- npm 23.7
+- (nvm)
+
+#### 5.2 Navigate to the frontend folder:
+- From Project root:
+```cd frontend/```
+
+#### 5.3 Use Node 23.7:
+```nvm use 23.7```
+
+#### 5.4 install the project dependencies:
+```yarn install```
+
+#### 5.5 Start the frontend development server:
+```yarn start```
