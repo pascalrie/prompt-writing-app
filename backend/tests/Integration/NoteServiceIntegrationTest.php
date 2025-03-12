@@ -3,6 +3,7 @@
 namespace App\Tests\Integration;
 
 use App\Service\NoteService;
+use Doctrine\ORM\EntityNotFoundException;
 
 class NoteServiceIntegrationTest extends BaseIntegrationTest
 {
@@ -72,11 +73,16 @@ class NoteServiceIntegrationTest extends BaseIntegrationTest
         $this->assertEquals('Category 1', $updatedNote->getCategory()->getTitle());
     }
 
+    /**
+     * @throws EntityNotFoundException
+     */
     public function testDeleteNote(): void
     {
         $note = $this->noteService->create('To Be Deleted');
+        $noteId = $note->getId();
         $this->noteService->delete($note->getId());
-        $this->assertNull($note);
+        $shouldBeNull = $this->noteService->show($noteId);
+        $this->assertNull($shouldBeNull);
     }
 
     public function testListNotes(): void
