@@ -41,7 +41,7 @@ class Category
     /**
      * The collection of notes associated with this category.
      *
-     * @ORM\OneToMany(targetEntity=Note::class, mappedBy="category")
+     * @ORM\OneToMany(targetEntity=Note::class, mappedBy="category", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     private Collection $notes;
 
@@ -125,32 +125,17 @@ class Category
     }
 
     /**
-     * Removes a prompt from the category and disassociates it.
-     *
-     * @param Prompt $prompt The prompt to remove.
-     * @return $this
-     */
-    public function removePrompt(Prompt $prompt): self
-    {
-        if ($this->prompts->removeElement($prompt)) {
-            if ($prompt->getCategory() === $this) {
-                $prompt->setCategory(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * Removes all prompts associated with this category.
      *
      * @return void
      */
     public function clearPrompts(): void
     {
+        /** @var Prompt $prompt */
         foreach ($this->prompts as $prompt) {
-            $this->removePrompt($prompt);
+            $prompt->setCategory(null);
         }
+        $this->prompts->clear();
     }
 
     /**

@@ -56,43 +56,6 @@ class CategoryServiceTest extends TestCase
         $this->assertEquals($newTitle, $updatedCategory->getTitle());
     }
 
-    public function testCategoryUpdatePrompts(): void
-    {
-        $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
-        $newPromptToAdd = new Prompt();
-        $newPromptToAdd->setTitle('new prompt');
-        $newPromptToAdd->setId(1);
-
-        $updatedCategory = $this->categoryService->update($this->exampleCategory->getId(), "", [$newPromptToAdd]);
-        $this->assertNotNull($updatedCategory);
-        $this->assertEquals($newPromptToAdd, $updatedCategory->getPrompts()[0]);
-    }
-
-    public function testUpdateCategoryReplacePrompts(): void
-    {
-        $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
-
-        $newPromptToAdd = new Prompt();
-        $newPromptToAdd->setTitle('new prompt after overwrite');
-        $newPromptToAdd->setId(2);
-
-        $existingPromptToOverwrite = new Prompt();
-        $existingPromptToOverwrite->setTitle('prompt to overwrite');
-        $existingPromptToOverwrite->setId(1);
-
-        // step 1: update add to category the (first) "existing prompt"
-        $this->exampleCategory = $this->categoryService->update($this->exampleCategory->getId(), "", [$existingPromptToOverwrite]);
-        $this->assertEquals($existingPromptToOverwrite, $this->exampleCategory->getPrompts()[0]);
-
-        // step 2: replace/overwrite that prompt with the new prompt
-        $this->exampleCategory = $this->categoryService->update($this->exampleCategory->getId(), "", [$newPromptToAdd], [], true);
-
-        // index is +1 compared to first (deleted) prompt
-        $this->assertNull($this->exampleCategory->getPrompts()[0]);
-        $this->assertNotNull($this->exampleCategory->getPrompts()[1]);
-        $this->assertEquals($newPromptToAdd, $this->exampleCategory->getPrompts()[1]);
-    }
-
     public function testCategoryUpdateNotes(): void
     {
         $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
@@ -101,9 +64,21 @@ class CategoryServiceTest extends TestCase
         $newNote->setId(1);
         $newNote->setContent('content of new note');
 
-        $updatedCategory = $this->categoryService->update($this->exampleCategory->getId(), "", [], [$newNote]);
+        $updatedCategory = $this->categoryService->update($this->exampleCategory->getId(), "", [$newNote]);
         $this->assertNotNull($updatedCategory);
         $this->assertEquals($newNote, $updatedCategory->getNotes()[0]);
+    }
+
+    public function testCategoryUpdatePrompts(): void
+    {
+        $this->repoMock->method('findOneBy')->willReturn($this->exampleCategory);
+        $newPromptToAdd = new Prompt();
+        $newPromptToAdd->setTitle('new prompt');
+        $newPromptToAdd->setId(1);
+
+        $updatedCategory = $this->categoryService->update($this->exampleCategory->getId(), "", [], [$newPromptToAdd]);
+        $this->assertNotNull($updatedCategory);
+        $this->assertEquals($newPromptToAdd, $updatedCategory->getPrompts()[0]);
     }
 
     public function testCategoryShowShouldBeNonExisting(): void

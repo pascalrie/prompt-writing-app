@@ -57,6 +57,7 @@ class Note
      * The category to which this note belongs. Optional association.
      *
      * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="notes")
+     * @ORM\JoinColumn(nullable=true)
      */
     private ?Category $category;
 
@@ -64,6 +65,7 @@ class Note
      * The prompt linked to this note. Optional association.
      *
      * @ORM\ManyToOne(targetEntity=Prompt::class, inversedBy="notes")
+     * @ORM\JoinColumn(nullable=true)
      */
     private ?Prompt $prompt;
 

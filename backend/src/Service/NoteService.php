@@ -47,17 +47,28 @@ class NoteService implements IService
      * @return Note The newly created note entity.
      */
     public function create(string $title = "", string $content = "", int $promptId = null, ?ArrayCollection $tags = null,
-                           ?Category $category = null): Note
-    {
+        ?Category $category = null): Note {
         $note = new Note();
 
-        // Automatically generate title if not provided
         $note->setTitle($title ?: substr($content, 0, 15) . '...');
 
         $note->setContent($content);
+
+        if ($promptId !== null && $category !== null) {
+            throw new \InvalidArgumentException('A note cannot be associated with both a prompt and a category
+            (due to duplication of information). Please choose one or the other, or do not provide both.');
+        }
+
         if ($promptId !== null) {
             $prompt = $this->promptRepository->findOneBy(['id' => $promptId]);
+            if (!$prompt) {
+                throw new \InvalidArgumentException("Prompt with ID $promptId not found.");
+            }
             $note->setPrompt($prompt);
+        }
+
+        if ($category !== null) {
+            $note->setCategory($category);
         }
 
         if ($tags !== null) {
@@ -66,10 +77,6 @@ class NoteService implements IService
                     $note->addTag($tag);
                 }
             }
-        }
-
-        if ($category !== null) {
-            $note->setCategory($category);
         }
 
         $this->noteRepository->add($note, true);
@@ -84,14 +91,14 @@ class NoteService implements IService
      * @param string $newTitle The new title for the note, if provided.
      * @param string $content The updated content for the note.
      * @param bool $contentShouldBeAdded Whether the provided content should be appended to the current content.
-     * @param bool $contentShouldBeRemoved Whether the content of the note should be cleared.
+     * @param bool $oldContentShouldBeRemoved Whether the content of the note should be cleared.
      * @param array $newTags A list of tag titles to associate with the note.
      * @param string|null $newCategoryTitle The title of the new category to associate with the note, if applicable.
      * @return Note The updated note entity.
      * @throws EntityNotFoundException If the note with the specified ID is not found.
      */
     public function update(int  $noteId, string $newTitle = "", string $content = "", bool $contentShouldBeAdded = false,
-                           bool $contentShouldBeRemoved = false, array $newTags = [], ?string $newCategoryTitle = null): Note
+                           bool $oldContentShouldBeRemoved = false, array $newTags = [], ?string $newCategoryTitle = null): Note
     {
         $note = $this->noteRepository->findOneBy(['id' => $noteId]);
 
@@ -101,9 +108,9 @@ class NoteService implements IService
 
         if ($contentShouldBeAdded && $content) {
             $note->addContent($content);
-        } elseif ($contentShouldBeRemoved) {
+        } else if ($oldContentShouldBeRemoved) {
             $note->setContent("");
-        } elseif ($content) {
+        } else if ($content) {
             $note->setContent($content);
         }
 
