@@ -1,7 +1,6 @@
 # Prompt Writing App - **Work in progress**
 
 ### TODOs
-- integrate frontend into docker-container
 - implement that div-tag from html isn't saved in db 
 - fix color-selection in easyadmin, in adjusting tags
 - prettify the design of the application 
@@ -16,7 +15,7 @@ which users can save, tag, categorize, and organize for future reference. There 
 database-entries easily. Furthermore, there are several API-routes to send requests to.
 
 ### Key Features
-
+- Appealing frontend with all CRUD-Features except update of entities.
 - Answer predefined prompts in the console and let the program automatically create a note with your response.
 - Prompts for Inspiration: Browse a collection of predefined prompts to spark ideas or reflections.
 - Each prompt offers a starting point for writing, making it easy to capture insights on various topics.
@@ -63,35 +62,40 @@ This application provides a powerful and flexible way to record, categorize, and
 - MYSQL_USER
 - MYSQL_PASSWORD
 
-#### Make sure the docker application is started!
+#### 1.4 Start the docker container:
 
 start the docker-container to run more commands in it:
 ```docker-compose up -d```
 
-#### create/copy (old) .env - file into the project-root directory:
-```cp path/to/own/.env path/to/prompt-writing-project/```
+#### 1.5 create/copy (old) .env - file into the project-root directory:
+```cp <path/to/own/.env> <path/to/prompt-writing-project/>```
 **"This application was tested on mariadb-10.6.0"**
 
-#### install composer-dependencies:
+#### 1.6 Install composer-dependencies:
 ```docker-compose exec app composer install```
+**alternatively:** ```make install```
+
 ### 2. Generate database
 
-#### 2.1 Execute command to create database in ddev-docker-container
+#### 2.1 Execute command to create database in docker-container:
 ```docker-compose exec app php bin/console doctrine:database:create```
+**alternatively:** ```make db-create```
 
-#### 2.2 Update the schema of the database (to use the structure of the entities)
-
+#### 2.2 Update the schema of the database (to use the structure of the entities):
 ```docker-compose exec app php bin/console doctrine:schema:update --force```
+**alternatively:** ```make db-schema-update```
 
-#### 2.3 Optional: Load DataFixtures for an example DataSet
+#### 2.3 Optional: Load DataFixtures for an example DataSet:
 ```docker-compose exec app php bin/console doctrine:fixtures:load```
+**alternatively:** ```make db-seed```
 
 ### 3. Usage:
 
 #### 3.1 Possible Routes of API
 
-##### 3.1.1 Show via Command
+##### 3.1.1 Show via Command:
 ```docker-compose exec app php bin/console debug:router```
+
 ##### 3.1.2 Alternatively listed here:
 - possible routes in a table:
 
@@ -129,10 +133,10 @@ start the docker-container to run more commands in it:
 #### 3.1.3 Access Server in Browser (reference: terminal after ```docker-compose up -d```):
 -  http://localhost:8083
 
-#### 3.1.4 To access the easyadmin-dashboard, access the route: /admin
+#### 3.1.4 To access the easyadmin-dashboard, access the route: /admin:
 - http://localhost:8083/admin
 
-#### 3.2 Usage of random prompts in terminal
+#### 3.2 Usage of random prompts in terminal (also on homepage of frontend):
 - **Prerequisites**:
   - at least 1 prompt in the database, thus at least 1 category is required for prompt-creation
 
@@ -141,24 +145,7 @@ start the docker-container to run more commands in it:
 - follow the instructions.
 ### 4. Execute tests in terminal:
 ```./vendor/bin/phpunit```
+```make test```
 
-
-## 5. Access and setup Frontend
-### 5.1 Prerequisites
-
-- yarn
-- npm 23.7
-- (nvm)
-
-#### 5.2 Navigate to the frontend folder:
-- From Project root:
-```cd frontend/```
-
-#### 5.3 Use Node 23.7:
-```nvm use 23.7```
-
-#### 5.4 install the project dependencies:
-```yarn install```
-
-#### 5.5 Start the frontend development server:
-```yarn start```
+## 5. Access Frontend:
+- http://localhost:3000

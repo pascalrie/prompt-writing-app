@@ -41,7 +41,6 @@ test:
 
 install:
 	$(DOCKER_COMPOSE) exec $(PHP_CONTAINER) composer install
-	cd ../frontend/ && yarn install
 
 build:
 	cd ../frontend/ && yarn build

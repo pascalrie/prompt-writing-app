@@ -37,7 +37,22 @@ services:
       MYSQL_USER: !ChangeMe
       MYSQL_PASSWORD: !ChangeMe
     ports:
-      - "3309:3309"
+      - "3309:3306"
+    networks:
+      - symfony
+
+  frontend:
+    container_name: react_frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    working_dir: /usr/src/app
+    command: yarn start
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend:/usr/src/app
+      - /usr/src/app/node_modules
     networks:
       - symfony
 

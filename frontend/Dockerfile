@@ -1,9 +1,20 @@
-FROM nginx:alpine
+# Use an official Node.js image as a base
+FROM node:23-alpine
 
-COPY build /usr/share/nginx/html
+# Set working directory inside the container
+WORKDIR /usr/src/app
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy package.json and yarn.lock for dependency installation
+COPY package.json yarn.lock ./
 
-EXPOSE 80
+# Install dependencies using Yarn
+RUN yarn install
 
-CMD ["nginx", "-g", "daemon off;"]
+# Copy the rest of the application files into the container
+COPY . .
+
+# Expose port 3000 for the React development server
+EXPOSE 3000
+
+# Default command to start the React development server
+CMD ["yarn", "start"]
