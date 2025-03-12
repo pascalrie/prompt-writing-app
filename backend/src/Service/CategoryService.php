@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Note;
 use App\Entity\Prompt;
 use App\Repository\CategoryRepository;
+use InvalidArgumentException;
 
 class CategoryService implements IService
 {
@@ -36,7 +37,7 @@ class CategoryService implements IService
 
         $existingCategory = $this->categoryRepository->findOneBy(['title' => $title]);
         if ($existingCategory) {
-            throw new \InvalidArgumentException('A category with this title already exists.');
+            throw new InvalidArgumentException('A category with this title already exists.');
         }
 
         if ($firstNote) {
@@ -55,38 +56,36 @@ class CategoryService implements IService
      *
      * @param int $id The ID of the Category to update.
      * @param string|null $newTitle The new title for the category (if provided).
-     * @param Prompt[] $newPrompts An array of Prompt objects to add to the category.
      * @param Note[] $newNotes An array of Note objects to add to the category.
-     * @param bool $replacePrompts Set to true to clear and replace the current Prompts in the category.
+     * @param Prompt[] $newPrompts An array of Prompt objects to add to the category.
      * @return Category The updated Category entity.
-     * @throws \InvalidArgumentException If the Category with the given ID is not found.
+     * @throws InvalidArgumentException If the Category with the given ID is not found.
      */
-    public function update(int $id, string $newTitle = null, array $newPrompts = [], array $newNotes = [], bool $replacePrompts = false): Category
+    public function update(int $id, string $newTitle = null, array $newNotes = [], array $newPrompts = []): Category
     {
         $category = $this->findCategoryById($id);
 
         if ($category === null) {
-            throw new \InvalidArgumentException("Category with ID {$id} not found.");
+            throw new InvalidArgumentException("Category with ID {$id} not found.");
         }
 
         if (!empty($newTitle)) {
             $category->setTitle($newTitle);
         }
 
-        if ($replacePrompts) {
-            $category->clearPrompts();
+        foreach ($newNotes as $note) {
+            if (!$note instanceof Note) {
+                throw new InvalidArgumentException('Invalid Note object provided in "newNotes" array.');
+            }
+            $category->addNote($note);
         }
 
         foreach ($newPrompts as $prompt) {
-            if ($prompt instanceof Prompt) {
-                $category->addPrompt($prompt);
+            if (!$prompt instanceof Prompt) {
+                throw new InvalidArgumentException('Invalid Prompt provided in "newPrompts" array.');
             }
-        }
-
-        foreach ($newNotes as $note) {
-            if ($note instanceof Note) {
-                $category->addNote($note);
-            }
+            $prompt->setCategory($category);
+            $category->addPrompt($prompt);
         }
 
         $this->categoryRepository->flush();
@@ -109,14 +108,14 @@ class CategoryService implements IService
      *
      * @param int $id The ID of the Category to delete.
      * @return void
-     * @throws \InvalidArgumentException If the Category with the given ID is not found.
+     * @throws InvalidArgumentException If the Category with the given ID is not found.
      */
     public function delete(int $id): void
     {
         $category = $this->findCategoryById($id);
 
         if ($category === null) {
-            throw new \InvalidArgumentException("Category with ID {$id} not found.");
+            throw new InvalidArgumentException("Category with ID {$id} not found.");
         }
 
         $this->categoryRepository->remove($category, true);

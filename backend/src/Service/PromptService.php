@@ -30,18 +30,16 @@ class PromptService implements IService
      * Creates a new Prompt entity with an optional associated Category.
      *
      * @param string $title The title of the prompt.
-     * @param int|null $categoryId A Category-id to associate with the prompt.
+     * @param int $categoryId A Category-id to associate with the prompt.
      * @return Prompt The created Prompt entity.
      */
-    public function create(string $title, ?int $categoryId = null): Prompt
+    public function create(string $title, int $categoryId): Prompt
     {
         $prompt = new Prompt();
         $prompt->setTitle($title);
 
-        if ($categoryId !== null) {
-            $category = $this->categoryRepository->findOneBy(['id' => $categoryId]);
-            $prompt->setCategory($category);
-        }
+        $category = $this->categoryRepository->findOneBy(['id' => $categoryId]);
+        $prompt->setCategory($category);
 
         $this->promptRepository->add($prompt, true);
         return $prompt;
@@ -131,7 +129,7 @@ class PromptService implements IService
      */
     public function showBy(string $criteria, $argument): ?Prompt
     {
-        $prompts = $this->promptRepository->findBy([$criteria, $argument]);
+        $prompts = $this->promptRepository->findBy([$criteria => $argument]);
         if (empty($prompts)) {
             return null;
         }
@@ -144,7 +142,7 @@ class PromptService implements IService
      * @return Prompt A randomly selected Prompt entity.
      * @throws Exception If there are no prompts available.
      */
-    public function showRandomPrompt(): Prompt
+    public function showRandom(): Prompt
     {
         $prompts = $this->promptRepository->findAll();
 

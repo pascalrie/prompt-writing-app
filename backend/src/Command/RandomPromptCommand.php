@@ -66,7 +66,7 @@ class RandomPromptCommand extends Command
         $noteCommand = $this->getApplication()->find('api:create-note');
 
         try {
-            $prompt = $this->promptService->showRandomPrompt();
+            $prompt = $this->promptService->showRandom();
         } catch (\Exception $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;

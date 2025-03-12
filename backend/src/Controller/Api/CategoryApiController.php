@@ -133,7 +133,7 @@ class CategoryApiController extends BaseApiController
         $prompts = array_map(fn($promptId) => $this->promptService->show($promptId), $promptIds);
         $notes = array_map(fn($noteId) => $this->noteService->show($noteId), $noteIds);
 
-        $updatedCategory = $this->categoryService->update($id, $bodyParameters['title'], $prompts, $notes);
+        $updatedCategory = $this->categoryService->update($id, $bodyParameters['title'], $notes, $prompts);
 
         return $this->json($this->appendTimeStampToApiResponse($updatedCategory->jsonSerialize()));
     }

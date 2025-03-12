@@ -42,7 +42,7 @@ class Prompt
     /**
      * A collection of notes associated with this prompt.
      *
-     * @ORM\OneToMany(targetEntity=Note::class, mappedBy="prompt")
+     * @ORM\OneToMany(targetEntity=Note::class, mappedBy="prompt", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     private Collection $notes;
 

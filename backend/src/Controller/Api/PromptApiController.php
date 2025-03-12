@@ -185,7 +185,7 @@ class PromptApiController extends BaseApiController
      */
     public function chooseRandom(): JsonResponse
     {
-        $randomPrompt = $this->promptService->showRandomPrompt();
+        $randomPrompt = $this->promptService->showRandom();
 
         return $this->json($this->appendTimeStampToApiResponse($randomPrompt->jsonSerialize()));
     }
