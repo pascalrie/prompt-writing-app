@@ -32,12 +32,27 @@ services:
     container_name: symfony_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: !ChangeMe
-      MYSQL_DATABASE: prompt-writing-db
-      MYSQL_USER: !ChangeMe
-      MYSQL_PASSWORD: !ChangeMe
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: prompt-writing-db3
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     ports:
-      - "3309:3309"
+      - "3309:3306"
+    networks:
+      - symfony
+
+  frontend:
+    container_name: react_frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    working_dir: /usr/src/app
+    command: yarn start
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend:/usr/src/app
+      - /usr/src/app/node_modules
     networks:
       - symfony
 
